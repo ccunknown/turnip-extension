@@ -1,0 +1,35 @@
+{
+  "author": "NECTEC INO",
+  "content_scripts": [
+    {
+      "css": [
+        "css/extension.css"
+      ],
+      "js": [
+        "js/extension.js"
+      ]
+    }
+  ],
+  "description": "Mozilla IoT gateway extension which is work like webhook.",
+  "gateway_specific_settings": {
+    "webthings": {
+      "exec": "{nodeLoader} {path}",
+      "primary_type": "extension",
+      "strict_max_version": "*",
+      "strict_min_version": "0.10.0"
+    }
+  },
+  "homepage_url": "https://github.com/ccunknown/turnip-extension",
+  "id": "turnip-extension-extension",
+  "license": "ISC",
+  "manifest_version": 1,
+  "name": "Turnip Extension",
+  "short_name": "TurnipExt",
+  "version": "0.1.0",
+  "web_accessible_resources": [
+    "css/*.css",
+    "images/*.svg",
+    "js/*.js",
+    "views/*.html"
+  ]
+}
