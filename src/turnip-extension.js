@@ -1,11 +1,11 @@
 'use strict';
 
 const {APIHandler, APIResponse} = require('gateway-addon');
-const manifest = require('./manifest.json');
+const manifest = require('../manifest.json');
 
 class TurnipExtension extends APIHandler{
-	constructor() {
-		super(addonManager);
+	constructor(addonManager) {
+		super(addonManager, manifest.id);
 		addonManager.addAPIHandler(this);
 	}
 

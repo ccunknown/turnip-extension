@@ -1,10 +1,10 @@
 {
   "name": "turnip-extension",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Mozilla IoT gateway extension which is work like webhook.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -25,13 +25,20 @@
     "url": "https://github.com/ccunknown/turnip-extension/issues"
   },
   "devDependencies": {
+    "babel-eslint": "^10.0.3",
+    "eslint": "^6.8.0"
   },
   "homepage": "https://github.com/ccunknown/turnip-extension#readme",
   "files": [
     "README.md",
     "SHA256SUMS",
     "index.js",
-    "manifest.json"
+    "manifest.json",
+    "README.md",
+    "static/css/extension.css",
+    "static/images/menu-icon.svg",
+    "static/js/extension.js",
+    "static/view/content.html"
   ],
   "moziot": {
     "api": {
@@ -43,3 +50,4 @@
     "exec": "{nodeLoader} {path}"
   }
 }
+

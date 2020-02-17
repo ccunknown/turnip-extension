@@ -3,10 +3,15 @@
   "content_scripts": [
     {
       "css": [
-        "css/extension.css"
+        "static/css/all.min.css",
+        "static/css/extension-bootstrap.css",
+        "static/css/extension.css"
       ],
       "js": [
-        "js/extension.js"
+        "static/js/extension.js",
+        "static/js/jquery.min.js",
+        "static/js/popper.min.js",
+        "static/js/bootstrap.js"
       ]
     }
   ],
@@ -20,16 +25,14 @@
     }
   },
   "homepage_url": "https://github.com/ccunknown/turnip-extension",
-  "id": "turnip-extension-extension",
+  "id": "turnip-extension",
   "license": "ISC",
   "manifest_version": 1,
   "name": "Turnip Extension",
   "short_name": "TurnipExt",
   "version": "0.1.0",
   "web_accessible_resources": [
-    "css/*.css",
-    "images/*.svg",
-    "js/*.js",
-    "views/*.html"
+    "static/*"
   ]
 }
+
