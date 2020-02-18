@@ -1,100 +1,164 @@
 <div id="extension-turnip-extension-contents">
-  <div id="turnip-container">
+  <div class="container" id="turnip-container">
     <div class="container">
       <div class="row">
-        <div style="width: 55px; overflow: hidden;">
-          <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-            
-            <a class="nav-link" id="extension-turnip-extension-nav-console" data-toggle="pill" href="#extension-turnip-extension-content-console" role="tab" aria-controls="extension-turnip-extension-content-console" aria-selected="false">
-              <i class="fas fa-terminal fa-3x"></i>
-            </a>
-            
-            <a class="nav-link" id="extension-turnip-extension-nav-hook" data-toggle="pill" href="#extension-turnip-extension-content-hook" role="tab" aria-controls="extension-turnip-extension-content-hook" aria-selected="false">
-              <center><i class="fas fa-cloud-upload-alt fa-3x"></i></center>
-            </a>
-            
-            <a class="nav-link" id="extension-turnip-extension-nav-setting" data-toggle="pill" href="#extension-turnip-extension-content-setting" role="tab" aria-controls="extension-turnip-extension-content-setting" aria-selected="false">
-              <center><i class="fas fa-cogs fa-3x"></i></center>
-            </a>
-            
-            <a class="nav-link active" id="extension-turnip-extension-nav-user" data-toggle="pill" href="#extension-turnip-extension-content-user" role="tab" aria-controls="extension-turnip-extension-content-user" aria-selected="true">
-              <center><i class="fas fa-user fa-3x"></i></center>
-            </a>
+        <div class="nav flex-column nav-pills turnip-container-nav" role="tablist" aria-orientation="vertical">
 
-          </div>
+          <a class="nav-link active" id="extension-turnip-extension-nav-console" data-toggle="pill" href="#extension-turnip-extension-content-console" role="tab" aria-controls="extension-turnip-extension-content-console" aria-selected="false">
+            <i class="fas fa-terminal fa-3x"></i>
+          </a>
+
+          <a class="nav-link" id="extension-turnip-extension-nav-hook" data-toggle="pill" href="#extension-turnip-extension-content-hook" role="tab" aria-controls="extension-turnip-extension-content-hook" aria-selected="false">
+            <center><i class="fas fa-cloud-upload-alt fa-3x"></i></center>
+          </a>
+
+          <a class="nav-link" id="extension-turnip-extension-nav-setting" data-toggle="pill" href="#extension-turnip-extension-content-setting" role="tab" aria-controls="extension-turnip-extension-content-setting" aria-selected="false">
+            <center><i class="fas fa-cogs fa-3x"></i></center>
+          </a>
+
+          <a class="nav-link" id="extension-turnip-extension-nav-user" data-toggle="pill" href="#extension-turnip-extension-content-user" role="tab" aria-controls="extension-turnip-extension-content-user" aria-selected="true">
+            <center><i class="fas fa-user fa-3x"></i></center>
+          </a>
         </div>
-        <div class="col bg-dark text-light">
-          <div class="tab-content overflow-auto " id="v-pills-tabContent">
-            
-            <div class="tab-pane fade" id="extension-turnip-extension-content-console" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-console">
-              ...<br>...<br>...<br>...<br>...<br>...<br>...<br>...<br>...<br>...<br>...<br>...<br>...<br>...<br>...<br>...<br>...<br>...<br>
+        <div class="col bg-dark text-light tab-content py-4">
+
+          <div class="tab-pane fade turnip-tab-content active show" id="extension-turnip-extension-content-loading" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-loading">
+            <div id="extension-turnip-extension-contents-loading" class="turnip-content-section">
+              <div>
+                <button class="btn btn-primary" type="button" disabled="">
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  &nbsp;Loading...
+                </button>
+              </div>
             </div>
-            
-            <div class="tab-pane fade" id="extension-turnip-extension-content-hook" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-hook">
-              ...
-            </div>
-            
-            <div class="tab-pane fade" id="extension-turnip-extension-content-setting" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-setting">
-              ...
-            </div>
-            
-            <div class="tab-pane fade active show" id="extension-turnip-extension-content-user" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-user">
-              <div class="turnip-tab-content">
-                <div class="card text-dark border-warning mb-3">
-                  <div class="card-header bg-warning">
-                    <b>Extension's User</b>
-                  </div>
-                  <div class="card-body bg-dark">
-                    <div class="container">
-                      <div class="row">
-                        <p class="text-danger">
-                          This extension require your permission to create a new user for operationing. You can change user information below. Click create account to process. 
-                        </p>
+          </div>
+
+          <div class="tab-pane fade turnip-tab-content active show" id="extension-turnip-extension-content-console" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-console">
+            ...
+          </div>
+
+          <div class="tab-pane fade turnip-tab-content" id="extension-turnip-extension-content-hook" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-hook">
+            ...
+          </div>
+
+          <div class="tab-pane fade turnip-tab-content" id="extension-turnip-extension-content-setting" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-setting">
+            ...
+          </div>
+
+          <div class="tab-pane fade turnip-tab-content" id="extension-turnip-extension-content-user" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-user">
+            <div id="extension-turnip-extension-contents-user-section-01" class="turnip-content-section">
+
+              <div class="card text-dark border-warning ternip-content-section-card">
+                <div class="card-header bg-warning">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <b>Extension's User</b>
+                </div>
+                <div class="card-body bg-dark d-flex flex-column">
+
+                  <!-- section-01-loading -->
+                  <div id="extension-turnip-extension-content-user-section-01-loading" class="">
+                    <div id="extension-turnip-extension-content-user-section-01-loading-progress" class="d-flex flex-column justify-content-center">
+                      <br>
+                      <div class="text-light">
+                        <center>
+                          Please wait, this process will take a while.
+                        </center>
                       </div>
                       <br>
-
-                      <div class="row text-light d-flex justify-content-center" id="extension-turnip-extension-content-user-section-01-form">
-                        <form class="col-md-6">
-                          
-                          <div class="form-group">
-                            <label for="extension-turnip-extension-content-user-section-01-form-email">
-                              E-mail address
-                            </label>
-                            <input type="email" class="form-control" id="extension-turnip-extension-content-user-section-01-form-email" placeholder="example@example.com">
-                          </div>
-
-                          <div class="form-group">
-                            <label for="extension-turnip-extension-content-user-section-01-form-name">
-                              Name
-                            </label>
-                            <input type="text" class="form-control" id="extension-turnip-extension-content-user-section-01-form-name" placeholder="John">
-                          </div>
-
-                          <div class="form-group">
-                            <label for="extension-turnip-extension-content-user-section-01-form-password">
-                              Password
-                            </label>
-                            <input type="text" class="form-control" id="extension-turnip-extension-content-user-section-01-form-password" placeholder="leave blank for auto-generate">
-                          </div>
-
-                        </form>
-                      </div>
-                      <br>
-
-                      <div class="row d-flex justify-content-center" id="extension-turnip-extension-content-user-section-01-button">
-                        <button class="btn btn-primary" id="extension-turnip-extension-content-user-section-01-button-create">Create</button>
-                        <button class="btn btn-danger" id="extension-turnip-extension-content-user-section-01-button-remove">Remove</button>
-                      </div>
-                      <div id="extension-turnip-extension-content-user-section-01-progress" class="row progress">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:100%">
+                      <div class="progress">
+                        <div class="progress-bar progress-bar-black-striped bg-warning progress-bar-animated" style="width:100%">
                         </div>
                       </div>
                     </div>
                   </div>
+
+                  <!-- section-01-create -->
+                  <div id="extension-turnip-extension-content-user-section-01-create" class="">
+                    <div id="extension-turnip-extension-contents-user-section-01-create-caution">
+                      <div class="text-danger" id="extension-turnip-extension-contents-user-section-01-create-caution-create">
+                        This extension require your permission to create a new account for operationing. You can change user information below. Click create button to process. 
+                      </div>
+                    </div>
+                    <br>
+
+                    <div class="text-light d-flex justify-content-center" id="extension-turnip-extension-content-user-section-01-create-form">
+                      <form class="col-md-6">
+
+                        <div class="form-group">
+                          <label for="extension-turnip-extension-content-user-section-01-create-form-email">
+                            E-mail address
+                          </label>
+                          <input type="email" class="form-control" id="extension-turnip-extension-content-user-section-01-create-form-email" placeholder="example@example.com">
+                        </div>
+
+                        <div class="form-group">
+                          <label for="extension-turnip-extension-content-user-section-01-create-form-name">
+                            Name
+                          </label>
+                          <input type="text" class="form-control" id="extension-turnip-extension-content-user-section-01-create-form-name" placeholder="John">
+                        </div>
+
+                        <div class="form-group">
+                          <label for="extension-turnip-extension-content-user-section-01-create-form-password">
+                            Password
+                          </label>
+                          <input type="text" class="form-control" id="extension-turnip-extension-content-user-section-01-create-form-password" placeholder="leave blank for auto-generate">
+                        </div>
+
+                      </form>
+                    </div>
+                    <br>
+
+                    <div class="d-flex justify-content-center" id="extension-turnip-extension-content-user-section-01-create-button">
+                      <button class="btn btn-primary" id="extension-turnip-extension-content-user-section-01-create-button-create">Create</button>
+                    </div>
+                  </div>
+
+                  <!-- section-01-remove -->
+                  <div id="extension-turnip-extension-content-user-section-01-remove" class="">
+                    <div id="extension-turnip-extension-contents-user-section-01-remove-caution">
+                      <div class="text-danger" id="extension-turnip-extension-contents-user-section-01-remove-caution-remove">
+                        This extension use account below for operationing, if you want to revoke or edit user, you have to remove user first. Click remove button to process. 
+                      </div>
+                    </div>
+                    <br>
+
+                    <div class="text-light d-flex justify-content-center" id="extension-turnip-extension-content-user-section-01-remove-form">
+                      <form class="col-md-6">
+
+                        <div class="form-group">
+                          <label for="extension-turnip-extension-content-user-section-01-remove-form-email">
+                            E-mail address
+                          </label>
+                          <input type="email" class="form-control" id="extension-turnip-extension-content-user-section-01-remove-form-email" disabled="">
+                        </div>
+
+                        <div class="form-group">
+                          <label for="extension-turnip-extension-content-user-section-01-remove-form-name">
+                            Name
+                          </label>
+                          <input type="text" class="form-control" id="extension-turnip-extension-content-user-section-01-remove-form-name" disabled="">
+                        </div>
+
+                        <div class="form-group">
+                          <label for="extension-turnip-extension-content-user-section-01-remove-form-password">
+                            Password
+                          </label>
+                          <input type="text" class="form-control" id="extension-turnip-extension-content-user-section-01-remove-form-password" disabled="">
+                        </div>
+
+                      </form>
+                    </div>
+                    <br>
+
+                    <div class="d-flex justify-content-center" id="extension-turnip-extension-content-user-section-01-remove-button">
+                      <button class="btn btn-danger" id="extension-turnip-extension-content-user-section-01-remove-button-remove">Remove</button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
 
+            </div>
           </div>
         </div>
       </div>

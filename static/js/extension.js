@@ -21,7 +21,7 @@
       const value = document.getElementById(
         'extension-turnip-extension-form-value');
       const buttonCreate = document.getElementById(
-        'extension-turnip-extension-content-user-section-01-button-create');
+        'extension-turnip-extension-content-user-section-01-create-button');
       const pre = document.getElementById(
         'extension-turnip-extension-response-data');
 

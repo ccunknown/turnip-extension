@@ -45,6 +45,7 @@
   background: var(--light);
   margin-bottom: 5px;
   color: var(--dark);
+  border-radius: 0.5rem 0rem 0rem 0.5rem;
 }
 
 #turnip-container .nav .nav-link:hover {
@@ -64,6 +65,28 @@
 }
 
 #turnip-container .turnip-tab-content {
-  margin: 20px 0px 10px 0px;
   font-size: medium;
+  height: 100%;
 }
+
+#turnip-container .turnip-tab-content.active {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#turnip-container .turnip-content-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+#turnip-container .progress-bar-black-striped {
+  background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.75) 25%, transparent 25%, transparent 50%, rgba(0, 0, 0, 0.75) 50%, rgba(0, 0, 0, 0.75) 75%, transparent 75%, transparent);
+  background-size: 1rem 1rem;
+}
+
+#turnip-container .hide {
+  display: none;
+}
+
