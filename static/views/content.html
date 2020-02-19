@@ -1,14 +1,14 @@
-<div id="extension-turnip-extension-contents">
-  <div class="container" id="turnip-container">
-    <div class="container">
-      <div class="row">
+<div id="extension-turnip-extension-contents" style="height: 100%;">
+  <div id="turnip-container" style="height: 100%;">
+    <div class="container h-100">
+      <div class="row h-100">
         <div class="nav flex-column nav-pills turnip-container-nav" role="tablist" aria-orientation="vertical">
 
-          <a class="nav-link active" id="extension-turnip-extension-nav-console" data-toggle="pill" href="#extension-turnip-extension-content-console" role="tab" aria-controls="extension-turnip-extension-content-console" aria-selected="false">
+          <a class="nav-link" id="extension-turnip-extension-nav-console" data-toggle="pill" href="#extension-turnip-extension-content-console" role="tab" aria-controls="extension-turnip-extension-content-console" aria-selected="false">
             <i class="fas fa-terminal fa-3x"></i>
           </a>
 
-          <a class="nav-link" id="extension-turnip-extension-nav-hook" data-toggle="pill" href="#extension-turnip-extension-content-hook" role="tab" aria-controls="extension-turnip-extension-content-hook" aria-selected="false">
+          <a class="nav-link" id="extension-turnip-extension-nav-webhook" data-toggle="pill" href="#extension-turnip-extension-content-webhook" role="tab" aria-controls="extension-turnip-extension-content-webhook" aria-selected="false">
             <center><i class="fas fa-cloud-upload-alt fa-3x"></i></center>
           </a>
 
@@ -16,14 +16,14 @@
             <center><i class="fas fa-cogs fa-3x"></i></center>
           </a>
 
-          <a class="nav-link" id="extension-turnip-extension-nav-user" data-toggle="pill" href="#extension-turnip-extension-content-user" role="tab" aria-controls="extension-turnip-extension-content-user" aria-selected="true">
+          <a class="nav-link" id="extension-turnip-extension-nav-account" data-toggle="pill" href="#extension-turnip-extension-content-account" role="tab" aria-controls="extension-turnip-extension-content-account" aria-selected="true">
             <center><i class="fas fa-user fa-3x"></i></center>
           </a>
         </div>
-        <div class="col bg-dark text-light tab-content py-4">
+        <div class="col bg-dark text-light tab-content turnip-container-content py-4">
 
           <div class="tab-pane fade turnip-tab-content active show" id="extension-turnip-extension-content-loading" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-loading">
-            <div id="extension-turnip-extension-contents-loading" class="turnip-content-section">
+            <div id="extension-turnip-extension-content-loading" class="turnip-content-section">
               <div>
                 <button class="btn btn-primary" type="button" disabled="">
                   <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -33,11 +33,11 @@
             </div>
           </div>
 
-          <div class="tab-pane fade turnip-tab-content active show" id="extension-turnip-extension-content-console" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-console">
+          <div class="tab-pane fade turnip-tab-content" id="extension-turnip-extension-content-console" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-console">
             ...
           </div>
 
-          <div class="tab-pane fade turnip-tab-content" id="extension-turnip-extension-content-hook" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-hook">
+          <div class="tab-pane fade turnip-tab-content" id="extension-turnip-extension-content-webhook" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-webhook">
             ...
           </div>
 
@@ -45,19 +45,19 @@
             ...
           </div>
 
-          <div class="tab-pane fade turnip-tab-content" id="extension-turnip-extension-content-user" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-user">
-            <div id="extension-turnip-extension-contents-user-section-01" class="turnip-content-section">
+          <div class="tab-pane fade turnip-tab-content" id="extension-turnip-extension-content-account" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-account">
+            <div class="turnip-content-section" id="extension-turnip-extension-content-account-section-01">
 
-              <div class="card text-dark border-warning ternip-content-section-card">
+              <div class="card text-dark border-warning ternip-content-section-card w-100">
                 <div class="card-header bg-warning">
                   <i class="fas fa-exclamation-triangle"></i>
-                  <b>Extension's User</b>
+                  <b>Extension's Account</b>
                 </div>
                 <div class="card-body bg-dark d-flex flex-column">
 
                   <!-- section-01-loading -->
-                  <div id="extension-turnip-extension-content-user-section-01-loading" class="">
-                    <div id="extension-turnip-extension-content-user-section-01-loading-progress" class="d-flex flex-column justify-content-center">
+                  <div id="extension-turnip-extension-content-account-section-01-loading" class="">
+                    <div id="extension-turnip-extension-content-account-section-01-loading-progress" class="d-flex flex-column justify-content-center">
                       <br>
                       <div class="text-light">
                         <center>
@@ -73,86 +73,86 @@
                   </div>
 
                   <!-- section-01-create -->
-                  <div id="extension-turnip-extension-content-user-section-01-create" class="">
-                    <div id="extension-turnip-extension-contents-user-section-01-create-caution">
-                      <div class="text-danger" id="extension-turnip-extension-contents-user-section-01-create-caution-create">
-                        This extension require your permission to create a new account for operationing. You can change user information below. Click create button to process. 
+                  <div id="extension-turnip-extension-content-account-section-01-create" class="">
+                    <div id="extension-turnip-extension-content-account-section-01-create-caution">
+                      <div class="text-danger" id="extension-turnip-extension-content-account-section-01-create-caution-create">
+                        This extension require your permission to create a new account for operationing. You can change account information below. Click create button to process. 
                       </div>
                     </div>
                     <br>
 
-                    <div class="text-light d-flex justify-content-center" id="extension-turnip-extension-content-user-section-01-create-form">
+                    <div class="text-light d-flex justify-content-center" id="extension-turnip-extension-content-account-section-01-create-form">
                       <form class="col-md-6">
 
                         <div class="form-group">
-                          <label for="extension-turnip-extension-content-user-section-01-create-form-email">
+                          <label for="extension-turnip-extension-content-account-section-01-create-form-email">
                             E-mail address
                           </label>
-                          <input type="email" class="form-control" id="extension-turnip-extension-content-user-section-01-create-form-email" placeholder="example@example.com">
+                          <input type="email" class="form-control" id="extension-turnip-extension-content-account-section-01-create-form-email" placeholder="example@example.com">
                         </div>
 
                         <div class="form-group">
-                          <label for="extension-turnip-extension-content-user-section-01-create-form-name">
+                          <label for="extension-turnip-extension-content-account-section-01-create-form-name">
                             Name
                           </label>
-                          <input type="text" class="form-control" id="extension-turnip-extension-content-user-section-01-create-form-name" placeholder="John">
+                          <input type="text" class="form-control" id="extension-turnip-extension-content-account-section-01-create-form-name" placeholder="John">
                         </div>
 
                         <div class="form-group">
-                          <label for="extension-turnip-extension-content-user-section-01-create-form-password">
+                          <label for="extension-turnip-extension-content-account-section-01-create-form-password">
                             Password
                           </label>
-                          <input type="text" class="form-control" id="extension-turnip-extension-content-user-section-01-create-form-password" placeholder="leave blank for auto-generate">
+                          <input type="text" class="form-control" id="extension-turnip-extension-content-account-section-01-create-form-password" placeholder="leave blank for auto-generate">
                         </div>
 
                       </form>
                     </div>
                     <br>
 
-                    <div class="d-flex justify-content-center" id="extension-turnip-extension-content-user-section-01-create-button">
-                      <button class="btn btn-primary" id="extension-turnip-extension-content-user-section-01-create-button-create">Create</button>
+                    <div class="d-flex justify-content-center" id="extension-turnip-extension-content-account-section-01-create-button">
+                      <button class="btn btn-primary" id="extension-turnip-extension-content-account-section-01-create-button-create">Create</button>
                     </div>
                   </div>
 
                   <!-- section-01-remove -->
-                  <div id="extension-turnip-extension-content-user-section-01-remove" class="">
-                    <div id="extension-turnip-extension-contents-user-section-01-remove-caution">
-                      <div class="text-danger" id="extension-turnip-extension-contents-user-section-01-remove-caution-remove">
-                        This extension use account below for operationing, if you want to revoke or edit user, you have to remove user first. Click remove button to process. 
+                  <div id="extension-turnip-extension-content-account-section-01-remove" class="">
+                    <div id="extension-turnip-extension-content-account-section-01-remove-caution">
+                      <div class="text-danger" id="extension-turnip-extension-content-account-section-01-remove-caution-remove">
+                        This extension use account below for operationing, if you want to revoke or edit account, you have to remove account first. Click remove button to process. 
                       </div>
                     </div>
                     <br>
 
-                    <div class="text-light d-flex justify-content-center" id="extension-turnip-extension-content-user-section-01-remove-form">
+                    <div class="text-light d-flex justify-content-center" id="extension-turnip-extension-content-account-section-01-remove-form">
                       <form class="col-md-6">
 
                         <div class="form-group">
-                          <label for="extension-turnip-extension-content-user-section-01-remove-form-email">
+                          <label for="extension-turnip-extension-content-account-section-01-remove-form-email">
                             E-mail address
                           </label>
-                          <input type="email" class="form-control" id="extension-turnip-extension-content-user-section-01-remove-form-email" disabled="">
+                          <input type="email" class="form-control" id="extension-turnip-extension-content-account-section-01-remove-form-email" disabled="">
                         </div>
 
                         <div class="form-group">
-                          <label for="extension-turnip-extension-content-user-section-01-remove-form-name">
+                          <label for="extension-turnip-extension-content-account-section-01-remove-form-name">
                             Name
                           </label>
-                          <input type="text" class="form-control" id="extension-turnip-extension-content-user-section-01-remove-form-name" disabled="">
+                          <input type="text" class="form-control" id="extension-turnip-extension-content-account-section-01-remove-form-name" disabled="">
                         </div>
 
                         <div class="form-group">
-                          <label for="extension-turnip-extension-content-user-section-01-remove-form-password">
+                          <label for="extension-turnip-extension-content-account-section-01-remove-form-password">
                             Password
                           </label>
-                          <input type="text" class="form-control" id="extension-turnip-extension-content-user-section-01-remove-form-password" disabled="">
+                          <input type="text" class="form-control" id="extension-turnip-extension-content-account-section-01-remove-form-password" disabled="">
                         </div>
 
                       </form>
                     </div>
                     <br>
 
-                    <div class="d-flex justify-content-center" id="extension-turnip-extension-content-user-section-01-remove-button">
-                      <button class="btn btn-danger" id="extension-turnip-extension-content-user-section-01-remove-button-remove">Remove</button>
+                    <div class="d-flex justify-content-center" id="extension-turnip-extension-content-account-section-01-remove-button">
+                      <button class="btn btn-danger" id="extension-turnip-extension-content-account-section-01-remove-button-remove">Remove</button>
                     </div>
                   </div>
                 </div>

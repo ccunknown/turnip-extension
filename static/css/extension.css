@@ -41,6 +41,10 @@
   top: 7.6rem;
 }
 
+#turnip-container .turnip-container-nav {
+  height: fit-content;
+}
+
 #turnip-container .nav .nav-link {
   background: var(--light);
   margin-bottom: 5px;
@@ -64,9 +68,16 @@
   opacity: 0.5;
 }
 
+#turnip-container .turnip-container-content {
+  max-height: 100%;
+  overflow: auto;
+  height: fit-content;
+}
+
 #turnip-container .turnip-tab-content {
   font-size: medium;
-  height: 100%;
+  height: fit-content;
+  min-height: 150px;
 }
 
 #turnip-container .turnip-tab-content.active {
@@ -89,4 +100,5 @@
 #turnip-container .hide {
   display: none;
 }
+
 
