@@ -48,6 +48,9 @@
     "type": "extension",
     "plugin": true,
     "exec": "{nodeLoader} {path}"
+  },
+  "dependencies": {
+    "jsonschema": "^1.2.5",
+    "node-fetch": "^2.6.0"
   }
 }
-

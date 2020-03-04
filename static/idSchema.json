@@ -1,0 +1,36 @@
+{
+	"id@extension-turnip-extension": {
+		"nav": {
+			"console": "console",
+			"webhook": "webhook",
+			"setting": "setting",
+			"account": "account"
+		},
+		"con@content": {
+			"console": "console",
+			"webhook": "webhook",
+			"setting": "setting",
+			"account": {
+				"loading": "section-01-loading",
+				"create@section-01-create": {
+					"caution": "caution",
+					"email": "form-email",
+					"name": "form-name",
+					"password": "form-password",
+					"button": {
+						"create": "create"
+					}
+				},
+				"remove@section-01-remove": {
+					"caution": {
+						"remove": "remove",
+						"wrong": "wrong"
+					},
+					"email": "form-email",
+					"name": "form-name",
+					"jwt": "form-jwt"
+				}
+			}
+		}
+	}
+}

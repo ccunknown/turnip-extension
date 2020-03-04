@@ -5,6 +5,7 @@
       "css": [
         "static/css/all.min.css",
         "static/css/extension-bootstrap.css",
+        "static/css/jquery.dataTables.min.css",
         "static/css/extension.css"
       ],
       "js": [
@@ -12,6 +13,7 @@
         "static/js/popper.min.js",
         "static/js/bootstrap.js",
         "static/js/password-generator.min.js",
+        "static/js/jquery.dataTables.min.js",
         "static/js/extension.js"
       ]
     }

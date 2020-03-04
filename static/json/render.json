@@ -1,0 +1,68 @@
+{
+	"renderList": [
+		{
+			"id": "turnip.content.account.loading",
+			"show": []
+		},
+
+		{
+			"id": "turnip.content.account.create",
+			"show": ["noAccount"]
+		},
+		{
+			"id": "turnip.content.account.create.email",
+			"source": {
+				"type": "val",
+				"val": "this.config.account.email"
+			}
+		},
+		{
+			"id": "turnip.content.account.create.name",
+			"source": {
+				"type": "val",
+				"val": "this.config.account.name"
+			}
+		},
+		{
+			"id": "turnip.content.account.create.password",
+			"source": {
+				"type": "val",
+				"val": "generatePassword(32, false)"
+			}
+		},
+
+		{
+			"id": "turnip.content.account.remove",
+			"show": ["wrongToken", "noWebhook", "allReady"]
+		},
+		{
+			"id": "turnip.content.account.remove.caution.remove",
+			"show": ["noWebhook", "allReady"]
+		},
+		{
+			"id": "turnip.content.account.remove.caution.wrong",
+			"show": ["wrongToken"]
+		},
+		{
+			"id": "turnip.content.account.remove.email",
+			"source": {
+				"type": "val",
+				"val": "this.config.account.email"
+			}
+		},
+		{
+			"id": "turnip.content.account.remove.name",
+			"source": {
+				"type": "val",
+				"val": "this.config.account.name"
+			}
+		},
+		{
+			"id": "turnip.content.account.remove.jwt",
+			"source": {
+				"type": "html",
+				"val": "this.config.account.jwt"
+			}
+		}
+	]
+}

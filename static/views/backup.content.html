@@ -38,7 +38,46 @@
           </div>
 
           <div class="tab-pane fade turnip-tab-content" id="extension-turnip-extension-content-webhook" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-webhook">
-            ...
+            <table id="extension-turnip-extension-content-webhook-section-01-table" class="display" style="width:100%">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Position</th>
+                  <th>Office</th>
+                  <th>Age</th>
+                  <th>Start date</th>
+                  <th>Salary</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Tiger Nixon</td>
+                  <td>System Architect</td>
+                  <td>Edinburgh</td>
+                  <td>61</td>
+                  <td>2011/04/25</td>
+                  <td>$320,800</td>
+                </tr>
+                <tr>
+                  <td>Garrett Winters</td>
+                  <td>Accountant</td>
+                  <td>Tokyo</td>
+                  <td>63</td>
+                  <td>2011/07/25</td>
+                  <td>$170,750</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Name</th>
+                  <th>Position</th>
+                  <th>Office</th>
+                  <th>Age</th>
+                  <th>Start date</th>
+                  <th>Salary</th>
+                </tr>
+              </tfoot>
+            </table>
           </div>
 
           <div class="tab-pane fade turnip-tab-content" id="extension-turnip-extension-content-setting" role="tabpanel" aria-labelledby="extension-turnip-extension-nav-setting">
@@ -120,6 +159,9 @@
                       <div class="text-danger" id="extension-turnip-extension-content-account-section-01-remove-caution-remove">
                         This extension use account below for operationing, if you want to revoke or edit account, you have to remove account first. Click remove button to process. 
                       </div>
+                      <div class="text-danger" id="extension-turnip-extension-content-account-section-01-remove-caution-wrong">
+                        Token below is invalid, please click 'Remove' button for re-create account again or update token manualy by replace token below then click 'Update' button!!!
+                      </div>
                     </div>
                     <br>
 
@@ -141,10 +183,10 @@
                         </div>
 
                         <div class="form-group">
-                          <label for="extension-turnip-extension-content-account-section-01-remove-form-password">
-                            Password
+                          <label for="extension-turnip-extension-content-account-section-01-remove-form-jwt">
+                            JWT Token
                           </label>
-                          <input type="text" class="form-control" id="extension-turnip-extension-content-account-section-01-remove-form-password" disabled="">
+                          <textarea class="form-control no-resize" id="extension-turnip-extension-content-account-section-01-remove-form-jwt" rows="10"></textarea>
                         </div>
 
                       </form>
@@ -152,7 +194,8 @@
                     <br>
 
                     <div class="d-flex justify-content-center" id="extension-turnip-extension-content-account-section-01-remove-button">
-                      <button class="btn btn-danger" id="extension-turnip-extension-content-account-section-01-remove-button-remove">Remove</button>
+                      <button class="btn btn-primary mx-2" id="extension-turnip-extension-content-account-section-01-remove-button-update">Update</button>
+                      <button class="btn btn-danger mx-2" id="extension-turnip-extension-content-account-section-01-remove-button-remove">Remove</button>
                     </div>
                   </div>
                 </div>

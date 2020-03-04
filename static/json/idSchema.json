@@ -1,0 +1,52 @@
+{
+	"id@extension-turnip-extension": {
+		"nav": {
+			"console": "",
+			"webhook": "",
+			"setting": "",
+			"account": ""
+		},
+		"con@content": {
+			"this@": "",
+			"console": {
+				"this@": ""
+			},
+			"webhook": {
+				"this@": ""
+			},
+			"setting": {
+				"this@": ""
+			},
+			"account": {
+				"this@": "",
+				"loading@section-01-loading": {
+					"this@": ""
+				},
+				"create@section-01-create": {
+					"this@": "",
+					"caution": "create",
+					"email@": "form-email",
+					"name@": "form-name",
+					"password@": "form-password",
+					"button": {
+						"create@": "create"
+					}
+				},
+				"remove@section-01-remove": {
+					"this@": "",
+					"caution": {
+						"remove@": "remove",
+						"wrong@": "wrong"
+					},
+					"email@": "form-email",
+					"name@": "form-name",
+					"jwt@": "form-jwt",
+					"button": {
+						"update@": "update",
+						"remove@": "remove"
+					}
+				}
+			}
+		}
+	}
+}
