@@ -1,28 +1,109 @@
 <div class="turnip-slide-container" id="extension-turnip-extension-content-webhook-section">
-  <div class="turnip-slide-base" id="extension-turnip-extension-content-webhook-section-01">
-    <div class="turnip-webhook-container">
+  <div class="turnip-slide-slide" id="extension-turnip-extension-content-webhook-section-02">
+    <div class="card bg-warning">
 
-      <div class="card turnip-webhook-item">
-        <div class="card-header bg-dark d-flex justify-content-between">
-          <div class="text-truncate">very longgggggggggggggggg title</div>
-          <div class="turnip-card-header-btn-box">
-            <button class="btn btn-warning">
-              <i class="fas fa-edit fa-lg"></i>
+      <div class="card-header border-secondary">
+        <div class="d-flex justify-content-between text-dark">
+          <div>
+            <i class="fas fa-envelope mr-2"></i><b>New Webhook</b>
+          </div>
+          <div>
+            <button class="btn btn-danger border-secondary mr-1" onclick="$('#extension-turnip-extension-content-webhook-section-02').addClass('hide')">
+              <i class="fas fa-backspace mr-2"></i>
+              <b>Back</b>
             </button>
-            <button class="btn btn-danger">
-              <i class="fas fa-trash fa-lg"></i>
+            <button class="btn btn-success border-secondary mr-1">
+              <i class="fas fa-save mr-2"></i><b>Save</b>
             </button>
           </div>
         </div>
-        <div class="card-body bg-secondary">
-          <h5 class="card-title">Special title treatment</h5>
-          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        </div>
       </div>
+      
+      <div class="card-body bg-dark">
+        <div class="turnip-form-container col-sm-12 col-md-8 col-lg-6">
 
-      <div class="card turnip-webhook-item">
-        <div class="card-header bg-dark">
-          <div class="d-flex justify-content-between">
+          <div class="turnip-form-row  align-items-end turnip-badge-header-group">
+            <label class="turnip-label-badge badge-info font-size-inherit">General Information</label>
+            <div class="d-flex flex-column w-100 border-dash border-info turnip-badge-union p-3">
+              <div class="turnip-badge-header-group grow-1">
+                <label class="turnip-label-badge badge-secondary badge-secondary">Webhook Name</label>
+                <input class="turnip-badge-union border-secondary" type="text">
+              </div>
+              <div class="turnip-badge-header-group grow-1">
+                <label class="turnip-label-badge badge-secondary">Description</label>
+                <textarea class="turnip-badge-union border-secondary no-resize" rows="4"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="turnip-form-row align-items-end turnip-badge-header-group">
+            <label class="turnip-label-badge badge-info font-size-inherit">Webhook Information</label>
+            <div class="d-flex flex-column border-dash border-info turnip-badge-union p-3 w-100">
+
+              <div class="turnip-form-row">
+                <div class="turnip-badge-header-group">
+                  <label class="turnip-label-badge badge-secondary">Method</label>
+                  <select class="turnip-badge-union border-secondary">
+                    <option>GET</option>
+                    <option>POST</option>
+                    <option>PATCH</option>
+                    <option>PUT</option>
+                  </select>
+                </div>
+                &nbsp;
+                <div class="turnip-badge-header-group grow-1">
+                  <label class="turnip-label-badge badge-secondary">URL</label>
+                  <input class="turnip-badge-union border-secondary" type="text">
+                </div>
+              </div>
+
+              <div class="turnip-badge-header-group">
+                <label class="turnip-label-badge badge-secondary">Headers</label>
+                <div class="turnip-form-row flex-column border-dash border-secondary turnip-badge-union p-3">
+                  <div class="turnip-form-row flex-column mb-3">
+                    <div class="header-item">
+                      <span class="">accept</span>
+                      <span class="">application/json</span>
+                      <span class=""><i class="fa fas fa-times"></i></span>
+                    </div>
+                    <div class="header-item">
+                      <span class="">content-type</span>
+                      <span class="">application/json</span>
+                      <span class=""><i class="fa fas fa-times"></i></span>
+                    </div>
+                  </div>
+                  <div class="turnip-form-row align-items-end">
+                    <div class="turnip-badge-header-group" style="min-width: 50px;max-width: 30%;">
+                      <label class="turnip-label-badge badge-secondary">Key</label>
+                      <input class="turnip-badge-union border-secondary" type="text">              
+                    </div>
+                    <div class="turnip-badge-header-group grow-1" style="min-width: 50px;">
+                      <label class="turnip-label-badge badge-secondary">Value</label>
+                      <input class="turnip-badge-union border-secondary" type="text">
+                    </div>
+                    <button class="btn btn-primary">Add</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="turnip-badge-header-group grow-1">
+                <label class="turnip-label-badge badge-secondary">Payload</label>
+                <div class="turnip-badge-union border-secondary">
+                  <div id="jsoneditor" class="w-100" style="height: 300px;">
+                  </div>
+                </div>
+              </div></div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div><div class="turnip-slide-base" id="extension-turnip-extension-content-webhook-section-01">
+      <div class="turnip-webhook-container">
+
+        <div class="card turnip-webhook-item">
+          <div class="card-header bg-dark d-flex justify-content-between">
             <div class="text-truncate">very longgggggggggggggggg title</div>
             <div class="turnip-card-header-btn-box">
               <button class="btn btn-warning">
@@ -33,90 +114,22 @@
               </button>
             </div>
           </div>
+          <div class="card-body bg-secondary">
+            <h5 class="card-title">Special title treatment</h5>
+            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+          </div>
         </div>
-        <div class="card-body bg-secondary">
-          <h5 class="card-title">Special title treatment</h5>
-          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        </div>
-      </div>
 
-      <div class="card turnip-webhook-item">
-        <div class="card-header bg-dark">
-          <div class="d-flex justify-content-between">
-            <div class="text-truncate">very longgggggggggggggggg title</div>
-            <div class="turnip-card-header-btn-box">
-              <button class="btn btn-warning">
-                <i class="fas fa-edit fa-lg"></i>
-              </button>
-              <button class="btn btn-danger">
-                <i class="fas fa-trash fa-lg"></i>
-              </button>
+        <div class="card turnip-webhook-item turnip-webhook-item-adder bg-secondary">
+          <div class="card-body" onclick="$('#extension-turnip-extension-content-webhook-section-02').removeClass('hide')">
+            <div class="d-flex flex-column justify-content-center align-items-center w-100 h-100">
+              <i class="fas fa-plus fa-4x"></i>
+              <span>Create new webhook</span>
             </div>
           </div>
         </div>
-        <div class="card-body bg-secondary">
-          <h5 class="card-title">Special title treatment</h5>
-          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        </div>
+
       </div>
-
-      <div class="card turnip-webhook-item">
-        <div class="card-header bg-dark">
-          <div class="d-flex justify-content-between">
-            <div class="text-truncate">very longgggggggggggggggg title</div>
-            <div class="turnip-card-header-btn-box">
-              <button class="btn btn-warning">
-                <i class="fas fa-edit fa-lg"></i>
-              </button>
-              <button class="btn btn-danger">
-                <i class="fas fa-trash fa-lg"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="card-body bg-secondary">
-          <h5 class="card-title">Special title treatment</h5>
-          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        </div>
-      </div>
-
-      <div class="card turnip-webhook-item turnip-webhook-item-adder bg-secondary">
-        <div class="card-body" onclick="$('#extension-turnip-extension-content-webhook-section-02').removeClass('hide')">
-          <div class="d-flex flex-column justify-content-center align-items-center w-100 h-100">
-            <i class="fas fa-plus fa-4x"></i>
-            <span>Create new webhook</span>
-          </div>
-        </div>
-      </div>
-
     </div>
-  </div>
-  <div class="turnip-slide-slide hide" id="extension-turnip-extension-content-webhook-section-02"><div class="d-flex">
-    <button class="btn btn-danger mr-1" onclick="$('#extension-turnip-extension-content-webhook-section-02').addClass('hide')">
-      Back
-    </button>
-    <button class="btn btn-success mr-1">
-      Save
-    </button>
-  </div>
 
-  <br>
-
-  <div class="d-flex" style="font-size: small;max-width: 768px;flex-wrap: wrap;">
-
-    <div class="d-flex flex-column">
-      <span class="badge badge-secondary" style="width:fit-content;border-radius: 3px 3px 0 0;">Method</span>
-      <select style="border-top-left-radius:0;border-style: solid;border-width: 2px;height: 24px;width: fit-content;border-radius: 0px 3px 3px 3px;" class="border-secondary">
-        <option>GET</option>
-        <option>POST</option>
-        <option>PATCH</option>
-        <option>PUT</option>
-      </select>
-    </div>
-    &nbsp;
-    <div class="d-flex flex-column" style="width: 100%;max-width: 400px;">
-      <span class="badge badge-secondary" style="width:fit-content;border-radius: 3px 3px 0 0;">URL</span>
-      <input type="text" style="border-top-left-radius:0;border-style: solid;border-width: 2px;height: 24px;" class="border-secondary">
-    </div>
   </div>
-</div>
