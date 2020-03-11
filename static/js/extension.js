@@ -24,6 +24,22 @@
       this.content = '';
       this.contents = {};
 
+      //  Load script.
+      let scriptAddrPrefix = `/extensions/${this.id}/`;
+      let scriptArr = [
+        "static/js/jquery.min.js",
+        "static/js/popper.min.js",
+        "static/js/bootstrap.js",
+        "static/js/password-generator.min.js",
+        "static/ace-builds/src-min-noconflict/ace.js",
+        "static/ace-builds/src-min-noconflict/ext-language_tools.js",
+        "static/js/mode-json_mustache.js"
+      ];
+
+      for(let i in scriptArr)
+        this.loadScriptSync(`${scriptAddrPrefix}${scriptArr[i]}`);
+
+      //  Load resource.
       let prom = Promise.all([
         this.loadResource(`/extensions/${this.id}/static/views/main.html`),
         this.loadResource(`/extensions/${this.id}/static/views/console.html`),
@@ -68,6 +84,10 @@
 
           this.content = content.body.innerHTML;
           //console.log(`content : ${this.content}`);
+
+          //  Initial components.
+          this.webhook = new TurnipExtensionWebhook(this, this.turnipRaid);
+
           resolve();
         });
       });
@@ -88,6 +108,14 @@
           this.pageRender();
         });
       });
+    }
+
+    loadScriptSync (src) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.type = "text/javascript";
+      s.async = false;
+      document.getElementsByTagName('head')[0].appendChild(s);
     }
 
     loadResource(url, type) {
@@ -221,29 +249,7 @@
         }
       }
 
-      this.renderContentWebhook();
-    }
-
-    renderContentWebhook() {
-      console.log(`renderContentWebhook() >> `);
-      // create the editor
-      const container = document.getElementById("jsoneditor");
-      const options = {};
-      const editor = new JSONEditor(container, options);
-
-      // set json
-      const initialJson = {
-        "Array": [1, 2, 3],
-        "Boolean": true,
-        "Null": null,
-        "Number": 123,
-        "Object": {"a": "b", "c": "d"},
-        "String": "Hello World"
-      };
-      editor.set(initialJson);
-
-      // get json
-      const updatedJson = editor.get();
+      this.webhook.render();
     }
 
     generateToken(token) {
@@ -437,52 +443,5 @@
     }
   }
 
-  //  TurnipRaid class used for predict and verify id of html.
-  class TurnipRaid {
-    constructor(idList) {
-      this.idList = (idList) ? idList : [];
-      let duplicateList = this.findDuplicate();
-      if(duplicateList.length)
-        console.error(`Found duplicate id in html : ${JSON.stringify(duplicateList, null, 2)}`);
-    }
-
-    findDuplicate(arr) {
-      arr = (arr) ? arr : this.idList;
-      return arr.filter((item, index) => {
-        return arr.indexOf(item) != index;
-      });
-    }
-
-    regexAutoId(regex, opt) {
-      let arr = (opt && opt.array) ? opt.array : this.idList;
-      let shortest = (opt && opt.shortest) ? true : false;
-
-      let result = arr.filter((item, index) => item.match(regex));
-      if(result.length == 0)
-        console.error(`Not found id with regex : ${regex}`);
-      else if(result.length > 1 && !shortest)
-        console.warn(`Found list of id for regex : ${regex} : ${JSON.stringify(result, null, 2)}`);
-      return result.reduce((a, b) => a.length <= b.length ? a : b);
-    }
-
-    stringAutoId(str, opt) {
-      let arr = (opt && opt.array) ? opt.array : this.idList;
-      var delimiter = (opt && delimiter) ? opt.delimiter : '.';
-      let shortest = (opt && opt.shortest) ? true : false;
-
-      str = str.split(delimiter).join(`.*`);
-      str = `${str}$`;
-      let regex = new RegExp(str);
-      return this.regexAutoId(regex, opt);
-    }
-
-    stringAutoIdObject(str) {
-      let id = this.stringAutoId(str);
-      return (id) ? $(`#${id}`) : null;
-    }
-  }
-
   new TurnipExtension();
 })();
-
-

@@ -10,12 +10,8 @@
         "static/css/extension.css"
       ],
       "js": [
-        "static/js/jquery.min.js",
-        "static/js/popper.min.js",
-        "static/js/bootstrap.js",
-        "static/js/password-generator.min.js",
-        "static/js/jquery.dataTables.min.js",
-        "static/js/jsoneditor.min.js",
+        "static/js/turnipRaid.js",
+        "static/js/webhook.js",
         "static/js/extension.js"
       ]
     }
