@@ -65,6 +65,36 @@ const errDef = [
 			"contentType": "application/json",
 			"contentIndex": "message"
 		}
+	},
+	{
+		"name": "FoundDuplicateWebhookItem",
+		"extends": Error,
+		"super": (arg) => `Webhook name '${arg}' already exist.`,
+		"httpResponse": {
+			"status": 403,
+			"contentType": "application/json",
+			"contentIndex": "message"
+		}
+	},
+	{
+		"name": "ObjectNotFound",
+		"extends": Error,
+		"super": (arg) => `Webhook name '${arg}' not found.`,
+		"httpResponse": {
+			"status": 403,
+			"contentType": "application/json",
+			"contentIndex": "message"
+		}
+	},
+	{
+		"name": "ObjectPathNameMismatch",
+		"extends": Error,
+		"super": (arg) => `Object url path mismatch to payload (found '${arg}').`,
+		"httpResponse": {
+			"status": 403,
+			"contentType": "application/json",
+			"contentIndex": "message"
+		}
 	}
 ];
 

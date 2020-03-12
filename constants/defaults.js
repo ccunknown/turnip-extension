@@ -47,19 +47,25 @@ var Defaults = {
 					"required": [
 						"name",
 						"description",
-						"verify",
+						"enable",
+						"unverify",
 						"url",
 						"method"
 					],
 					"additionalProperties": false,
 					"properties": {
 						"name": {
-							"type": "string"
+							"type": "string",
+							"pattern": "^[a-zA-Z-_0-9]{4,40}$"
 						},
 						"description": {
 							"type": "string"
 						},
-						"verify": {
+						"enable": {
+							"type": "boolean",
+							"default": true
+						},
+						"unverify": {
 							"type": "boolean",
 							"default": false
 						},
@@ -98,10 +104,12 @@ var Defaults = {
 										"type": "string"
 									}
 								}
-							}
+							},
+							"default": []
 						},
 						"payload": {
-							"type": "string"
+							"type": "string",
+							"default": ""
 						}
 					}
 				}

@@ -28,11 +28,38 @@ class ConfigManager {
 		});
 	}
 
+	getConfigWebhook() {
+		console.log("getConfigWebhook() >> ");
+		return new Promise((resolve, reject) => {
+			try {
+				this.getConfig()
+				.then((conf) => resolve(conf.webhook))
+			} catch(err) {
+				err = (err) ? err : new Errors.ErrorObjectNotReturn();
+				reject(err);
+			}
+		});
+	}
+
 	saveConfig(config) {
 		console.log("saveConfig() >> ");
 		return new Promise((resolve, reject) => {
 			try {
 				resolve(this.saveConfigToDatabase(config));
+			} catch(err) {
+				err = (err) ? err : new Errors.ErrorObjectNotReturn();
+				reject(err);
+			}
+		});
+	}
+
+	saveConfigWebhook(webhook) {
+		console.log("saveConfigWebhook() >> ");
+		return new Promise((resolve, reject) => {
+			try {
+				this.getConfig()
+				.then((config) => this.saveConfig(Object.assign(config, {"webhook": webhook})))
+				.then((conf) => resolve(conf.webhook))
 			} catch(err) {
 				err = (err) ? err : new Errors.ErrorObjectNotReturn();
 				reject(err);

@@ -33,6 +33,7 @@
         "static/js/password-generator.min.js",
         "static/ace-builds/src-min-noconflict/ace.js",
         "static/ace-builds/src-min-noconflict/ext-language_tools.js",
+        "static/js/mode-text_mustache.js",
         "static/js/mode-json_mustache.js"
       ];
 
@@ -158,17 +159,21 @@
 
     pageRender() {
       console.log("pageRender() >> ");
-      this.getWorkMode().then((workMode) => {
-        console.log("Work Mode : "+workMode);
-        this.renderNav(workMode);
-        this.renderContent(workMode);
-        /*
-        this.renderContentConsole(workMode);
-        this.renderContentWebhook(workMode);
-        this.renderContentSetting(workMode);
-        this.renderContentAccount(workMode);
-        */
-      });
+      this.getConfig()
+      .then((config) => {
+        this.config = config;
+        this.getWorkMode().then((workMode) => {
+          console.log("Work Mode : "+workMode);
+          this.renderNav(workMode);
+          this.renderContent(workMode);
+          /*
+          this.renderContentConsole(workMode);
+          this.renderContentWebhook(workMode);
+          this.renderContentSetting(workMode);
+          this.renderContentAccount(workMode);
+          */
+        });
+      })
     }
 
     webUi() {

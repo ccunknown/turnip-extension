@@ -5,7 +5,8 @@ class TurnipExtensionWebhook {
     this.said = this.turnipRaid.stringAutoId.bind(this.turnipRaid);
     this.saidObj = this.turnipRaid.stringAutoIdObject.bind(this.turnipRaid);
 
-    this.form = {
+    this.form = {};
+    this.form.default = {
       meta: {
         mode: "new",
         ref: {
@@ -18,7 +19,7 @@ class TurnipExtensionWebhook {
       description: "",
       method: "POST",
       url: "",
-      headers: {},
+      headers: [],
       header: {
         key: "",
         value: ""
@@ -44,7 +45,8 @@ class TurnipExtensionWebhook {
     this.editor = ace.edit(this.said("turnip.content.webhook.form.payload"));
     var session = this.editor.getSession();
     //session.setMode(`ace/mode/json`);
-    session.setMode(`ace/mode/json_mustache`);
+    //session.setMode(`ace/mode/json_mustache`);
+    session.setMode(`ace/mode/text_mustache`);
 
     console.log(`onSet`);
     console.log(session.$mode.$highlightRules);
@@ -84,24 +86,49 @@ class TurnipExtensionWebhook {
   setupFunctions() {
     let saidObj = this.saidObj;
     //  Add event listener of create button.
-    saidObj(`turnip.content.webhook.form.button.add`).click(() => {
-      console.log(`Event [Click] : turnip.content.webhook.form.button.add`);
+    saidObj(`turnip.content.webhook.form.header.button.add`).click(() => {
+      console.log(`Event [Click] : turnip.content.webhook.form.header.button.add`);
 
       var header = {
         key: saidObj(`extension-turnip-extension-content-webhook-section-02-form-header-key`).val(),
         value: saidObj(`extension-turnip-extension-content-webhook-section-02-form-header-value`).val()
       };
 
+      if(header.key == `` || header.value == ``)
+        return ;
+
       this.addToHeaders(header);
 
       key: saidObj(`extension-turnip-extension-content-webhook-section-02-form-header-key`).val(``);
       value: saidObj(`extension-turnip-extension-content-webhook-section-02-form-header-value`).val(``);
     });
+
+    saidObj(`turnip.content.webhook.form.save`).click(() => {
+      console.log(`Event [Click] : turnip.content.webhook.form.save`);
+
+      let form = this.getForm();
+      console.log(`Form : ${JSON.stringify(form, null, 2)}`);
+    });
+
+    //saidObj(`turnip.content.webhook.form.headers`).change(this.onHeaderChange);
   }
 
   render() {
     this.renderBase();
     this.renderForm();
+  }
+
+  onHeaderChange() {
+    console.log(`onHeaderChange() >> `);
+    let headers = this.getFormHeaders();
+    let mode = `ace/mode/text_mustache`;
+    for(let i in headers) {
+      if(headers[i].key.toLowerCase() == `content-type`) {
+        if(headers[i].value.toLowerCase() == `application/json`)
+          mode = `ace/mode/json_mustache`;
+      }
+    }
+    this.editor.getSession().setMode(mode);
   }
 
   addToHeaders(header) {
@@ -121,6 +148,28 @@ class TurnipExtensionWebhook {
     $(`#${rkey}`).click(() => {
       this.removeFromHeaders(header.key);
     });
+    this.onHeaderChange();
+  }
+
+  getFormHeaders() {
+    let parentId = `extension-turnip-extension-content-webhook-section-02-form-headers`;
+    let item = $(`#${parentId} > .header-item`);
+    let key = $(`#${parentId} > .header-item > .header-item-key`);
+    let value = $(`#${parentId} > .header-item > .header-item-value`);
+    let result = [];
+
+    console.log(item);
+    console.log(key);
+    console.log(value);
+
+    for(let i = 0;i < item.length;i++) {
+      result.push({
+        key: key[i].innerHTML,
+        value: value[i].innerHTML
+      });
+    }
+
+    return result;
   }
 
   removeFromHeaders(key) {
@@ -130,13 +179,57 @@ class TurnipExtensionWebhook {
     console.log(child1);
     console.log(child2);
     for(let i = 0;i < child2.length;i++) {
-      if(child2[i].innerHTML == key)
-          child1[i].remove();
+      if(child2[i].innerHTML == key) {
+        child1[i].remove();
+      }
     }
+    this.onHeaderChange();
   }
 
-  renderBase(form) {
-    form = (form) ? form : this.form;
+  renderBase(webhookList) {
+    console.log(`renderBase() >> `);
+    let saidObj = this.saidObj;
+
+    let itemTemplate = `
+      <div class="card turnip-webhook-item" id="extension-turnip-extension-content-webhook-section-01-items-{{name}}">
+        <div class="card-header bg-dark d-flex justify-content-between">
+          <div class="text-truncate" id="extension-turnip-extension-content-webhook-section-01-items-{{name}}-name">very longgggggggggggggggg title</div>
+          <div class="turnip-card-header-btn-box">
+            <button class="btn btn-warning" id="extension-turnip-extension-content-webhook-section-01-items-{{name}}-button-edit">
+              <i class="fas fa-edit fa-lg"></i>
+            </button>
+            <button class="btn btn-danger" id="extension-turnip-extension-content-webhook-section-01-items-{{name}}-button-remove">
+              <i class="fas fa-trash fa-lg"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body bg-secondary">
+          <h5 class="card-title text-truncate" id="extension-turnip-extension-content-webhook-section-01-items-{{name}}-url">Special title treatment</h5>
+          <p class="card-text" id="extension-turnip-extension-content-webhook-section-01-items-{{name}}-description">With supporting text below as a natural lead-in to additional content.</p>
+        </div>
+      </div>
+    `;
+
+    ((webhookList) ? Promise.resolve(webhookList) : this.getConfigWebhook()).then((webhookArray) => {
+      for(let i in webhookArray) {
+        let webhook = webhookArray[i];
+        let item = `${itemTemplate}`.replace(/{{name}}/, webhook.name);
+        //extension-turnip-extension-content-webhook-section-01-container
+        saidObj(`turnip.content.webhook.container`).prepend(item);
+        saidObj(`turnip.content.webhook.container.items.${webhook.name}.name`).html(webhook.name);
+        saidObj(`turnip.content.webhook.container.items.${webhook.name}.url`).html(webhook.url);
+        saidObj(`turnip.content.webhook.container.items.${webhook.name}.description`).html(webhook.description);
+
+        saidObj(`turnip.content.webhook.container.items.${webhook.name}.button.remove`).click(() => {
+          //  In progress
+          saidObj(`turnip.content.webhook.container.items.${webhook.name}`).remove();
+        });
+      }
+    });
+  }
+
+  renderForm(form) {
+    form = (form) ? form : this.form.default;
     let saidObj = this.saidObj;
 
     saidObj(`turnip.content.webhook.form.meta.mode`).val(form.meta.mode);
@@ -164,7 +257,33 @@ class TurnipExtensionWebhook {
     this.editor.setValue(form.payload);
   }
 
-  renderForm() {
+  getForm() {
+    let saidObj = this.saidObj;
+    let form = Object.assign({}, this.form.default);
+    form.meta.mode = saidObj(`turnip.content.webhook.form.meta.mode`).val();
+    form.meta.ref.index = saidObj(`turnip.content.webhook.form.meta.ref.index`).val();
+    form.meta.ref.index = saidObj(`turnip.content.webhook.form.meta.ref.name`).val();
+    
+    form.title = saidObj(`turnip.content.webhook.form.title`).html();
+    form.name = saidObj(`turnip.content.webhook.form.name`).val();
+    form.description = saidObj(`turnip.content.webhook.form.description`).html();
+    form.method = saidObj(`turnip.content.webhook.form.method`).val();
+    form.url = saidObj(`turnip.content.webhook.form.url`).val();
+
+    form.headers = this.getFormHeaders();
+
+    form.payload = this.editor.getValue();
+
+    return form;
+  }
+
+  getConfigWebhook() {
+    return new Promise((resolve, reject) => {
+      window.API.getJson(`/extensions/${this.parent.id}/api/config/webhook`).then((resBody) => {
+        //console.log(JSON.stringify(resBody));
+        resolve(resBody);
+      });
+    });
   }
 }
 
