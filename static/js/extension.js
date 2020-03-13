@@ -18,6 +18,7 @@
     constructor() {
       super('turnip-extension');
       this.addMenuEntry('Turnip Extension');
+      this.idRegex = /^extension-turnip-extension/;
 
       this.promise = [];
 
@@ -159,21 +160,16 @@
 
     pageRender() {
       console.log("pageRender() >> ");
+      let workMode;
       this.getConfig()
       .then((config) => {
         this.config = config;
-        this.getWorkMode().then((workMode) => {
-          console.log("Work Mode : "+workMode);
-          this.renderNav(workMode);
-          this.renderContent(workMode);
-          /*
-          this.renderContentConsole(workMode);
-          this.renderContentWebhook(workMode);
-          this.renderContentSetting(workMode);
-          this.renderContentAccount(workMode);
-          */
-        });
+        return this.getWorkMode();
       })
+      .then((wMode) => (workMode = wMode))
+      .then(() => this.renderNav(workMode))
+      .then(() => this.renderContent(workMode))
+      .then(() => this.turnipRaid.updateIdList(this.idRegex));
     }
 
     webUi() {

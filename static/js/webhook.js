@@ -9,21 +9,15 @@ class TurnipExtensionWebhook {
     this.form.default = {
       meta: {
         mode: "new",
-        ref: {
-          id: null,
-          name: null
-        }
+        name: "New Webhook"
       },
-      title: "New Webhook",
       name: "",
       description: "",
+      enable: true,
       method: "POST",
       url: "",
+      unverify: false,
       headers: [],
-      header: {
-        key: "",
-        value: ""
-      },
       payload: ""
     };
 
@@ -31,6 +25,7 @@ class TurnipExtensionWebhook {
   }
 
   init() {
+    this.initRestApiTool();
     //this.setAce();
     //this.setupFunctions();
   }
@@ -90,8 +85,8 @@ class TurnipExtensionWebhook {
       console.log(`Event [Click] : turnip.content.webhook.form.header.button.add`);
 
       var header = {
-        key: saidObj(`extension-turnip-extension-content-webhook-section-02-form-header-key`).val(),
-        value: saidObj(`extension-turnip-extension-content-webhook-section-02-form-header-value`).val()
+        key: saidObj(`turnip.content.webhook.form.header.key`).val(),
+        value: saidObj(`turnip.content.webhook.form.header.value`).val()
       };
 
       if(header.key == `` || header.value == ``)
@@ -99,15 +94,28 @@ class TurnipExtensionWebhook {
 
       this.addToHeaders(header);
 
-      key: saidObj(`extension-turnip-extension-content-webhook-section-02-form-header-key`).val(``);
-      value: saidObj(`extension-turnip-extension-content-webhook-section-02-form-header-value`).val(``);
+      saidObj(`turnip.content.webhook.form.header.key`).val(``);
+      saidObj(`turnip.content.webhook.form.header.value`).val(``);
     });
 
     saidObj(`turnip.content.webhook.form.save`).click(() => {
       console.log(`Event [Click] : turnip.content.webhook.form.save`);
 
       let form = this.getForm();
+      let mode = form.meta.mode;
+
       console.log(`Form : ${JSON.stringify(form, null, 2)}`);
+      
+      delete form[`meta`];
+
+      console.log(`Form : ${JSON.stringify(form, null, 2)}`);
+
+      ((mode == `edit`) ? this.rest.put(form.name, form) : this.rest.post(form))
+      .then((webhook) => {
+        this.renderForm();
+        this.renderBase();
+        this.goToBase();
+      });
     });
 
     //saidObj(`turnip.content.webhook.form.headers`).change(this.onHeaderChange);
@@ -189,57 +197,87 @@ class TurnipExtensionWebhook {
   renderBase(webhookList) {
     console.log(`renderBase() >> `);
     let saidObj = this.saidObj;
+    let said = this.said;
 
-    let itemTemplate = `
-      <div class="card turnip-webhook-item" id="extension-turnip-extension-content-webhook-section-01-items-{{name}}">
-        <div class="card-header bg-dark d-flex justify-content-between">
-          <div class="text-truncate" id="extension-turnip-extension-content-webhook-section-01-items-{{name}}-name">very longgggggggggggggggg title</div>
-          <div class="turnip-card-header-btn-box">
-            <button class="btn btn-warning" id="extension-turnip-extension-content-webhook-section-01-items-{{name}}-button-edit">
-              <i class="fas fa-edit fa-lg"></i>
-            </button>
-            <button class="btn btn-danger" id="extension-turnip-extension-content-webhook-section-01-items-{{name}}-button-remove">
-              <i class="fas fa-trash fa-lg"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body bg-secondary">
-          <h5 class="card-title text-truncate" id="extension-turnip-extension-content-webhook-section-01-items-{{name}}-url">Special title treatment</h5>
-          <p class="card-text" id="extension-turnip-extension-content-webhook-section-01-items-{{name}}-description">With supporting text below as a natural lead-in to additional content.</p>
-        </div>
-      </div>
-    `;
+    let itemTemplate = saidObj(`turnip.content.webhook.section-01.template.item`).html();
+    let adder = saidObj(`turnip.content.webhook.section-01.template.adder`).html().replace(/-{{template}}/gi,``);
 
-    ((webhookList) ? Promise.resolve(webhookList) : this.getConfigWebhook()).then((webhookArray) => {
+    //  Clear all .turnip-webhook-item
+    $(`#${said(`turnip.content.webhook.section-01.container`)} .turnip-webhook-item`).remove();
+
+    ((webhookList) ? Promise.resolve(webhookList) : this.rest.get()).then((webhookArray) => {
       for(let i in webhookArray) {
         let webhook = webhookArray[i];
-        let item = `${itemTemplate}`.replace(/{{name}}/, webhook.name);
+        let item = `${itemTemplate}`.replace(/{{name}}/gi, `:${webhook.name}:`);
+        console.log(`item : ${item}`);
         //extension-turnip-extension-content-webhook-section-01-container
-        saidObj(`turnip.content.webhook.container`).prepend(item);
-        saidObj(`turnip.content.webhook.container.items.${webhook.name}.name`).html(webhook.name);
-        saidObj(`turnip.content.webhook.container.items.${webhook.name}.url`).html(webhook.url);
-        saidObj(`turnip.content.webhook.container.items.${webhook.name}.description`).html(webhook.description);
+        saidObj(`turnip.content.webhook.container`).append(item);
 
-        saidObj(`turnip.content.webhook.container.items.${webhook.name}.button.remove`).click(() => {
+        this.turnipRaid.updateIdList(this.parent.idRegex);
+        console.log(this.turnipRaid.idList);
+
+        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.name`).html(webhook.name);
+        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.url`).html(webhook.url);
+        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.description`).html(webhook.description);
+
+        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.button.edit`).click(() => {
+          this.rest.get(webhook.name)
+          .then((array) => {
+            if(array.length != 1)
+              throw(new Error(`Found multiple webhook as name as '${webhook.name} : ${JSON.stringify(array)}'`));
+
+            let w = Object.assign(JSON.parse(JSON.stringify(this.form.default)), array[0]);
+            w.meta.mode = "edit";
+            w.meta.name = webhook.name;
+            
+            this.goToForm();
+            this.renderForm(w);
+          })
+          .catch((e) => {
+            console.error(e);
+          });
+        });
+
+        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.button.remove`).click(() => {
           //  In progress
-          saidObj(`turnip.content.webhook.container.items.${webhook.name}`).remove();
+          if(!confirm(`Confirm to remove '${webhook.name}'.`))
+            return ;
+
+          this.rest.delete(webhook.name)
+          .then((webhookArray) => this.renderBase());
+          //saidObj(`turnip.content.webhook.container.items.${webhook.name}`).remove();
         });
       }
+
+      saidObj(`turnip.content.webhook.container`).append(adder);
+      this.turnipRaid.updateIdList();
+      saidObj(`turnip.content.webhook.container.adder`).click(() => {
+        console.log(`Event [Click] : turnip.content.webhook.container.adder`);
+        this.renderForm();
+      })
     });
   }
 
   renderForm(form) {
-    form = (form) ? form : this.form.default;
+    console.log(`renderForm(${(form && form.meta && form.meta.mode) ? form.meta.mode : ``}) >> `);
+    form = (form) ? form : JSON.parse(JSON.stringify(this.form.default));
+    console.log(`default : ${JSON.stringify(this.form.default, null, 2)}`);
+    console.log(`form : ${JSON.stringify(form, null, 2)}`);
     let saidObj = this.saidObj;
 
     saidObj(`turnip.content.webhook.form.meta.mode`).val(form.meta.mode);
-    saidObj(`turnip.content.webhook.form.meta.ref.index`).val(form.meta.ref.index);
-    saidObj(`turnip.content.webhook.form.meta.ref.name`).val(form.meta.ref.name);
-    saidObj(`turnip.content.webhook.form.title`).html(form.title);
+    saidObj(`turnip.content.webhook.form.meta.name`).val(form.meta.name);
+    saidObj(`turnip.content.webhook.form.title`).html(form.meta.name);
+    //  In progress.
+    saidObj(`turnip.content.webhook.form.enable`).prop("checked", form.enable);
     saidObj(`turnip.content.webhook.form.name`).val(form.name);
-    saidObj(`turnip.content.webhook.form.description`).html(form.description);
+    saidObj(`turnip.content.webhook.form.description`).val(form.description);
     saidObj(`turnip.content.webhook.form.method`).val(form.method);
     saidObj(`turnip.content.webhook.form.url`).val(form.url);
+    saidObj(`turnip.content.webhook.form.unverify`).prop("checked", form.unverify);
+
+    //  Disable name input when in edit mode.
+    saidObj(`turnip.content.webhook.form.name`).prop("disabled", (form.meta.mode == `edit`));
     
     //saidObj(`turnip.content.webhook.form.headers`);
     let headers = saidObj(`turnip.content.webhook.form.headers`);
@@ -248,8 +286,10 @@ class TurnipExtensionWebhook {
       this.addToHeaders(form.headers[i]);
     }
 
-    saidObj(`turnip.content.webhook.form.header.key`).val(form.header.key);
-    saidObj(`turnip.content.webhook.form.header.value`).val(form.header.value);
+    if(form.header) {
+      saidObj(`turnip.content.webhook.form.header.key`).val(form.header.key);
+      saidObj(`turnip.content.webhook.form.header.value`).val(form.header.value);
+    }
     
     //saidObj(`turnip.content.webhook.form.payload`);
     if(!this.editor)
@@ -259,31 +299,67 @@ class TurnipExtensionWebhook {
 
   getForm() {
     let saidObj = this.saidObj;
-    let form = Object.assign({}, this.form.default);
+    let form = JSON.parse(JSON.stringify(this.form.default));
     form.meta.mode = saidObj(`turnip.content.webhook.form.meta.mode`).val();
-    form.meta.ref.index = saidObj(`turnip.content.webhook.form.meta.ref.index`).val();
-    form.meta.ref.index = saidObj(`turnip.content.webhook.form.meta.ref.name`).val();
+    form.meta.name = saidObj(`turnip.content.webhook.form.meta.name`).val();
     
-    form.title = saidObj(`turnip.content.webhook.form.title`).html();
     form.name = saidObj(`turnip.content.webhook.form.name`).val();
-    form.description = saidObj(`turnip.content.webhook.form.description`).html();
+    form.description = saidObj(`turnip.content.webhook.form.description`).val();
+    form.enable = saidObj(`turnip.content.webhook.form.enable`).prop("checked");
     form.method = saidObj(`turnip.content.webhook.form.method`).val();
     form.url = saidObj(`turnip.content.webhook.form.url`).val();
-
+    form.unverify = saidObj(`turnip.content.webhook.form.unverify`).prop("checked");
     form.headers = this.getFormHeaders();
-
     form.payload = this.editor.getValue();
 
     return form;
   }
 
-  getConfigWebhook() {
-    return new Promise((resolve, reject) => {
-      window.API.getJson(`/extensions/${this.parent.id}/api/config/webhook`).then((resBody) => {
-        //console.log(JSON.stringify(resBody));
-        resolve(resBody);
-      });
-    });
+  goToForm() {
+    this.saidObj(`turnip.content.webhook.section-02`).removeClass('hide');
+  }
+
+  goToBase() {
+    this.saidObj(`turnip.content.webhook.section-02`).addClass('hide');
+  }
+
+  initRestApiTool() {
+    this.rest = {
+
+      get: (name) => {
+        return new Promise((resolve, reject) => {
+          window.API.getJson(`/extensions/${this.parent.id}/api/config/webhook${(name) ? `/${name}` : ``}`).then((resBody) => {
+            resolve(resBody);
+          });
+        });
+      },
+
+      post: (webhook) => {
+        return new Promise((resolve, reject) => {
+          window.API.postJson(`/extensions/${this.parent.id}/api/config/webhook`, webhook).then((resBody) => {
+            resolve(resBody);
+          });
+        });
+      },
+
+      put: (name, webhook) => {
+        return new Promise((resolve, reject) => {
+          webhook = (webhook) ? webhook : name;
+          name = (webhook) ? name : null;
+          window.API.putJson(`/extensions/${this.parent.id}/api/config/webhook${(name) ? `/${name}` : ``}`, webhook).then((resBody) => {
+            resolve(resBody);
+          });
+        });
+      },
+
+      delete: (name) => {
+        return new Promise((resolve, reject) => {
+          window.API.delete(`/extensions/${this.parent.id}/api/config/webhook${(name) ? `/${name}` : ``}`).then((resBody) => {
+            resolve(resBody);
+          });
+        });
+      }
+    };
   }
 }
 

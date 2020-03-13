@@ -7,6 +7,18 @@ class TurnipRaid {
       console.error(`Found duplicate id in html : ${JSON.stringify(duplicateList, null, 2)}`);
   }
 
+  updateIdList(idRegex) {
+    let list = [];
+    $('*').each((i, obj) => {
+      let id = $(obj).attr('id');
+        (id && id.match(idRegex)) ? list.push(id) : {};
+    });
+    this.idList = list;
+    let duplicateList = this.findDuplicate();
+    if(duplicateList.length)
+      console.error(`Found duplicate id in html : ${JSON.stringify(duplicateList, null, 2)}`);
+  }
+
   findDuplicate(arr) {
     arr = (arr) ? arr : this.idList;
     return arr.filter((item, index) => {
@@ -32,6 +44,7 @@ class TurnipRaid {
     let shortest = (opt && opt.shortest) ? true : false;
 
     str = str.split(delimiter).join(`.*`);
+    str = str.split(':').join(`\\:`);
     str = `${str}$`;
     let regex = new RegExp(str);
     return this.regexAutoId(regex, opt);
@@ -39,6 +52,7 @@ class TurnipRaid {
 
   stringAutoIdObject(str) {
     let id = this.stringAutoId(str);
+    id = id.split(':').join('\\:');
     return (id) ? $(`#${id}`) : null;
   }
 }

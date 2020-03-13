@@ -185,6 +185,10 @@
   white-space: normal;
 }
 
+#turnip-container .turnip-webhook-item .card-body p {
+  font-size: 1.2rem;
+}
+
 #turnip-container .turnip-webhook-item .card-text {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -369,5 +373,3 @@
     width: calc(33% - 20px);
   }
 }
-
-
