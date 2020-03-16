@@ -55,6 +55,11 @@
                     <option>POST</option>
                     <option>PATCH</option>
                     <option>PUT</option>
+                    <option>DELETE</option>
+                    <option>HEAD</option>
+                    <option>CONNECT</option>
+                    <option>OPTIONS</option>
+                    <option>TRACE</option>
                   </select>
                 </div>
                 &nbsp;
@@ -121,7 +126,14 @@
             </div>
           </div>
           <div class="card-body bg-secondary">
-            <h5 class="card-title text-truncate" id="extension-turnip-extension-content-webhook-section-01-container-item-{{name}}-url">Special title treatment</h5>
+            <div class="card-title text-truncate">
+              <span class="badge" id="extension-turnip-extension-content-webhook-section-01-container-item-{{name}}-method">
+                POST
+              </span>
+              <span id="extension-turnip-extension-content-webhook-section-01-container-item-{{name}}-url">
+                Special title treatment
+              </span>
+            </div>
             <p class="card-text" id="extension-turnip-extension-content-webhook-section-01-container-item-{{name}}-description">With supporting text below as a natural lead-in to additional content.</p>
           </div>
         </div>

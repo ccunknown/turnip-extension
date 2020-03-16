@@ -1,0 +1,86 @@
+const servicePrefix = "./service/";
+
+class laborsManager {
+  constructor(extension) {
+    this.extension = extension;
+    this.addonManager = extension.addonManager;
+    this.configManager = extension.configManager;
+    this.routesManager = extension.routesManager;
+
+    this.serviceList = [];
+    this.init();
+  }
+
+  init() {
+    console.log(`laborsManager: init() >> `);
+    this.loadService()
+    .then(() => {
+      console.log(`service list : `);
+      console.log(this.serviceList);
+      this.startService();
+    });
+  }
+
+  loadService() {
+    console.log(`laborsManager: loadService() >> `);
+    return new Promise((resolve, reject) => {
+      this.getConfigService()
+      .then((serviceList) => {
+        console.log(`service list : ${JSON.stringify(serviceList, null, 2)}`);
+        for(let i in serviceList) {
+          let service = serviceList[i];
+          let serviceClass = require(`${servicePrefix}${service.id}`);
+          service.obj = new serviceClass(this.extension);
+          //console.log(`service : ${service}`);
+          this.serviceList.push(service);
+        }
+        resolve();
+      });
+    });
+  }
+
+  startService(serviceId) {
+    console.log(`laborsManager: startService(${(serviceId) ? serviceId : ``})`);
+    return new Promise((resolve, reject) => {
+      if(serviceId) {
+        this.getService(serviceId)
+        .then((service) => {
+          resolve(service.obj.start());
+        });
+      }
+      else {
+        let list = [];
+        for(var i in this.serviceList) {
+          let service = this.serviceList[i];
+          if(service.enable)
+            list.push(this.startService(this.serviceList[i].id))
+        }
+        resolve(Promise.all(list));
+      }
+    });
+  }
+
+  getConfigService() {
+    console.log(`laborsManager: getConfigService() >> `);
+    return new Promise((resolve, reject) => {
+      this.configManager.getConfig()
+      .then((config) => {
+        resolve(config.service);
+      });
+    });
+  }
+
+  getService(serviceId) {
+    return new Promise((resolve, reject) => {
+      let arr = this.serviceList.filter((service) => service.id == serviceId);
+      if(arr.length == 1)
+        resolve(arr[0]);
+      else if(arr.length == 0)
+        resolve(null);
+      else
+        reject(new Errors.FoundDuplicateServiceId(serviceId));
+    });
+  }
+}
+
+module.exports = laborsManager;

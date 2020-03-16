@@ -189,6 +189,35 @@
   font-size: 1.2rem;
 }
 
+#turnip-container .turnip-webhook-item .card-body .card-title {
+  font-size: 1.5rem;
+}
+
+#turnip-container .turnip-badge-http-method-post,
+#turnip-container .turnip-badge-http-method-put,
+#turnip-container .turnip-badge-http-method-patch {
+  color: var(--dark);
+  background-color: var(--warning);
+}
+
+#turnip-container .turnip-badge-http-method-get {
+  color: var(--light);
+  background-color: var(--success);
+}
+
+#turnip-container .turnip-badge-http-method-delete {
+  color: var(--dark);
+  background-color: var(--danger);
+}
+
+#turnip-container .turnip-badge-http-method-head,
+#turnip-container .turnip-badge-http-method-connect,
+#turnip-container .turnip-badge-http-method-option,
+#turnip-container .turnip-badge-http-method-trace {
+  color: var(--dark);
+  background-color: var(--light);
+}
+
 #turnip-container .turnip-webhook-item .card-text {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -373,3 +402,4 @@
     width: calc(33% - 20px);
   }
 }
+

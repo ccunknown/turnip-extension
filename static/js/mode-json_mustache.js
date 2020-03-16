@@ -14,9 +14,6 @@ ace.define('ace/mode/json_mustache_highlight_rules', ["require", "exports", "mod
           regex: "{{",
           next: "mustache"
         }, {
-          token : "variable", // single line
-          regex : '["](?:(?:\\\\.)|(?:[^"\\\\]))*?["]\\s*(?=:)'
-        }, {
           token : "string", // single line
           regex : '"',
           next  : "string"
@@ -60,11 +57,21 @@ ace.define('ace/mode/json_mustache_highlight_rules', ["require", "exports", "mod
           defaultToken: "string.regex"
         }
       ],
+      "mustache-string": [
+        {
+          token : "string.regex",
+          regex : "}}",
+          next  : "string"
+        },
+        {
+          defaultToken: "string.regex"
+        }
+      ],
       "string" : [
         {
           token : "string.regex",
           regex : "{{",
-          next  : "mustache"
+          next  : "mustache-string"
         }, {
           token : "constant.language.escape",
           regex : /\\(?:x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|["\\\/bfnrt])/

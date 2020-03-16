@@ -217,6 +217,8 @@ class TurnipExtensionWebhook {
         console.log(this.turnipRaid.idList);
 
         saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.name`).html(webhook.name);
+        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.method`).html(webhook.method.toUpperCase());
+        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.method`).addClass(`turnip-badge-http-method-${webhook.method.toLowerCase()}`);
         saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.url`).html(webhook.url);
         saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.description`).html(webhook.description);
 

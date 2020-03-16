@@ -95,6 +95,16 @@ const errDef = [
 			"contentType": "application/json",
 			"contentIndex": "message"
 		}
+	},
+	{
+		"name": "FoundDuplicateServiceId",
+		"extends": Error,
+		"super": (arg) => `Found multiple service which id '${arg}'.`,
+		"httpResponse": {
+			"status": 403,
+			"contentType": "application/json",
+			"contentIndex": "message"
+		}
 	}
 ];
 
