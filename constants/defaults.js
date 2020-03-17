@@ -19,14 +19,18 @@ var Defaults = {
         "status": "unknow"
       },
       {
-        "id": "webhook-service",
+        "id": "wsocket-service",
         "enable": true,
         "status": "unknow"
       },
       {
-        "id": "wsocket-service",
+        "id": "webhook-service",
         "enable": true,
-        "status": "unknow"
+        "status": "unknow",
+        "dependencies": [
+          "history-service",
+          "wsocket-service"
+        ]
       }
     ],
     "webhook": []
@@ -74,6 +78,13 @@ var Defaults = {
             "description": {
               "type": "string",
               "default": ""
+            },
+            "dependency": {
+              "type": "array",
+              "default": [],
+              "items": {
+                "type": "string"
+              }
             },
             "enable": {
               "type": "boolean",

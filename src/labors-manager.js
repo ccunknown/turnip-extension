@@ -13,11 +13,13 @@ class laborsManager {
 
   init() {
     console.log(`laborsManager: init() >> `);
-    this.loadService()
-    .then(() => {
-      console.log(`service list : `);
-      console.log(this.serviceList);
-      this.startService();
+    return new Promise((resolve, reject) => {
+      this.loadService()
+      .then(() => {
+        //console.log(`service list : `);
+        //console.log(this.serviceList);
+        resolve(this.startService());
+      });
     });
   }
 
@@ -26,12 +28,12 @@ class laborsManager {
     return new Promise((resolve, reject) => {
       this.getConfigService()
       .then((serviceList) => {
-        console.log(`service list : ${JSON.stringify(serviceList, null, 2)}`);
+        //console.log(`service list : ${JSON.stringify(serviceList, null, 2)}`);
         for(let i in serviceList) {
           let service = serviceList[i];
           let serviceClass = require(`${servicePrefix}${service.id}`);
           service.obj = new serviceClass(this.extension);
-          //console.log(`service : ${service}`);
+          console.log(`service : ${service.id}`);
           this.serviceList.push(service);
         }
         resolve();
@@ -41,21 +43,20 @@ class laborsManager {
 
   startService(serviceId) {
     console.log(`laborsManager: startService(${(serviceId) ? serviceId : ``})`);
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if(serviceId) {
         this.getService(serviceId)
-        .then((service) => {
-          resolve(service.obj.start());
-        });
+        .then((service) => service.obj.start())
+        .then(() => resolve());
       }
       else {
         let list = [];
         for(var i in this.serviceList) {
           let service = this.serviceList[i];
           if(service.enable)
-            list.push(this.startService(this.serviceList[i].id))
+            await this.startService(this.serviceList[i].id);
         }
-        resolve(Promise.all(list));
+        resolve();
       }
     });
   }
@@ -71,10 +72,13 @@ class laborsManager {
   }
 
   getService(serviceId) {
+    console.log(`laborsManager: getService(${serviceId}) >> `);
     return new Promise((resolve, reject) => {
-      let arr = this.serviceList.filter((service) => service.id == serviceId);
-      if(arr.length == 1)
+      let arr = this.serviceList.filter((service) => (service.id == serviceId));
+      if(arr.length == 1) {
+        console.log(arr[0]);
         resolve(arr[0]);
+      }
       else if(arr.length == 0)
         resolve(null);
       else

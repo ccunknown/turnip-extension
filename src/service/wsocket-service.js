@@ -6,7 +6,8 @@ const request = require('request');
 const Database = require('../lib/my-database');
 const {Defaults, Errors} = require('../../constants/constants');
 
-const ReopeningWebSocket = require('../lib/reopening-web-socket');
+//const ReopeningWebSocket = require('../lib/reopening-web-socket');
+const Websocket = require('../lib/websocket');
 
 class wsocketService extends EventEmitter {
   constructor(extension) {
@@ -27,21 +28,18 @@ class wsocketService extends EventEmitter {
   }
 
   init() {
-    console.log(`webhookService: init() >> `);
+    console.log(`wsocketService: init() >> `);
   }
 
   start() {
     console.log(`wsocketService: start() >> `);
     return new Promise((resolve, reject) => {
-      let config;
-      this.configManager.getConfig()
-      .then((conf) => {
-        config = conf;
-        return this.getSchemaWithToken(config.account.jwt);
-      })
-      .then((thingsSchemaString) => JSON.parse(thingsSchemaString))
-      .then((thingsSchema) => this.initialThingsSchema(thingsSchema))
-      .then(() => this.reopeningWebsocket(config.account.jwt));
+      this.initialThingsSchema()
+      .then(() => this.configManager.getConfig())
+      .then((config) => {
+        this.reopeningWebsocket(config.account.jwt);
+        resolve();
+      });
     });
   }
 
@@ -50,23 +48,85 @@ class wsocketService extends EventEmitter {
   }
 
   reopeningWebsocket(jwt) {
-    if(!this.reopeningWebsocket)
-      this.reopeningWebsocket = new ReopeningWebSocket(`ws://localhost:8080/things?jwt=${jwt}`);
+    console.log(`wsocketService: openWebsocket() >> `);
+    if(!this.websocket) {
+      this.websocket = new Websocket(`ws://localhost:8080/things?jwt=${jwt}`);
+      this.websocket.create();
+    }
+    else {
+      this.websocket.drop();
+    }
 
-    this.reopeningWebsocket.reopen();
-    this.ws.addEventListener('message', this.onMessage);
+    this.websocket.connect();
+
+    this.websocket.removeAllListeners();
+    this.websocket.on('WEBSOCKET_MESSAGE', (ws, message) => this.onMessage(message));
   }
 
   onMessage(event) {
-    const message = JSON.parse(event.data);
+    //const message = JSON.parse(event.data);
+    if(event && event.type && event.type == `utf8` && event.utf8Data) {
+      let message = JSON.parse(event.utf8Data);
+      //console.log(`wsocketService: onMessage : ${JSON.stringify(message)}`);
+      
+      let updateThing = (thing) => {
+        //console.log(`t : ${JSON.stringify(thing, null, 2)}`);
+        switch(message.messageType) {
+          case `connected`:
+            thing.connected = message.data;
+            thing.property.name = `connected`;
+            thing.property.origin = `connected`;
+            thing.property.value = message.data;
+            break;
+          case `propertyStatus`:
+            for(let i in message.data) {
+              thing.property.name = `prop-${i}`;
+              thing.property.origin = `${i}`;
+              thing.property.value = message.data[i];
+            }
+            break;
+          default :
+            console.error(`Message type '${message.messageType}' undefined.`);
+            break;
+        }
+        if(thing.property.name) {
+          //console.log(`update : ${JSON.stringify(thing)}`);
+          this.emit('UPDATE', this, thing);
+        }
+      };
 
-    console.log(`onMessage : ${JSON.stringify(message, null, 2)}`);
-    if (message.messageType !== 'connected') {
-      return;
+      let t = this.get(message.id);
+      if (!t) {
+        this.initialThingsSchema()
+        .then(() => {
+          t = this.get(message.id);
+          if(!t) {
+            console.error(`Not found thing with id '${message.id}'.`);
+            return ;
+          }
+          updateThing(t);
+        });
+      }
+      else
+        updateThing(t);
     }
+    else
+      console.log(`Unhandle websocket message : ${event}`);
+    return ;
   }
 
-  initialThingsSchema(thingsSchema) {
+  initialThingsSchema() {
+    console.log(`wsocketService: initialThingsSchema() >> `);
+    return new Promise((resolve, reject) => {
+      this.configManager.getConfig()
+      .then((config) => this.getSchemaWithToken(config.account.jwt))
+      .then((thingsSchemaString) => JSON.parse(thingsSchemaString))
+      .then((thingsSchema) => this.buildThingsSchema(thingsSchema))
+      .then(() => resolve());
+    });
+  }
+
+  buildThingsSchema(thingsSchema) {
     console.log(`wsocketService: initialThingsSchema() >> `);
     return new Promise((resolve, reject) => {
       this.things = [];
@@ -76,14 +136,16 @@ class wsocketService extends EventEmitter {
           meta: thing,
           id: thing.href.replace(`/things/`, ``),
           connected: false,
-          properties: {
+          property: {
             name: null,
+            origin: null,
             value: null
           }
         };
         this.things.push(schema);
       });
-      console.log(`this.things : ${JSON.stringify(this.things, null, 2)}`);
+      //console.log(`this.things : ${JSON.stringify(this.things)}`);
+      resolve();
     });
   }
 
@@ -98,31 +160,18 @@ class wsocketService extends EventEmitter {
     });
   }
 
-  getSchema() {
-    return new Promise((resolve, reject) => {
-      if(!this.db) {
-        console.log("Recreate database object!!!");
-        this.db = new Database(this.manifest.name);
-      }
-
-      this.db.open().then(async () => {
-        var data = await this.db.loadThings();
-        this.db.close();
-        var result = {};
-        for(var i in data)
-          result[data[i].id] = JSON.parse(data[i].description);
-
-        resolve(result);
-      });
-    });
-  }
-
-  initialWebsocket() {
-
-  }
-
-  get() {
-
+  get(id) {
+    let arr = this.things.filter((elem) => id == elem.id);
+    if(arr.length == 1)
+      return JSON.parse(JSON.stringify(arr[0]));
+    else if(arr.length == 0) {
+      console.error(`Not found thing with id '${id}'.`);
+      return null;
+    }
+    else {
+      console.error(`Found multiple things with id '${id}'.`);
+      return JSON.parse(JSON.stringify(arr[0]));
+    }
   }
 
   makeRequest(option) {

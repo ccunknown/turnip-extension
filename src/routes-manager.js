@@ -8,6 +8,10 @@ class RoutesManager extends APIHandler{
   constructor(extension) {
     super(extension.addonManager, extension.manifest.id);
     this.configManager = extension.configManager;
+    this.laborsManager = extension.laborsManager;
+
+    this.historyService = null;
+
     this.setRouter();
   }
 
@@ -147,26 +151,62 @@ class RoutesManager extends APIHandler{
           }
         }
       },
-      /***  Resource : /config/webhook/{name}  ***/
+      /***  Resource : /history  ***/
       {
-        "resource": /\/config\/history/,
+        "resource": /\/history/,
         "method": {
           "GET": (req) => {
             return new Promise((resolve, reject) => {
-              this.configManager.getConfigWebhook()
-              .then((webhook) => {})
+              this.laborsManager.getService(`history-service`)
+              .then((service) => {
+                this.historyService = service.obj;
+                return this.historyService.getRecord();
+              })
+              .then((list) => resolve(this.makeJsonRespond(JSON.stringify(list))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
           },
           "DELETE": (req) => {
             return new Promise((resolve, reject) => {
-              this.configManager.getConfigWebhook()
-              .then((conf) => {})
+              this.laborsManager.getService(`history-service`)
+              .then((service) => {
+                this.historyService = service.obj;
+                return this.historyService.clearRecord();
+              })
+              .then((list) => resolve(this.makeJsonRespond(JSON.stringify(list))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
           }
         }
       },
+      /***  Resource : /history/{webhook}  ***/
+      {
+        "resource": /\/history\/[^/]+/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              this.laborsManager.getService(`history-service`)
+              .then((service) => {
+                this.historyService = service.obj;
+                return this.historyService.getRecord(req.path.split(`/`).pop());
+              })
+              .then((list) => resolve(this.makeJsonRespond(JSON.stringify(list))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          },
+          "DELETE": (req) => {
+            return new Promise((resolve, reject) => {
+              this.laborsManager.getService(`history-service`)
+              .then((service) => {
+                this.historyService = service.obj;
+                return this.historyService.clearRecord(req.path.split(`/`).pop());
+              })
+              .then((list) => resolve(this.makeJsonRespond(JSON.stringify(list))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          }
+        }
+      }
     ];
   }
 

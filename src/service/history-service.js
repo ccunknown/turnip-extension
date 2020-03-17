@@ -18,6 +18,10 @@ class historyService extends EventEmitter {
     this.configManager = this.extension.configManager;
     this.routesManager = this.extension.routesManager;
 
+    this.limit = 50;
+
+    this.history = {};
+
     this.init();
   }
 
@@ -32,6 +36,33 @@ class historyService extends EventEmitter {
 
   stop() {
 
+  }
+
+  pushRecord(webhookName, record) {
+    console.log(`historyService: pushRecord(${webhookName}, [record]) >> `);
+    if(!this.history.hasOwnProperty(webhookName)) {
+      this.history[webhookName] = [];
+    }
+    this.history[webhookName].push(record);
+    while(this.history[webhookName].length > this.limit)
+      this.history[webhookName].shift();
+    console.log(JSON.stringify(this.history[webhookName]));
+  }
+
+  getRecord(webhookName) {
+    return (webhookName) ? this.history[webhookName] : this.history;
+  }
+
+  clearRecord(webhookName) {
+    if(webhookName)
+      this.history[webhookName] = [];
+    else
+      this.history = [];
+    return ;
+  }
+
+  setLimit(num) {
+    this.limit = num;
   }
 }
 

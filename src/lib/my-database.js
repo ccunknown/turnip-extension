@@ -21,4 +21,3 @@ class myDatabase extends Database {
 }
 
 module.exports = myDatabase;
-
