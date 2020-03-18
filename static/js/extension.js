@@ -44,7 +44,6 @@
       //  Load resource.
       let prom = Promise.all([
         this.loadResource(`/extensions/${this.id}/static/views/main.html`),
-        this.loadResource(`/extensions/${this.id}/static/views/console.html`),
         this.loadResource(`/extensions/${this.id}/static/views/webhook.html`),
         this.loadResource(`/extensions/${this.id}/static/views/setting.html`),
         this.loadResource(`/extensions/${this.id}/static/views/account.html`),
@@ -52,7 +51,6 @@
         ])
       .then(([
         mainPage,
-        consolePage,
         webhookPage,
         settingPage,
         accountPage,
@@ -60,7 +58,6 @@
       ]) => {
         return new Promise((resolve, reject) => {
           this.contents.mainPage = new DOMParser().parseFromString(mainPage, "text/html");
-          this.contents.consolePage = new DOMParser().parseFromString(consolePage, "text/html");
           this.contents.webhookPage = new DOMParser().parseFromString(webhookPage, "text/html");
           this.contents.settingPage = new DOMParser().parseFromString(settingPage, "text/html");
           this.contents.accountPage = new DOMParser().parseFromString(accountPage, "text/html");
@@ -79,7 +76,6 @@
 
           let content = new DOMParser().parseFromString(mainPage, "text/html");
           
-          content.getElementById(said(`turnip.content.console`)).innerHTML = this.contents.consolePage.body.innerHTML;
           content.getElementById(said(`turnip.content.webhook`)).innerHTML = this.contents.webhookPage.body.innerHTML;
           content.getElementById(said(`turnip.content.setting`)).innerHTML = this.contents.settingPage.body.innerHTML;
           content.getElementById(said(`turnip.content.account`)).innerHTML = this.contents.accountPage.body.innerHTML;
@@ -187,28 +183,24 @@
       switch(workMode) {
         case constants.workMode.noAccount:
           ui.click(`turnip.nav.account`);
-          ui.disable(`turnip.nav.console`);
           ui.disable(`turnip.nav.webhook`);
           ui.disable(`turnip.nav.setting`);
           ui.enable(`turnip.nav.account`);
           break;
         case constants.workMode.wrongToken:
           ui.click(`turnip.nav.account`);
-          ui.disable(`turnip.nav.console`);
           ui.disable(`turnip.nav.webhook`);
           ui.disable(`turnip.nav.setting`);
           ui.enable(`turnip.nav.account`);
           break;
         case constants.workMode.noWebhook:
           ui.click(`turnip.nav.webhook`);
-          ui.disable(`turnip.nav.console`);
           ui.enable(`turnip.nav.webhook`);
           ui.enable(`turnip.nav.setting`);
           ui.enable(`turnip.nav.account`);
           break;
         case constants.workMode.allReady:
-          ui.click(`turnip.nav.console`);
-          ui.enable(`turnip.nav.console`);
+          ui.click(`turnip.nav.webhook`);
           ui.enable(`turnip.nav.webhook`);
           ui.enable(`turnip.nav.setting`);
           ui.enable(`turnip.nav.account`);
@@ -285,14 +277,9 @@
     }
 
     setEventFunction() {
-      this.setConsolePageEventFunction();
       this.setWebhookPageEventFunction();
       this.setSettingPageEventFunction();
       this.setAccountPageEventFunction();
-    }
-
-    setConsolePageEventFunction() {
-
     }
 
     setWebhookPageEventFunction() {

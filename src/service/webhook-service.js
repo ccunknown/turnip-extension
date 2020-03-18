@@ -41,6 +41,7 @@ class webhookService extends EventEmitter {
       this.initDependencies()
       .then(() => this.initWebhookList())
       .then(() => this.initMessageHandler())
+      .then(() => this.initRequestHandler())
       .then(() => resolve());
     });
   }
@@ -84,6 +85,23 @@ class webhookService extends EventEmitter {
     });
   }
 
+  initRequestHandler() {
+    this.routesManager.eventEmitter.on(`PUT/\\/config/`, (req) => this.onRouterProcess(req));
+    this.routesManager.eventEmitter.on(`DELETE/\\/config/[^\\/]+/`, (req) => this.onRouterProcess(req));
+
+    this.routesManager.eventEmitter.on(`PUT/\\/config\\/webhook\\/[^\\/]+/`, (req) => this.onRouterProcess(req));
+    this.routesManager.eventEmitter.on(`DELETE/\\/config\\/webhook\\/[^\\/]+/`, (req) => this.onRouterProcess(req));
+
+    this.routesManager.eventEmitter.on(`POST/\\/config\\/webhook/`, (req) => this.onRouterProcess(req));
+    this.routesManager.eventEmitter.on(`PUT/\\/config\\/webhook/`, (req) => this.onRouterProcess(req));
+    this.routesManager.eventEmitter.on(`DELETE/\\/config\\/webhook/`, (req) => this.onRouterProcess(req));
+  }
+
+  onRouterProcess(req) {
+    console.log(`webhookService: onRouterProcess(${req.method}: ${req.path}) >> `);
+    this.initWebhookList();
+  }
+
   dataImprove(data) {
     let type = (data.property.name == 'connected') ? `string` :  data.meta.properties[data.property.origin].type;
     let result = {
@@ -122,6 +140,9 @@ class webhookService extends EventEmitter {
         url: webhook.url,
         method: webhook.method,
         headers: webhook.headers,
+        insecure: webhook.unverify,
+        rejectUnauthorized: !webhook.unverify,
+        strictSSL: !webhook.unverify,
         body: webhook.payload
       };
       let optionStr = mustache.render(JSON.stringify(option), data);

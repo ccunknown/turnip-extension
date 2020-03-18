@@ -1,5 +1,7 @@
 'use strict';
 
+const EventEmitter = require('events').EventEmitter;
+
 const {APIHandler, APIResponse} = require('gateway-addon');
 const {Errors} = require('../constants/constants');
 //const manifest = require('../manifest.json');
@@ -10,6 +12,7 @@ class RoutesManager extends APIHandler{
     this.configManager = extension.configManager;
     this.laborsManager = extension.laborsManager;
 
+    this.eventEmitter = new EventEmitter();
     this.historyService = null;
 
     this.setRouter();
@@ -227,8 +230,17 @@ class RoutesManager extends APIHandler{
     console.log(`arr : ${JSON.stringify(arr, null, 2)}`);
     if(!arr.length)
       return Promise.resolve(this.catchErrorRespond(new Errors.Http404()));
-    var func = arr[0].method[req.method];
-    return func(req);
+    let func = arr[0].method[req.method];
+    //return func(req);
+    return new Promise((resolve, reject) => {
+      func(req)
+      .then((result) => {
+        let event = `${req.method.toUpperCase()}${arr[0].resource}`;
+        console.log(`Emit event : ${event}`);
+        this.eventEmitter.emit(event, req);
+        resolve(result);
+      });
+    });
   }
 
   pathMatch(path, regex) {

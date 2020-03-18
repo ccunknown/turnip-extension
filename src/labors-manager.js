@@ -74,6 +74,8 @@ class laborsManager {
   getService(serviceId) {
     console.log(`laborsManager: getService(${serviceId}) >> `);
     return new Promise((resolve, reject) => {
+      if(!serviceId)
+        resolve(this.serviceList);
       let arr = this.serviceList.filter((service) => (service.id == serviceId));
       if(arr.length == 1) {
         console.log(arr[0]);
