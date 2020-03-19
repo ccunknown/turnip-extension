@@ -139,12 +139,15 @@ class webhookService extends EventEmitter {
       let option = {
         url: webhook.url,
         method: webhook.method,
-        headers: webhook.headers,
+        headers: {},
         insecure: webhook.unverify,
         rejectUnauthorized: !webhook.unverify,
         strictSSL: !webhook.unverify,
         body: webhook.payload
       };
+      for(let i in webhook.headers) {
+        option.headers[webhook.headers[i].key] = webhook.headers[i].value;
+      }
       let optionStr = mustache.render(JSON.stringify(option), data);
       let result = JSON.parse(optionStr);
       

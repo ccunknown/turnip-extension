@@ -44,26 +44,28 @@ class ConfigManager {
   saveConfig(config) {
     console.log("saveConfig() >> ");
     return new Promise((resolve, reject) => {
-      try {
-        resolve(this.saveConfigToDatabase(config));
-      } catch(err) {
+      this.saveConfigToDatabase(config)
+      .then((conf) => resolve(conf))
+      .catch((err) => {
+        //console.log(`saveConfig() : found error : ${err}`);
         err = (err) ? err : new Errors.ErrorObjectNotReturn();
         reject(err);
-      }
+      });
     });
   }
 
   saveConfigWebhook(webhook) {
     console.log("saveConfigWebhook() >> ");
     return new Promise((resolve, reject) => {
-      try {
-        this.getConfig()
-        .then((config) => this.saveConfig(Object.assign(config, {"webhook": webhook})))
-        .then((conf) => resolve(conf.webhook))
-      } catch(err) {
+      this.getConfig()
+      .then((serverConfig) => Object.assign(serverConfig, {"webhook": webhook}))
+      .then((config) => this.saveConfig(config))
+      .then((conf) => resolve(conf.webhook))
+      .catch((err) => {
+        //console.log(`saveConfigWebhook() : found error : ${err}`);
         err = (err) ? err : new Errors.ErrorObjectNotReturn();
         reject(err);
-      }
+      });
     });
   }
 
@@ -71,11 +73,12 @@ class ConfigManager {
     console.log("getConfigFromDatabase() >> ");
     return new Promise((resolve, reject) => {
       if(Database) {
-        console.log("{Database} found.");
+        //console.log("{Database} found.");
         this.db = new Database(this.manifest.name);
-        console.log("{Database} imported.");
-        this.db.open().then(() => {
-          console.log("opened database.");
+        //console.log("{Database} imported.");
+        this.db.open()
+        .then(() => {
+          //console.log("opened database.");
           var config = this.db.loadConfig();
           this.db.close();
           resolve(config);
@@ -94,15 +97,16 @@ class ConfigManager {
       //  Validate config.
       let validateInfo = this.validate(config);
       if(validateInfo.errors.length)
-        reject(new Errors.InvalidConfigSchema(validateInfo.errors));
+        throw(new Errors.InvalidConfigSchema(validateInfo.errors));
       //  Save to Database
       else {
         if(Database) {
-          console.log("{Database found.}");
+          //console.log("{Database found.}");
           this.db = new Database(this.manifest.name);
-          console.log("{Database} imported.");
-          this.db.open().then(() => {
-            console.log("opened database.");
+          //console.log("{Database} imported.");
+          this.db.open()
+          .then(() => {
+            //console.log("opened database.");
             this.db.saveConfig(validateInfo.instance);
             this.db.close();
             resolve(validateInfo.instance);

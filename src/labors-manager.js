@@ -78,7 +78,7 @@ class laborsManager {
         resolve(this.serviceList);
       let arr = this.serviceList.filter((service) => (service.id == serviceId));
       if(arr.length == 1) {
-        console.log(arr[0]);
+        console.log(arr[0].id);
         resolve(arr[0]);
       }
       else if(arr.length == 0)

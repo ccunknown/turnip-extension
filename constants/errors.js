@@ -77,9 +77,19 @@ const errDef = [
 		}
 	},
 	{
+		"name": "FoundMultipleWebhookItem",
+		"extends": Error,
+		"super": (arg) => `Found multiple webhook with name '${arg}'.`,
+		"httpResponse": {
+			"status": 500,
+			"contentType": "application/json",
+			"contentIndex": "message"
+		}
+	},
+	{
 		"name": "ObjectNotFound",
 		"extends": Error,
-		"super": (arg) => `Webhook name '${arg}' not found.`,
+		"super": (arg) => `Object with name '${arg}' not found.`,
 		"httpResponse": {
 			"status": 403,
 			"contentType": "application/json",

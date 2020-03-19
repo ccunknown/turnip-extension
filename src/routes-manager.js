@@ -91,8 +91,10 @@ class RoutesManager extends APIHandler{
                 if(arr.length != webhook.length)
                   throw(new Errors.FoundDuplicateWebhookItem(req.body.name));
                 webhook.push(req.body);
-                return this.configManager.saveConfigWebhook(webhook);
+                return webhook;
+                //return this.configManager.saveConfigWebhook(webhook);
               })
+              .then((wh) => this.configManager.saveConfigWebhook(wh))
               .then((w) => resolve(this.makeJsonRespond(JSON.stringify(w))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
@@ -121,6 +123,14 @@ class RoutesManager extends APIHandler{
             return new Promise((resolve, reject) => {
               this.configManager.getConfigWebhook()
               .then((webhookArray) => webhookArray.filter((elem) => (elem.name == req.path.split(`/`).pop())))
+              .then((webhookArr) => {
+                if(webhookArr.length == 1)
+                  return webhookArr[0];
+                else if(webhookArr.length > 1)
+                  throw(new Errors.FoundMultipleWebhookItem(req.path.split(`/`).pop()));
+                else
+                  throw(new Errors.ObjectNotFound(req.path.split(`/`).pop()));
+              })
               .then((webhook) => resolve(this.makeJsonRespond(JSON.stringify(webhook))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
@@ -204,7 +214,10 @@ class RoutesManager extends APIHandler{
                 this.historyService = service.obj;
                 return this.historyService.clearRecord(req.path.split(`/`).pop());
               })
-              .then((list) => resolve(this.makeJsonRespond(JSON.stringify(list))))
+              .then((list) => {
+                console.log(JSON.stringify(list));
+                this.makeJsonRespond(JSON.stringify(list));
+              })
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
           }
@@ -227,7 +240,7 @@ class RoutesManager extends APIHandler{
     let arr = this.router.filter((elem) => {
       return (this.pathMatch(req.path, elem.resource) && elem.method.hasOwnProperty(req.method)) ? true : false;
     });
-    console.log(`arr : ${JSON.stringify(arr, null, 2)}`);
+    //console.log(`arr : ${JSON.stringify(arr, null, 2)}`);
     if(!arr.length)
       return Promise.resolve(this.catchErrorRespond(new Errors.Http404()));
     let func = arr[0].method[req.method];
@@ -263,6 +276,7 @@ class RoutesManager extends APIHandler{
   }
 
   catchErrorRespond(err) {
+    console.log(`catchErrorRespond() >> `);
     return new Promise((resolve, reject) => {
       err = (err) ? err : new Errors.ErrorObjectNotReturn();
       console.error(err);
