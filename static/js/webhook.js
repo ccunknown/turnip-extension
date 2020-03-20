@@ -26,6 +26,7 @@ class TurnipExtensionWebhook {
 
   init() {
     this.initRestApiTool();
+    this.initDisplay();
     //this.setAce();
     //this.setupFunctions();
   }
@@ -50,38 +51,15 @@ class TurnipExtensionWebhook {
     //  Try to use 'snippet' if possible !!!
     var staticWordCompleter = {
       getCompletions: function(editor, session, pos, prefix, callback) {
-        /*
-        timestamp: {
-          unix: Date.now(),
-          isoString: new Date().toISOString()
-        },
-        device: {
-          id: data.id,
-          title: data.meta.title,
-          type: data.meta.type,
-          description: data.meta.description,
-          href: data.meta.href,
-          connected: data.connected
-        },
-        property: {
-          name: data.property.name,
-          origin: data.property.origin,
-          type: type,
-          value: data.property.value,
-          isString: type.toLowerCase() == `string`,
-          isNumber: type.toLowerCase() == `number`,
-          isBoolean: type.toLowerCase() == `boolean`
-        }
-        */
         var wordList = [
           "{{timestamp.unix}}",
-          "{{timestamp.isoString}}", 
+          "{{timestamp.isoString}}",
           "{{device.id}}",
           "{{device.title}}",
           "{{device.type}}",
           "{{device.description}}",
           "{{device.href}}",
-          "{{device.connected}}", 
+          "{{device.connected}}",
           "{{property.name}}",
           "{{property.origin}}",
           "{{property.type}}",
@@ -141,7 +119,8 @@ class TurnipExtensionWebhook {
       console.log(`Event [Click] : turnip.content.webhook.slider.section-01.reload`);
 
       let webhookName = saidObj(`turnip.content.webhook.slider.section-01.title`).html();
-      this.renderConsole(webhookName);
+      //this.renderConsole(webhookName);
+      this.display.console.sync(webhookName);
     });
 
     saidObj(`turnip.content.webhook.slider.section-01.clear`).click(() => {
@@ -149,11 +128,11 @@ class TurnipExtensionWebhook {
 
       let webhookName = saidObj(`turnip.content.webhook.slider.section-01.title`).html();
       this.rest.deleteHistory(webhookName)
-      .then(() => this.renderConsole(webhookName));
+      .then(() => this.display.console.sync(webhookName));
     });
 
-    saidObj(`turnip.content.webhook.slider.section-02.form.save`).click(() => {
-      console.log(`Event [Click] : turnip.content.webhook.slider.section-02.form.save`);
+    saidObj(`turnip.content.webhook.slider.section-02.save`).click(() => {
+      console.log(`Event [Click] : turnip.content.webhook.slider.section-02.save`);
 
       let form = this.getForm();
       let mode = form.meta.mode;
@@ -166,9 +145,12 @@ class TurnipExtensionWebhook {
 
       ((mode == `edit`) ? this.rest.put(form.name, form) : this.rest.post(form))
       .then((webhook) => {
-        this.renderForm();
-        this.renderBase();
-        this.goToBase();
+        console.log(webhook);
+        this.display.base.sync();
+      })
+      .catch((err) => {
+        console.log(err.body.error.message);
+        //console.log(JSON.stringify(JSON.parse(err.body.message)));
       });
     });
 
@@ -256,70 +238,57 @@ class TurnipExtensionWebhook {
     let itemTemplate = saidObj(`turnip.content.webhook.base.template.item`).html();
     let adder = saidObj(`turnip.content.webhook.base.template.adder`).html().replace(/-{{template}}/gi,``);
 
-    //  Clear all .turnip-webhook-item
-    $(`#${said(`turnip.content.webhook.base.container`)} .turnip-webhook-item`).remove();
+    return new Promise((resolve, reject) => {
+      //  Clear all .turnip-webhook-item
+      $(`#${said(`turnip.content.webhook.base.container`)} .turnip-webhook-item`).remove();
 
-    ((webhookList) ? Promise.resolve(webhookList) : this.rest.get()).then((webhookArray) => {
-      for(let i in webhookArray) {
-        let webhook = webhookArray[i];
-        let item = `${itemTemplate}`.replace(/{{name}}/gi, `:${webhook.name}:`);
-        console.log(`item : ${item}`);
-        //extension-turnip-extension-content-webhook-base-container
-        saidObj(`turnip.content.webhook.container`).append(item);
+      ((webhookList) ? Promise.resolve(webhookList) : this.rest.get())
+      .then((webhookArray) => {
+        for(let i in webhookArray) {
+          let webhook = webhookArray[i];
+          let item = `${itemTemplate}`.replace(/{{name}}/gi, `:${webhook.name}:`);
+          console.log(`item : ${item}`);
+          //extension-turnip-extension-content-webhook-base-container
+          saidObj(`turnip.content.webhook.container`).append(item);
 
-        this.turnipRaid.updateIdList(this.parent.idRegex);
-        console.log(this.turnipRaid.idList);
+          this.turnipRaid.updateIdList(this.parent.idRegex);
+          console.log(this.turnipRaid.idList);
 
-        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.name`).html(webhook.name);
-        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.method`).html(webhook.method.toUpperCase());
-        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.method`).addClass(`turnip-badge-http-method-${webhook.method.toLowerCase()}`);
-        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.url`).html(webhook.url);
-        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.description`).html(webhook.description);
+          saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.name`).html(webhook.name);
+          saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.method`).html(webhook.method.toUpperCase());
+          saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.method`).addClass(`turnip-badge-http-method-${webhook.method.toLowerCase()}`);
+          saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.url`).html(webhook.url);
+          saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.description`).html(webhook.description);
 
-        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.button.console`).click(() => {
-          this.goToConsole();
-          this.renderConsole(webhook.name)
-          .catch((e) => {
-            console.error(e);
+          saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.button.console`).click(() => {
+            this.display.console.sync(webhook.name);
           });
-        });
 
-        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.button.edit`).click(() => {
-          this.rest.get(webhook.name)
-          .then((array) => {
-            if(array.length != 1)
-              throw(new Error(`Found multiple webhook as name as '${webhook.name} : ${JSON.stringify(array)}'`));
-
-            let w = Object.assign(JSON.parse(JSON.stringify(this.form.default)), array[0]);
-            w.meta.mode = "edit";
-            w.meta.name = webhook.name;
-            
-            this.goToForm();
-            this.renderForm(w);
-          })
-          .catch((e) => {
-            console.error(e);
+          saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.button.edit`).click(() => {
+            this.display.form.sync(webhook.name);
           });
+
+          saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.button.remove`).click(() => {
+            //  In progress
+            if(!confirm(`Confirm to remove '${webhook.name}'.`))
+              return ;
+
+            this.rest.delete(webhook.name)
+            .then((webhookArray) => this.display.base.sync());
+            //saidObj(`turnip.content.webhook.container.items.${webhook.name}`).remove();
+          });
+        }
+
+        saidObj(`turnip.content.webhook.container`).append(adder);
+        this.turnipRaid.updateIdList();
+        saidObj(`turnip.content.webhook.container.adder`).click(() => {
+          console.log(`Event [Click] : turnip.content.webhook.container.adder`);
+          this.display.form.sync();
         });
 
-        saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.button.remove`).click(() => {
-          //  In progress
-          if(!confirm(`Confirm to remove '${webhook.name}'.`))
-            return ;
-
-          this.rest.delete(webhook.name)
-          .then((webhookArray) => this.renderBase());
-          //saidObj(`turnip.content.webhook.container.items.${webhook.name}`).remove();
-        });
-      }
-
-      saidObj(`turnip.content.webhook.container`).append(adder);
-      this.turnipRaid.updateIdList();
-      saidObj(`turnip.content.webhook.container.adder`).click(() => {
-        console.log(`Event [Click] : turnip.content.webhook.container.adder`);
-        this.goToForm();
-        this.renderForm();
+        resolve();
       })
+      .catch((err) => reject(err));
     });
   }
 
@@ -335,55 +304,75 @@ class TurnipExtensionWebhook {
         for(let i in recordArray) {
           str = (str == ``) ? JSON.stringify(recordArray[i]) : `${str}<br>${JSON.stringify(recordArray[i])}`;
         }
-        saidObj(`turnip.content.webhook.slider.section-01.body`).html(str);
-      });
+        saidObj(`turnip.content.webhook.slider.section-01.record`).html(str);
+        resolve();
+      })
+      .catch((err) => reject(err));
     });
   }
 
-  renderForm(form) {
-    console.log(`renderForm(${(form && form.meta && form.meta.mode) ? form.meta.mode : ``}) >> `);
-    form = (form) ? form : JSON.parse(JSON.stringify(this.form.default));
-    console.log(`default : ${JSON.stringify(this.form.default, null, 2)}`);
-    console.log(`form : ${JSON.stringify(form, null, 2)}`);
+  renderForm(webhookName) {
+    let said = this.said;
     let saidObj = this.saidObj;
+    //console.log(`renderForm(${(form && form.meta && form.meta.mode) ? form.meta.mode : ``}) >> `);
+    return new Promise((resolve, reject) => {
+      ((webhookName) ? this.rest.get(webhookName) : Promise.resolve(JSON.parse(JSON.stringify(this.form.default))))
+      .then((form) => {
+        console.log(`default : ${JSON.stringify(this.form.default, null, 2)}`);
+        console.log(`form : ${JSON.stringify(form, null, 2)}`);
 
-    saidObj(`turnip.content.webhook.slider.section-02.form.meta.mode`).val(form.meta.mode);
-    saidObj(`turnip.content.webhook.slider.section-02.form.meta.name`).val(form.meta.name);
-    saidObj(`turnip.content.webhook.slider.section-02.title`).html(form.meta.name);
-    //  In progress.
-    saidObj(`turnip.content.webhook.slider.section-02.form.enable`).prop("checked", form.enable);
-    saidObj(`turnip.content.webhook.slider.section-02.form.name`).val(form.name);
-    saidObj(`turnip.content.webhook.slider.section-02.form.description`).val(form.description);
-    saidObj(`turnip.content.webhook.slider.section-02.form.method`).val(form.method);
-    saidObj(`turnip.content.webhook.slider.section-02.form.url`).val(form.url);
-    saidObj(`turnip.content.webhook.slider.section-02.form.unverify`).prop("checked", form.unverify);
+        let meta = {
+          mode: (webhookName) ? "edit" : this.form.default.meta.mode,
+          name: (webhookName) ? webhookName : this.form.default.meta.name
+        };
 
-    //  Disable name input when in edit mode.
-    saidObj(`turnip.content.webhook.slider.section-02.form.name`).prop("disabled", (form.meta.mode == `edit`));
+        saidObj(`turnip.content.webhook.slider.section-02.meta.mode`).val(meta.mode);
+        saidObj(`turnip.content.webhook.slider.section-02.meta.name`).val(meta.name);
+        saidObj(`turnip.content.webhook.slider.section-02.title`).html(meta.name);
+        //  In progress.
+        saidObj(`turnip.content.webhook.slider.section-02.form.enable`).prop("checked", form.enable);
+        saidObj(`turnip.content.webhook.slider.section-02.form.name`).val(form.name);
+        saidObj(`turnip.content.webhook.slider.section-02.form.description`).val(form.description);
+        saidObj(`turnip.content.webhook.slider.section-02.form.method`).val(form.method);
+        saidObj(`turnip.content.webhook.slider.section-02.form.url`).val(form.url);
+        saidObj(`turnip.content.webhook.slider.section-02.form.unverify`).prop("checked", form.unverify);
+
+        //  Disable name input when in edit mode.
+        saidObj(`turnip.content.webhook.slider.section-02.form.name`).prop("disabled", (meta.mode == `edit`));
+        
+        //saidObj(`turnip.content.webhook.slider.section-02.form.headers`);
+        let headers = saidObj(`turnip.content.webhook.slider.section-02.form.headers`);
+        headers.empty();
+        for(var i in form.headers) {
+          this.addToHeaders(form.headers[i]);
+        }
+
+        if(form.header) {
+          saidObj(`turnip.content.webhook.slider.section-02.form.header.key`).val(form.header.key);
+          saidObj(`turnip.content.webhook.slider.section-02.form.header.value`).val(form.header.value);
+        }
+        
+        //saidObj(`turnip.content.webhook.slider.section-02.form.payload`);
+        if(!this.editor)
+          this.setAce();
+        this.editor.setValue(form.payload);
+
+        resolve();
+      })
+      .catch((err) => reject(err));
+    });
     
-    //saidObj(`turnip.content.webhook.slider.section-02.form.headers`);
-    let headers = saidObj(`turnip.content.webhook.slider.section-02.form.headers`);
-    headers.empty();
-    for(var i in form.headers) {
-      this.addToHeaders(form.headers[i]);
-    }
-
-    if(form.header) {
-      saidObj(`turnip.content.webhook.slider.section-02.form.header.key`).val(form.header.key);
-      saidObj(`turnip.content.webhook.slider.section-02.form.header.value`).val(form.header.value);
-    }
+    //form = (form) ? form : JSON.parse(JSON.stringify(this.form.default));
     
-    //saidObj(`turnip.content.webhook.slider.section-02.form.payload`);
-    if(!this.editor)
-      this.setAce();
-    this.editor.setValue(form.payload);
+
+    //return Promise.resolve();
   }
 
   getForm() {
     let saidObj = this.saidObj;
     let form = JSON.parse(JSON.stringify(this.form.default));
-    form.meta.mode = saidObj(`turnip.content.webhook.slider.section-02.form.meta.mode`).val();
-    form.meta.name = saidObj(`turnip.content.webhook.slider.section-02.form.meta.name`).val();
+    form.meta.mode = saidObj(`turnip.content.webhook.slider.section-02.meta.mode`).val();
+    form.meta.name = saidObj(`turnip.content.webhook.slider.section-02.meta.name`).val();
     
     form.name = saidObj(`turnip.content.webhook.slider.section-02.form.name`).val();
     form.description = saidObj(`turnip.content.webhook.slider.section-02.form.description`).val();
@@ -397,74 +386,252 @@ class TurnipExtensionWebhook {
     return form;
   }
 
-  goToForm() {
-    this.saidObj(`turnip.content.webhook.slider.section-01`).addClass('hide');
-    this.saidObj(`turnip.content.webhook.slider.section-02`).removeClass('hide');
-    this.saidObj(`turnip.content.webhook.slider`).removeClass('hide');
-  }
+  initDisplay() {
+    let said = this.said;
+    let saidObj = this.saidObj;
 
-  goToConsole() {
-    this.saidObj(`turnip.content.webhook.slider.section-01`).removeClass('hide');
-    this.saidObj(`turnip.content.webhook.slider.section-02`).addClass('hide');
-    this.saidObj(`turnip.content.webhook.slider`).removeClass('hide');
-  }
+    this.display = {};
 
-  goToBase() {
-    this.saidObj(`turnip.content.webhook.slider`).addClass('hide');
+    this.display.console = {
+      show: () => {
+        console.log(`display.console.show()`);
+        saidObj(`turnip.content.webhook.slider.section-01`).removeClass('hide');
+        saidObj(`turnip.content.webhook.slider.section-02`).addClass('hide');
+        saidObj(`turnip.content.webhook.slider`).removeClass('hide');
+      },
+      loading: () => {
+        console.log(`display.console.loading()`);
+        saidObj(`turnip.content.webhook.slider.section-01.record`).addClass('hide');
+        saidObj(`turnip.content.webhook.slider.section-01.loading`).removeClass('hide');
+      },
+      loaded: () => {
+        console.log(`display.console.loaded()`);
+        saidObj(`turnip.content.webhook.slider.section-01.loading`).addClass('hide');
+        saidObj(`turnip.content.webhook.slider.section-01.record`).removeClass('hide');
+      },
+      render: (webhookName) => {
+        console.log(`display.console.render(${(webhookName) ? webhookName : ``})`);
+        return this.renderConsole(webhookName);
+      },
+      sync: (webhookName) => {
+        console.log(`display.console.sync(${(webhookName) ? webhookName : ``})`);
+        this.display.console.loading();
+        this.display.console.show();
+        this.display.console.render(webhookName)
+        .then(() => {
+          this.display.console.loaded();
+        })
+        .catch((err) => {
+          alert(err);
+          this.display.form.loaded();
+        });
+      }
+    };
+
+    this.display.form = {
+      show: () => {
+        console.log(`display.form.show()`);
+        saidObj(`turnip.content.webhook.slider.section-01`).addClass('hide');
+        saidObj(`turnip.content.webhook.slider.section-02`).removeClass('hide');
+        saidObj(`turnip.content.webhook.slider`).removeClass('hide');
+      },
+      loading: () => {
+        console.log(`display.form.loading()`);
+        saidObj(`turnip.content.webhook.slider.section-02.form`).addClass('hide');
+        saidObj(`turnip.content.webhook.slider.section-02.loading`).removeClass('hide');
+      },
+      loaded: () => {
+        console.log(`display.form.loaded()`);
+        saidObj(`turnip.content.webhook.slider.section-02.loading`).addClass('hide');
+        saidObj(`turnip.content.webhook.slider.section-02.form`).removeClass('hide');
+      },
+      render: (webhookName) => {
+        console.log(`display.form.render(${(webhookName) ? webhookName : ``})`);
+        return this.renderForm(webhookName);
+      },
+      sync: (webhookName) => {
+        console.log(`display.form.sync(${(webhookName) ? webhookName : ``})`);
+        this.display.form.loading();
+        this.display.form.show();
+        this.display.form.render(webhookName)
+        .then(() => {
+          this.display.form.loaded();
+        })
+        .catch((err) => {
+          alert(err);
+          this.display.form.loaded();
+        });
+      }
+    };
+
+    this.display.base = {
+      show: () => {
+        console.log(`display.base.show()`);
+        saidObj(`turnip.content.webhook.slider`).addClass('hide');
+      },
+      loading: () => {
+        console.log(`display.base.loading()`);
+      },
+      loaded: () => {
+        console.log(`display.base.loaded()`);
+      },
+      render: () => {
+        console.log(`display.base.render()`);
+        return this.renderBase();
+      },
+      sync: () => {
+        console.log(`display.base.sync()`);
+        this.display.base.loading();
+        this.display.base.show();
+        this.display.base.render()
+        .then(() => {
+          this.display.base.loaded();
+        })
+        .catch((err) => {
+          alert(err);
+          this.display.form.loaded();
+        });
+      }
+    };
   }
 
   initRestApiTool() {
     this.rest = {
 
       getHistory: (name) => {
+        console.log(`rest.getHistory(${(name) ? `"${name}"` : ``})`);
         return new Promise((resolve, reject) => {
-          window.API.getJson(`/extensions/${this.parent.id}/api/history${(name) ? `/${name}` : ``}`).then((resBody) => {
+          this.API.getJson(`/extensions/${this.parent.id}/api/history${(name) ? `/${name}` : ``}`)
+          .then((resBody) => {
             resolve(resBody);
-          });
+          })
+          .catch((err) => reject(err));
         });
       },
 
       deleteHistory: (name) => {
+        console.log(`rest.deleteHistory(${(name) ? `"${name}"` : ``})`);
         return new Promise((resolve, reject) => {
-          window.API.delete(`/extensions/${this.parent.id}/api/history${(name) ? `/${name}` : ``}`).then((resBody) => {
+          this.API.delete(`/extensions/${this.parent.id}/api/history${(name) ? `/${name}` : ``}`)
+          .then((resBody) => {
             resolve(resBody);
-          });
+          })
+          .catch((err) => reject(err));
         });
       },
 
       get: (name) => {
+        console.log(`rest.get(${(name) ? `"${name}"` : ``})`);
         return new Promise((resolve, reject) => {
-          window.API.getJson(`/extensions/${this.parent.id}/api/config/webhook${(name) ? `/${name}` : ``}`).then((resBody) => {
+          this.API.getJson(`/extensions/${this.parent.id}/api/config/webhook${(name) ? `/${name}` : ``}`)
+          .then((resBody) => {
             resolve(resBody);
-          });
+          })
+          .catch((err) => reject(err));
         });
       },
 
       post: (webhook) => {
+        console.log(`rest.post(${(webhook.name) ? `"${webhook.name}"` : ``})`);
+        console.log(`webhook : ${JSON.stringify(webhook, null, 2)}`);
         return new Promise((resolve, reject) => {
-          window.API.postJson(`/extensions/${this.parent.id}/api/config/webhook`, webhook).then((resBody) => {
+          this.API.postJson(`/extensions/${this.parent.id}/api/config/webhook`, webhook)
+          .then((resBody) => {
             resolve(resBody);
+          })
+          .catch((err) => {
+            console.log(`found error`);
+            console.log(JSON.stringify(err));
+            reject(err);
           });
         });
       },
 
       put: (name, webhook) => {
+        console.log(`rest.put(${(name) ? `"${name}"` : ``})`);
         return new Promise((resolve, reject) => {
           webhook = (webhook) ? webhook : name;
           name = (webhook) ? name : null;
-          window.API.putJson(`/extensions/${this.parent.id}/api/config/webhook${(name) ? `/${name}` : ``}`, webhook).then((resBody) => {
+          this.API.putJson(`/extensions/${this.parent.id}/api/config/webhook${(name) ? `/${name}` : ``}`, webhook)
+          .then((resBody) => {
             resolve(resBody);
-          });
+          })
+          .catch((err) => reject(err));
         });
       },
 
       delete: (name) => {
+        console.log(`rest.delete(${(name) ? `"${name}"` : ``})`);
         return new Promise((resolve, reject) => {
-          window.API.delete(`/extensions/${this.parent.id}/api/config/webhook${(name) ? `/${name}` : ``}`).then((resBody) => {
+          this.API.delete(`/extensions/${this.parent.id}/api/config/webhook${(name) ? `/${name}` : ``}`)
+          .then((resBody) => {
             resolve(resBody);
-          });
+          })
+          .catch((err) => reject(err));
+        });
+      },
+    };
+
+    this.API = {
+
+      getJson(url) {
+        return new Promise((resolve, reject) => {
+          fetch(url, {
+            method: 'GET',
+            headers: window.API.headers()
+          })
+          .then((res) => (!res.ok) ? res.json().then((body) => reject({status: res.status, body: body})) : resolve(res.json()))
+          .catch((err) => reject(err));
+        });
+      },
+
+      postJson(url, data) {
+        return new Promise((resolve, reject) => {
+          fetch(url, {
+            method: 'POST',
+            headers: window.API.headers('application/json'),
+            body: JSON.stringify(data)
+          })
+          .then((res) => (!res.ok) ? res.json().then((body) => reject({status: res.status, body: body})) : resolve(res.json()))
+          .catch((err) => reject(err));
+        });
+      },
+
+      putJson(url, data) {
+        return new Promise((resolve, reject) => {
+          fetch(url, {
+            method: 'PUT',
+            headers: window.API.headers('application/json'),
+            body: JSON.stringify(data)
+          })
+          .then((res) => (!res.ok) ? res.json().then((body) => reject({status: res.status, body: body})) : resolve(res.json()))
+          .catch((err) => reject(err));
+        });
+      },
+
+      patchJson(url, data) {
+        return new Promise((resolve, reject) => {
+          fetch(url, {
+            method: 'PATCH',
+            headers: window.API.headers('application/json'),
+            body: JSON.stringify(data)
+          })
+          .then((res) => (!res.ok) ? res.json().then((body) => reject({status: res.status, body: body})) : resolve(res.json()))
+          .catch((err) => reject(err));
+        });
+      },
+
+      delete(url) {
+        return new Promise((resolve, reject) => {
+          fetch(url, {
+            method: 'DELETE',
+            headers: window.API.headers()
+          })
+          .then((res) => (!res.ok) ? res.json().then((body) => reject({status: res.status, body: body})) : resolve(res.json()))
+          .catch((err) => reject(err));
         });
       }
+
     };
   }
 }
