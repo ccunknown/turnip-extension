@@ -119,8 +119,8 @@ class TurnipExtensionWebhook {
       console.log(`Event [Click] : turnip.content.webhook.slider.section-01.reload`);
 
       let webhookName = saidObj(`turnip.content.webhook.slider.section-01.title`).html();
-      //this.renderConsole(webhookName);
-      this.display.console.sync(webhookName);
+      //this.renderHistory(webhookName);
+      this.display.history.sync(webhookName);
     });
 
     saidObj(`turnip.content.webhook.slider.section-01.clear`).click(() => {
@@ -128,7 +128,13 @@ class TurnipExtensionWebhook {
 
       let webhookName = saidObj(`turnip.content.webhook.slider.section-01.title`).html();
       this.rest.deleteHistory(webhookName)
-      .then(() => this.display.console.sync(webhookName));
+      .then(() => {
+        console.log(`After deleteHistory`);
+        this.display.history.sync(webhookName);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     });
 
     saidObj(`turnip.content.webhook.slider.section-02.save`).click(() => {
@@ -149,8 +155,8 @@ class TurnipExtensionWebhook {
         this.display.base.sync();
       })
       .catch((err) => {
-        console.log(err.body.error.message);
-        //console.log(JSON.stringify(JSON.parse(err.body.message)));
+        console.error(`turnip.content.webhook.slider.section-02.save`);
+        this.onError(err);
       });
     });
 
@@ -260,8 +266,8 @@ class TurnipExtensionWebhook {
           saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.url`).html(webhook.url);
           saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.description`).html(webhook.description);
 
-          saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.button.console`).click(() => {
-            this.display.console.sync(webhook.name);
+          saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.button.history`).click(() => {
+            this.display.history.sync(webhook.name);
           });
 
           saidObj(`turnip.content.webhook.container.item.:${webhook.name}:.button.edit`).click(() => {
@@ -292,7 +298,8 @@ class TurnipExtensionWebhook {
     });
   }
 
-  renderConsole(webhookName) {
+  renderHistory(webhookName) {
+    console.log(`renderHistory(${webhookName}) >> `);
     let said = this.said;
     let saidObj = this.saidObj;
     let str = ``;
@@ -301,6 +308,7 @@ class TurnipExtensionWebhook {
       saidObj(`turnip.content.webhook.slider.section-01.title`).html(webhookName);
       this.rest.getHistory(webhookName)
       .then((recordArray) => {
+        let str = ``;
         for(let i in recordArray) {
           str = (str == ``) ? JSON.stringify(recordArray[i]) : `${str}<br>${JSON.stringify(recordArray[i])}`;
         }
@@ -386,40 +394,61 @@ class TurnipExtensionWebhook {
     return form;
   }
 
+  onError(err) {
+    let errName = err.body.error.name;
+    let errMessage = err.body.error.message;
+
+    console.log(err);
+    console.log(errMessage);
+
+    if(errName == `InvalidConfigSchema`) {
+      let errList = JSON.parse(errMessage);
+      let errStr = ``;
+      errList.map((e) => {
+        let tmp = `"${e.property.split(`.`).pop()}" ${e.message}`;
+        errStr = `${errStr}${tmp}\n`;
+      });
+      alert(`Error : ${errStr}`);
+    }
+    else {
+      alert(`Error : ${errMessage}`);
+    }
+  }
+
   initDisplay() {
     let said = this.said;
     let saidObj = this.saidObj;
 
     this.display = {};
 
-    this.display.console = {
+    this.display.history = {
       show: () => {
-        console.log(`display.console.show()`);
+        console.log(`display.history.show()`);
         saidObj(`turnip.content.webhook.slider.section-01`).removeClass('hide');
         saidObj(`turnip.content.webhook.slider.section-02`).addClass('hide');
         saidObj(`turnip.content.webhook.slider`).removeClass('hide');
       },
       loading: () => {
-        console.log(`display.console.loading()`);
+        console.log(`display.history.loading()`);
         saidObj(`turnip.content.webhook.slider.section-01.record`).addClass('hide');
         saidObj(`turnip.content.webhook.slider.section-01.loading`).removeClass('hide');
       },
       loaded: () => {
-        console.log(`display.console.loaded()`);
+        console.log(`display.history.loaded()`);
         saidObj(`turnip.content.webhook.slider.section-01.loading`).addClass('hide');
         saidObj(`turnip.content.webhook.slider.section-01.record`).removeClass('hide');
       },
       render: (webhookName) => {
-        console.log(`display.console.render(${(webhookName) ? webhookName : ``})`);
-        return this.renderConsole(webhookName);
+        console.log(`display.history.render(${(webhookName) ? webhookName : ``})`);
+        return this.renderHistory(webhookName);
       },
       sync: (webhookName) => {
-        console.log(`display.console.sync(${(webhookName) ? webhookName : ``})`);
-        this.display.console.loading();
-        this.display.console.show();
-        this.display.console.render(webhookName)
+        console.log(`display.histor.sync(${(webhookName) ? webhookName : ``})`);
+        this.display.history.loading();
+        this.display.history.show();
+        this.display.history.render(webhookName)
         .then(() => {
-          this.display.console.loaded();
+          this.display.history.loaded();
         })
         .catch((err) => {
           alert(err);
@@ -514,9 +543,13 @@ class TurnipExtensionWebhook {
         return new Promise((resolve, reject) => {
           this.API.delete(`/extensions/${this.parent.id}/api/history${(name) ? `/${name}` : ``}`)
           .then((resBody) => {
+            console.log(`deleteHistory result : ${resBody}`);
             resolve(resBody);
           })
-          .catch((err) => reject(err));
+          .catch((err) => {
+            console.log(`Error : ${err}`);
+            reject(err)
+          });
         });
       },
 

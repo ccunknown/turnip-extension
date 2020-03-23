@@ -225,6 +225,48 @@
   overflow: hidden;
 }
 
+/* History Item */
+#turnip-container .turnip-history-item {
+  border-color: var(--secondary);
+  transition: 0.2s;
+}
+
+#turnip-container .turnip-history-item:hover {
+  border-color: var(--light);
+  transition: 0.2s;
+}
+
+#turnip-container .turnip-history-item .card-header{
+  background-color: var(--dark);
+}
+
+#turnip-container .turnip-history-item .card-body {
+  background-color: var(--secondary);
+  padding: 5px;
+}
+
+#turnip-container .turnip-history-item .card-body div {
+  background-color: var(--dark);
+  margin-bottom: 5px;
+  border-radius: 2px;
+}
+
+#turnip-container .turnip-history-item .card-body div:last-child {
+  margin-bottom: 0px;
+}
+
+#turnip-container .turnip-history-item .card-body span {
+  padding: 5px;
+}
+
+#turnip-container .turnip-history-item-req {
+
+}
+
+#turnip-container .turnip-history-item-res {
+
+}
+
 /* E-Form Customization */
 #turnip-container .turnip-form-container {
   display: flex;

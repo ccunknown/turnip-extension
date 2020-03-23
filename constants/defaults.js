@@ -135,7 +135,8 @@ var Defaults = {
               "default": false
             },
             "url": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^https?:\/\/.*$"
             },
             "method": {
               "type": "string",

@@ -27,6 +27,7 @@ class historyService extends EventEmitter {
 
   init() {
     console.log(`historyService: init() >> `);
+    this.setArrayComparator();
   }
 
   start() {
@@ -44,9 +45,23 @@ class historyService extends EventEmitter {
       this.history[webhookName] = [];
     }
     this.history[webhookName].push(record);
+    this.history[webhookName] = this.history[webhookName].sort(this.arrayCompare.reqTimestamp);
+    //this.history[webhookName].map((h) => console.log(h.timestamp.req.unix));
     while(this.history[webhookName].length > this.limit)
       this.history[webhookName].shift();
     //console.log(JSON.stringify(this.history[webhookName]));
+  }
+
+  setArrayComparator() {
+    this.arrayCompare = {
+      reqTimestamp: (a, b) => {
+        let ta = a.timestamp.req.unix;
+        let tb = b.timestamp.req.unix;
+        let result = (tb > ta) ? -1 : 1;
+        //console.log(`tb/ta : ${tb}/${ta} : ${result}`);
+        return result;
+      }
+    };
   }
 
   getRecord(webhookName) {
@@ -54,11 +69,12 @@ class historyService extends EventEmitter {
   }
 
   clearRecord(webhookName) {
+    console.log(`historyService: clearRecord(${webhookName}) >> `);
     if(webhookName)
       this.history[webhookName] = [];
     else
       this.history = [];
-    return ;
+    return (webhookName) ? this.history[webhookName] : this.history;
   }
 
   setLimit(num) {

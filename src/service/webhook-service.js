@@ -72,6 +72,11 @@ class webhookService extends EventEmitter {
         this.configManager.getConfigWebhook()
         .then((webhookList) => {
           this.webhookList = JSON.parse(JSON.stringify(webhookList));
+          let tmp = [];
+          this.webhookList.map((webhook) => {
+            tmp.push(`${webhook.name}`);
+          });
+          console.log(`webhookService: webhookList : ${tmp}`);
           resolve(this.webhookList);
         });
       }
@@ -136,6 +141,7 @@ class webhookService extends EventEmitter {
     this.webhookList.map((webhook) => {
       if(!webhook.enable)
         return ;
+
       let option = {
         url: webhook.url,
         method: webhook.method,
@@ -145,21 +151,32 @@ class webhookService extends EventEmitter {
         strictSSL: !webhook.unverify,
         body: webhook.payload
       };
+
       for(let i in webhook.headers) {
         option.headers[webhook.headers[i].key] = webhook.headers[i].value;
       }
+
       let optionStr = mustache.render(JSON.stringify(option), data);
-      let result = JSON.parse(optionStr);
+      let req = JSON.parse(optionStr);
       
-      this.makeRequest(result)
-      .then((resp) => {
+      let timestamp = {};
+      timestamp.req = {};
+      timestamp.res = {};
+      timestamp.req.unix = Date.now();
+      timestamp.req.isoString = new Date(timestamp.req.unix).toISOString();
+
+      this.makeRequest(req)
+      .then((res) => {
+        timestamp.res.unix = Date.now();
+        timestamp.res.isoString = new Date(timestamp.res.unix).toISOString();
         let record = {
-          request: option,
-          respond: resp
+          timestamp: timestamp,
+          request: req,
+          respond: res
         };
         this.historyService.pushRecord(webhook.name, record);
         //console.log(JSON.stringify(result));
-        //console.log(resp);
+        //console.log(res);
       });
     });
   }
