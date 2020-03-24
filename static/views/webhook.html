@@ -1,7 +1,7 @@
 <div class="turnip-slide-container" id="extension-turnip-extension-content-webhook-section">
   <div class="turnip-slide-slide hide" id="extension-turnip-extension-content-webhook-slider">
     <div class="card bg-warning hide" id="extension-turnip-extension-content-webhook-slider-section-01">
-      
+
       <div class="card-header border-secondary">
         <div class="d-flex justify-content-between text-dark">
           <div class="text-truncate">
@@ -28,30 +28,40 @@
       <div class="card-body bg-dark" id="extension-turnip-extension-content-webhook-slider-section-01-body">
 
         <div class="hide" id="extension-turnip-extension-content-webhook-slider-section-01-template">
-          <div class="card turnip-history-item">
-            <div class="card-header">
-              <span>
+          <div class="card turnip-history-item" id="extension-turnip-extension-content-webhook-slider-section-01-history-item-{{index}}">
+            <div class="hide" id="extension-turnip-extension-content-webhook-slider-section-01-history-item-{{index}}-meta">
+            </div>
+            <div class="card-header text-truncate">
+              <span class="text-truncate" id="extension-turnip-extension-content-webhook-slider-section-01-history-item-{{index}}-timestamp-req">
                 reqTimestamp
               </span>
-              <span>
+              <span id="extension-turnip-extension-content-webhook-slider-section-01-history-item-{{index}}-timestamp-timediff">
                 10ms
               </span>
             </div>
             <div class="card-body">
-              <div class="turnip-history-item-req">
-                <span>req</span>
-                <span class="text-truncate grow-1">method: url</span>
-                <button class="btn btn-primary">
+              <div class="turnip-history-item-req turnip-history-item-element">
+                <div>req</div>
+                <div class="text-truncate grow-1">
+                  <span class="badge" id="extension-turnip-extension-content-webhook-slider-section-01-history-item-{{index}}-req-method">PUT</span>
+                  &nbsp;
+                  <span class="text-truncate" id="extension-turnip-extension-content-webhook-slider-section-01-history-item-{{index}}-req-url">http://test-url.org</span>
+                </div>
+                <button class="btn btn-primary" id="extension-turnip-extension-content-webhook-slider-section-01-history-item-{{index}}-req-show" data-toggle="modal" data-target="#extension-turnip-extension-content-webhook-slider-section-01-modal-req">
                   <span>
                     <i class="fas fa-external-link-alt mr-2"></i>
                   </span>
                   <span>show</span>
                 </button>
               </div>
-              <div class="turnip-history-item-res">
-                <span>res</span>
-                <span class="text-truncate grow-1">code: body</span>
-                <button class="btn btn-primary">
+              <div class="turnip-history-item-res turnip-history-item-element">
+                <div>res</div>
+                <div class="text-truncate grow-1">
+                  <span class="badge" id="extension-turnip-extension-content-webhook-slider-section-01-history-item-{{index}}-res-code">200</span>
+                  &nbsp;
+                  <span class="text-truncate" id="extension-turnip-extension-content-webhook-slider-section-01-history-item-{{index}}-res-body">{this is a body}</span>
+                </div>
+                <button class="btn btn-primary" id="extension-turnip-extension-content-webhook-slider-section-01-history-item-{{index}}-res-show" data-toggle="modal" data-target="#extension-turnip-extension-content-webhook-slider-section-01-modal-res">
                   <span>
                     <i class="fas fa-external-link-alt mr-2"></i>
                   </span>
@@ -62,7 +72,7 @@
           </div>
         </div>
 
-        <div class="hide" id="extension-turnip-extension-content-webhook-slider-section-01-record">
+        <div class="hide turnip-history-container" id="extension-turnip-extension-content-webhook-slider-section-01-record">
           console
         </div>
         <!-- section-01-loading -->
@@ -78,6 +88,52 @@
             <div class="progress">
               <div class="progress-bar progress-bar-black-striped bg-warning progress-bar-animated" style="width:100%">
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade turnip-modal" id="extension-turnip-extension-content-webhook-slider-section-01-modal" tabindex="-1" role="dialog" aria-labelledby="extension-turnip-extension-content-webhook-slider-section-01-modal-req-label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="extension-turnip-extension-content-webhook-slider-section-01-modal-label">Transaction</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body" id="extension-turnip-extension-content-webhook-slider-section-01-modal-body">
+              <div class="turnip-badge-header-group grow-1" id="extension-turnip-extension-content-webhook-slider-section-01-modal-timestamp-group">
+                <label class="turnip-label-badge badge-secondary badge-secondary">Timestamp</label>
+                <input class="turnip-badge-union border-secondary" id="extension-turnip-extension-content-webhook-slider-section-01-modal-timestamp" type="text">
+              </div>
+
+              <div class="turnip-badge-header-group grow-1" id="extension-turnip-extension-content-webhook-slider-section-01-modal-url-group">
+                <label class="turnip-label-badge badge-secondary badge-secondary" id="extension-turnip-extension-content-webhook-slider-section-01-modal-method">Method</label>
+                <input class="turnip-badge-union border-secondary" id="extension-turnip-extension-content-webhook-slider-section-01-modal-url" type="text">
+              </div>
+
+              <div class="turnip-badge-header-group grow-1" id="extension-turnip-extension-content-webhook-slider-section-01-modal-code-group">
+                <label class="turnip-label-badge badge-secondary badge-secondary">Code</label>
+                <input class="turnip-badge-union border-secondary" id="extension-turnip-extension-content-webhook-slider-section-01-modal-code" type="text">
+              </div>
+
+              <div class="turnip-badge-header-group" id="extension-turnip-extension-content-webhook-slider-section-01-modal-headers-group">
+                <label class="turnip-label-badge badge-secondary">Headers</label>
+                <div class="turnip-form-row flex-column border-dash border-secondary turnip-badge-union p-3">
+                  <div class="turnip-form-row flex-column" id="extension-turnip-extension-content-webhook-slider-section-01-modal-headers"></div>
+                </div>
+              </div>
+
+              <div class="turnip-badge-header-group grow-1" id="extension-turnip-extension-content-webhook-slider-section-01-modal-payload-group">
+                <label class="turnip-label-badge badge-secondary">Payload</label>
+                <div class="turnip-badge-union border-secondary">
+                  <div style="height: 250px;" id="extension-turnip-extension-content-webhook-slider-section-01-modal-payload"></div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
           </div>
         </div>
@@ -175,7 +231,8 @@
                   <input type="checkbox" id="extension-turnip-extension-content-webhook-slider-section-02-form-unverify">
                   <div class="text-truncate pl-2">Skip certificate verification!</div>
                 </div>
-              </div><div class="turnip-badge-header-group">
+              </div>
+              <div class="turnip-badge-header-group">
                 <label class="turnip-label-badge badge-secondary">Headers</label>
                 <div class="turnip-form-row flex-column border-dash border-secondary turnip-badge-union p-3">
                   <div class="turnip-form-row flex-column mb-3" id="extension-turnip-extension-content-webhook-slider-section-02-form-headers"></div>

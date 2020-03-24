@@ -84,7 +84,7 @@
 #turnip-container .turnip-tab-content.active {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /* justify-content: center; */
 }
 
 #turnip-container .turnip-content-section {
@@ -124,7 +124,14 @@
 }
 
 #turnip-container .turnip-slide-slide .card-header {
-  white-space: nowrap
+  white-space: nowrap;
+}
+
+#turnip-container .turnip-slide-slide .card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 #turnip-container .turnip-slide-slide.hide {
@@ -226,9 +233,23 @@
 }
 
 /* History Item */
+#turnip-container .turnip-history-container {
+  width: 100%;
+  min-height: 80px;
+}
+
 #turnip-container .turnip-history-item {
   border-color: var(--secondary);
   transition: 0.2s;
+  margin-bottom: 10px;
+  max-width: 700px;
+  min-width: 50px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#turnip-container .turnip-history-item:last-child {
+  margin-bottom: 0px;
 }
 
 #turnip-container .turnip-history-item:hover {
@@ -238,25 +259,75 @@
 
 #turnip-container .turnip-history-item .card-header{
   background-color: var(--dark);
+  padding: 5px;
+  font-size: 1.5rem;
+  display: flex;
+  justify-content: space-between;
 }
 
 #turnip-container .turnip-history-item .card-body {
   background-color: var(--secondary);
+  font-size: 1.4rem;
   padding: 5px;
 }
 
-#turnip-container .turnip-history-item .card-body div {
-  background-color: var(--dark);
+#turnip-container .turnip-history-item-element {
+  width: 100%;
   margin-bottom: 5px;
-  border-radius: 2px;
+  border-radius: 3px;
+  display: flex;
+
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--dark);
+  transition: 0.2s;
 }
 
-#turnip-container .turnip-history-item .card-body div:last-child {
+#turnip-container .turnip-history-item-element:hover {
+  border-color: var(--light);
+  transition: 0.2s;
+}
+
+#turnip-container .turnip-history-item-element:last-child {
   margin-bottom: 0px;
 }
 
-#turnip-container .turnip-history-item .card-body span {
-  padding: 5px;
+#turnip-container .turnip-history-item-element > * {
+  padding: 0px 5px 0px 5px;
+  border-width: 0px
+}
+
+#turnip-container .turnip-history-item-element > div {
+  background-color: var(--dark);
+  display: flex;
+  align-items: center;
+}
+
+#turnip-container .turnip-history-item-element > div:first-child {
+  min-width: 32px;
+}
+
+#turnip-container .turnip-history-item-element > button {
+  display: flex;
+  flex-wrap: nowrap;
+  transition: 0.2s;
+}
+
+#turnip-container .turnip-history-item-element > button:hover {
+  background-color: var(--warning);
+  color: var(--dark);
+  transition: 0.2s;
+}
+
+#turnip-container .turnip-history-item-element > *:first-child {
+  border-radius: 3px 0px 0px 3px;
+  min-width: 30px;
+  background-color: var(--dark);
+  opacity: 0.5;
+}
+
+#turnip-container .turnip-history-item-element > *:last-child {
+  border-radius: 0px 3px 3px 0px;
 }
 
 #turnip-container .turnip-history-item-req {
@@ -265,6 +336,21 @@
 
 #turnip-container .turnip-history-item-res {
 
+}
+
+/* Modal item */
+#turnip-container .turnip-modal {
+
+}
+
+#turnip-container .turnip-modal .modal-header,
+#turnip-container .turnip-modal .modal-body,
+#turnip-container .turnip-modal .modal-footer {
+  background-color: var(--dark);
+}
+
+#turnip-container .turnip-modal .modal-body input {
+  font: 400 13.3333px Arial;
 }
 
 /* E-Form Customization */
@@ -374,28 +460,37 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
-  color: var(--dark);
-  background-color: var(--warning);
 }
 
 #turnip-container .header-item span:first-child {
   border-top-left-radius: 0.25rem;
   border-bottom-left-radius: 0.25rem;
-  color: var(--light);
-  background-color: var(--info);
+  
 }
 
 #turnip-container .header-item span:last-child {
   border-top-right-radius: 0.25rem;
   border-bottom-right-radius: 0.25rem;
-  color: var(--light);
-  background-color: var(--danger);
 }
 
 #turnip-container .header-item span:hover {
   opacity: 0.7;
   transition: 0.2s;
+}
+
+#turnip-container .header-item-key {
+  color: var(--light);
+  background-color: var(--info);
+}
+
+#turnip-container .header-item-value {
+  color: var(--dark);
+  background-color: var(--warning);
+}
+
+#turnip-container .header-item-remove {
+  color: var(--light);
+  background-color: var(--danger);
 }
 
 /* Millicious Components */

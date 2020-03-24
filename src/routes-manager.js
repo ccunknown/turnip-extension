@@ -216,7 +216,7 @@ class RoutesManager extends APIHandler{
               })
               .then((list) => {
                 console.log(JSON.stringify(list));
-                this.makeJsonRespond(JSON.stringify(list));
+                resolve(this.makeJsonRespond(JSON.stringify(list)));
               })
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });

@@ -57,7 +57,7 @@ class historyService extends EventEmitter {
       reqTimestamp: (a, b) => {
         let ta = a.timestamp.req.unix;
         let tb = b.timestamp.req.unix;
-        let result = (tb > ta) ? -1 : 1;
+        let result = (tb > ta) ? 1 : -1;
         //console.log(`tb/ta : ${tb}/${ta} : ${result}`);
         return result;
       }

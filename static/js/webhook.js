@@ -31,15 +31,21 @@ class TurnipExtensionWebhook {
     //this.setupFunctions();
   }
 
-  setAce() {
-    console.log(`renderWebhook() >> `);
+  setAce(target, options) {
+    console.log(`setAce(${target}) >> `);
     // create the editor
+
+    options = (options) ? options : {
+      enableBasicAutocompletion: true,
+      enableSnippets: false,
+      enableLiveAutocompletion: true
+    };
 
     ace.require("ace/ext/language_tools");
 
     //var editor = ace.edit("extension-turnip-extension-content-webhook-slider-section-02-form-payload");
-    this.editor = ace.edit(this.said("turnip.content.webhook.slider.section-02.form.payload"));
-    var session = this.editor.getSession();
+    let editor = ace.edit(this.said(`${target}`));
+    var session = editor.getSession();
     //session.setMode(`ace/mode/json`);
     //session.setMode(`ace/mode/json_mustache`);
     session.setMode(`ace/mode/text_mustache`);
@@ -85,14 +91,16 @@ class TurnipExtensionWebhook {
       }
     };
 
-    this.editor.setOptions({
+    editor.setOptions({
       enableBasicAutocompletion: true,
       enableSnippets: false,
       enableLiveAutocompletion: true
     });
 
-    this.editor.completers = [staticWordCompleter];
+    editor.completers = [staticWordCompleter];
     this.setupFunctions();
+
+    return editor;
   }
 
   setupFunctions() {
@@ -178,7 +186,7 @@ class TurnipExtensionWebhook {
           mode = `ace/mode/json_mustache`;
       }
     }
-    this.editor.getSession().setMode(mode);
+    this.webhookEditor.getSession().setMode(mode);
   }
 
   addToHeaders(header) {
@@ -190,7 +198,7 @@ class TurnipExtensionWebhook {
     <div class="header-item">
       <span class="header-item-key">${header.key}</span>
       <span class="header-item-value">${header.value}</span>
-      <span class="" id="${rkey}"><i class="fa fas fa-times"></i></span>
+      <span class="header-item-remove" id="${rkey}"><i class="fa fas fa-times"></i></span>
     </div>
     `;
     this.removeFromHeaders(header.key);
@@ -302,21 +310,128 @@ class TurnipExtensionWebhook {
     console.log(`renderHistory(${webhookName}) >> `);
     let said = this.said;
     let saidObj = this.saidObj;
-    let str = ``;
-
+    
     return new Promise((resolve, reject) => {
       saidObj(`turnip.content.webhook.slider.section-01.title`).html(webhookName);
       this.rest.getHistory(webhookName)
       .then((recordArray) => {
-        let str = ``;
+        let itemTemplate = saidObj(`turnip.content.webhook.slider.section-01.template`).html();
+        saidObj(`turnip.content.webhook.slider.section-01.record`).html(``);
+
         for(let i in recordArray) {
-          str = (str == ``) ? JSON.stringify(recordArray[i]) : `${str}<br>${JSON.stringify(recordArray[i])}`;
+          let item = itemTemplate.replace(/{{index}}/g, `${i}`);
+          let elem = recordArray[i];
+          saidObj(`turnip.content.webhook.slider.section-01.record`).append(item);
+          this.turnipRaid.updateIdList(this.parent.idRegex);
+          console.log(this.turnipRaid.idList);
+          
+          saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-meta`).html(JSON.stringify(elem));
+          saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-timestamp-req`).html(elem.timestamp.req.isoString);
+          saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-timestamp-timediff`).html(`${elem.timestamp.res.unix - elem.timestamp.req.unix} ms`);
+          saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-req.method`).html(elem.request.method.toUpperCase());
+          saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-req.method`).addClass(`turnip-badge-http-method-${elem.request.method.toLowerCase()}`);
+          saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-req.url`).html(elem.request.url);
+          saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-req-show`).click(() => {
+            let data = saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-meta`).html();
+            let json = JSON.parse(data);
+            let result = json.request;
+            result.timestamp = json.timestamp.req;
+            this.renderModal(result);
+            saidObj(`turnip.content.webhook.slider.section-01.modal`).modal('show');
+          });
+
+          saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-res.code`).html(`${elem.respond.code}`.toUpperCase());
+          (typeof elem.respond.code == `string`) ? saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-res.code`).addClass(`badge-danger`) : 
+          (elem.respond.code < 200) ? saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-res.code`).addClass(`badge-warning`) : 
+          (elem.respond.code == 200) ? saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-res.code`).addClass(`badge-success`) : 
+          (elem.respond.code < 300) ? saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-res.code`).addClass(`badge-info`) : 
+          (elem.respond.code < 600) ? saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-res.code`).addClass(`badge-danger`) : 
+          {};
+          console.log(`code : ${elem.respond.code}`);
+
+          if(elem.respond.hasOwnProperty(`body`))
+            saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-res.body`).html(elem.respond.body);
+          else
+            saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-res.body`).html(``);
+
+          saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-res-show`).click(() => {
+            let data = saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-meta`).html();
+            let json = JSON.parse(data);
+            let result = json.respond;
+            result.timestamp = json.timestamp.res;
+            this.renderModal(result);
+            saidObj(`turnip.content.webhook.slider.section-01.modal`).modal('show');
+          });
         }
-        saidObj(`turnip.content.webhook.slider.section-01.record`).html(str);
+        //saidObj(`turnip.content.webhook.slider.section-01.record`).html(str);
         resolve();
       })
       .catch((err) => reject(err));
     });
+  }
+
+  renderModal(schema) {
+    console.log(`renderModal() >> `);
+    console.log(`data : ${JSON.stringify(schema, null, 2)}`);
+
+    let said = this.said;
+    let saidObj = this.saidObj;
+
+    let workspace = `turnip.content.webhook.slider.section-01.modal`;
+    
+    //  Timestamp section.
+    if(schema.timestamp && schema.timestamp.unix && schema.timestamp.isoString) {
+      saidObj(`${workspace}.timestamp`).val(`${schema.timestamp.isoString} : ${schema.timestamp.unix}`);
+    }
+    else
+      saidObj(`${workspace}.timestamp.group`).addClass(`hide`);
+
+    //  Url/Method section.
+    if(schema.url && schema.method) {
+      saidObj(`${workspace}.method`).html(schema.method);
+      saidObj(`${workspace}.url`).val(schema.url);
+    }
+    else
+      saidObj(`${workspace}.url.group`).addClass(`hide`);
+
+    //  Code section.
+    if(schema.code) {
+      saidObj(`${workspace}.code`).val(schema.code);
+    }
+    else
+      saidObj(`${workspace}.code.group`).addClass(`hide`);
+
+    //  Header section.
+    if(schema.headers) {
+      saidObj(`${workspace}.headers`).empty();
+      for(let i in schema.headers) {
+        let h = `
+          <div class="header-item">
+            <span class="header-item-key">${i}</span>
+            <span class="header-item-value">${schema.headers[i]}</span>
+          </div>
+        `;
+        saidObj(`${workspace}.headers`).append(h);
+      }
+    }
+    else
+      saidObj(`${workspace}.headers.group`).addClass(`hide`);
+
+    //  Payload section.
+    if(schema.body || typeof schema.code == `string`) {
+      let payload = (schema.body) ? schema.body : JSON.stringify(schema, null, 2);
+      let editor = this.setAce(`${workspace}.payload`, {
+        enableBasicAutocompletion: false,
+        enableSnippets: false,
+        enableLiveAutocompletion: false
+      });
+      editor.setValue(payload);
+      (schema.headers && schema.headers[`content-type`] && schema.headers[`content-type`].startsWith(`application/json`)) ? editor.getSession().setMode(`ace/mode/json`) : {};
+      (typeof schema.code == `string`) ? editor.getSession().setMode(`ace/mode/json`) : {};
+      editor.setReadOnly(true);
+    }
+    else
+      saidObj(`${workspace}.payload.group`).addClass(`hide`);
   }
 
   renderForm(webhookName) {
@@ -361,9 +476,9 @@ class TurnipExtensionWebhook {
         }
         
         //saidObj(`turnip.content.webhook.slider.section-02.form.payload`);
-        if(!this.editor)
-          this.setAce();
-        this.editor.setValue(form.payload);
+        if(!this.webhookEditor)
+          this.webhookEditor = this.setAce(`turnip.content.webhook.slider.section-02.form.payload`);
+        this.webhookEditor.setValue(form.payload);
 
         resolve();
       })
@@ -389,7 +504,7 @@ class TurnipExtensionWebhook {
     form.url = saidObj(`turnip.content.webhook.slider.section-02.form.url`).val();
     form.unverify = saidObj(`turnip.content.webhook.slider.section-02.form.unverify`).prop("checked");
     form.headers = this.getFormHeaders();
-    form.payload = this.editor.getValue();
+    form.payload = this.webhookEditor.getValue();
 
     return form;
   }
