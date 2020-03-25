@@ -382,6 +382,7 @@ class TurnipExtensionWebhook {
     //  Timestamp section.
     if(schema.timestamp && schema.timestamp.unix && schema.timestamp.isoString) {
       saidObj(`${workspace}.timestamp`).val(`${schema.timestamp.isoString} : ${schema.timestamp.unix}`);
+      saidObj(`${workspace}.timestamp.group`).removeClass(`hide`);
     }
     else
       saidObj(`${workspace}.timestamp.group`).addClass(`hide`);
@@ -390,6 +391,7 @@ class TurnipExtensionWebhook {
     if(schema.url && schema.method) {
       saidObj(`${workspace}.method`).html(schema.method);
       saidObj(`${workspace}.url`).val(schema.url);
+      saidObj(`${workspace}.url.group`).removeClass(`hide`);
     }
     else
       saidObj(`${workspace}.url.group`).addClass(`hide`);
@@ -397,6 +399,7 @@ class TurnipExtensionWebhook {
     //  Code section.
     if(schema.code) {
       saidObj(`${workspace}.code`).val(schema.code);
+      saidObj(`${workspace}.code.group`).removeClass(`hide`);
     }
     else
       saidObj(`${workspace}.code.group`).addClass(`hide`);
@@ -413,6 +416,7 @@ class TurnipExtensionWebhook {
         `;
         saidObj(`${workspace}.headers`).append(h);
       }
+      saidObj(`${workspace}.headers.group`).removeClass(`hide`);
     }
     else
       saidObj(`${workspace}.headers.group`).addClass(`hide`);
@@ -429,6 +433,7 @@ class TurnipExtensionWebhook {
       (schema.headers && schema.headers[`content-type`] && schema.headers[`content-type`].startsWith(`application/json`)) ? editor.getSession().setMode(`ace/mode/json`) : {};
       (typeof schema.code == `string`) ? editor.getSession().setMode(`ace/mode/json`) : {};
       editor.setReadOnly(true);
+      saidObj(`${workspace}.payload.group`).removeClass(`hide`);
     }
     else
       saidObj(`${workspace}.payload.group`).addClass(`hide`);
