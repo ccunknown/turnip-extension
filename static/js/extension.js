@@ -85,6 +85,7 @@
 
           //  Initial components.
           this.webhook = new TurnipExtensionWebhook(this, this.turnipRaid);
+          this.setting = new TurnipExtensionSetting(this, this.turnipRaid);
 
           resolve();
         });
@@ -243,6 +244,7 @@
       }
 
       this.webhook.render();
+      this.setting.render();
     }
 
     generateToken(token) {

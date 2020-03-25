@@ -164,6 +164,28 @@ class RoutesManager extends APIHandler{
           }
         }
       },
+      /***  Resource : /config/history  ***/
+      {
+        "resource": /\/config\/history/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              this.configManager.getConfig()
+              .then((config) => resolve(this.makeJsonRespond(JSON.stringify(config.history))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          },
+          "PUT": (req) => {
+            return new Promise(async (resolve, reject) => {
+              this.configManager.getConfig()
+              .then((config) => Object.assign(config, {history: req.body}))
+              .then((config) => this.configManager.saveConfig(config))
+              .then((config) => resolve(this.makeJsonRespond(JSON.stringify(config.history))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          }
+        }
+      },
       /***  Resource : /history  ***/
       {
         "resource": /\/history/,
@@ -218,6 +240,27 @@ class RoutesManager extends APIHandler{
                 console.log(JSON.stringify(list));
                 resolve(this.makeJsonRespond(JSON.stringify(list)));
               })
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          }
+        }
+      },
+      /***  Resource : /service  ***/
+      {
+        "resource": /\/service/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              this.laborsManager.getService()
+              .then((serviceList) => serviceList.map((service) => {
+                return {
+                  id: service.id,
+                  enable: service.enable,
+                  status: service.status,
+                  description: (service.description) ? service.description : ``
+                };
+              }))
+              .then((servList) => resolve(this.makeJsonRespond(JSON.stringify(servList))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
           }

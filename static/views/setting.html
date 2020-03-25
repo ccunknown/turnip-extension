@@ -5,46 +5,144 @@
       <div class="d-flex justify-content-between text-dark">
         <div class="text-truncate">
           <i class="fas fa-cog mr-2"></i>
-          <b id="extension-turnip-extension-content-setting-section-01-title">Console</b>
+          <b id="extension-turnip-extension-content-setting-section-01-title">Settings</b>
         </div>
       </div>
     </div>
 
     <div class="card-body bg-dark" id="extension-turnip-extension-content-setting-section-01-body">
-      <div class="turnip-form-container col-sm-12 col-md-10 col-lg-8">
+      <div class="" id="extension-turnip-extension-content-setting-section-01-loading">
+        <div class="d-flex flex-column justify-content-center">
+          <br>
+          <div class="text-light">
+            <center>
+              Please wait, this process will take a while.
+            </center>
+          </div>
+          <br>
+          <div class="progress">
+            <div class="progress-bar progress-bar-black-striped bg-warning progress-bar-animated" style="width:100%">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="turnip-form-container col-sm-12 col-md-10 col-lg-8" id="extension-turnip-extension-content-setting-section-01-container">
 
         <div class="turnip-form-row align-items-end turnip-badge-header-group">
           <label class="turnip-label-badge badge-info font-size-inherit">General Setting</label>
           <div class="d-flex flex-column w-100 border-dash border-info turnip-badge-union p-3">
-            <div>
-              factory reset
+
+            <div class="card turnip-setting-item">
+              <div class="card-header bg-dark">
+                <span>
+                  Factory reset
+                </span>
+                <button class="btn btn-danger" id="extension-turnip-extension-content-setting-section-01-factory-reset-button">
+                  <i class="fas fa-sync-alt"></i>
+                  <span>Reset</span>
+                </button>
+              </div>
+              <div class="card-body bg-secondary">
+                This may restore config to default value and delete user account on gateway.
+              </div>
             </div>
-            <div>
-              account reset
+
+            <div class="card turnip-setting-item">
+              <div class="card-header bg-dark">
+                <span>
+                  Account reset
+                </span>
+                <button class="btn btn-danger" id="extension-turnip-extension-content-setting-section-01-account-reset-button">
+                  <i class="fas fa-sync-alt"></i>
+                  <span>Reset</span>
+                </button>
+              </div>
+              <div class="card-body bg-secondary">
+                This may delete account and restore account config to default.
+              </div>
             </div>
+
           </div>
         </div>
 
         <div class="turnip-form-row align-items-end turnip-badge-header-group">
           <label class="turnip-label-badge badge-info font-size-inherit">Webhook Setting</label>
           <div class="d-flex flex-column w-100 border-dash border-info turnip-badge-union p-3">
-            <div>
-              clear webhook
+
+            <div class="card turnip-setting-item">
+              <div class="card-header bg-dark">
+                <span>
+                  Webhook reset
+                </span>
+                <button class="btn btn-danger" id="extension-turnip-extension-content-setting-section-01-webhook-reset-button">
+                  <i class="fas fa-sync-alt"></i>
+                  <span>Reset</span>
+                </button>
+              </div>
+              <div class="card-body bg-secondary">
+                This may delete all webhook.
+              </div>
             </div>
-            <div>
-              clear history
+
+            <div class="card turnip-setting-item">
+              <div class="card-header bg-dark">
+                <span>
+                  History reset
+                </span>
+                <button class="btn btn-danger" id="extension-turnip-extension-content-setting-section-01-history-reset-button">
+                  <i class="fas fa-sync-alt"></i>
+                  <span>Reset</span>
+                </button>
+              </div>
+              <div class="card-body bg-secondary">
+                This may clear history of all webhook.
+              </div>
             </div>
-            <div>
-              set webhook limit
+
+            <div class="card turnip-setting-item">
+              <div class="card-header bg-dark">
+                <span>
+                  History limit
+                </span>
+                <button class="btn btn-success" id="extension-turnip-extension-content-setting-section-01-history-limit-set-button">
+                  <i class="fas fa-save"></i>
+                  <span>Set</span>
+                </button>
+              </div>
+              <div class="card-body bg-secondary">
+                <span class="mr-2">
+                  <input type="number" id="extension-turnip-extension-content-setting-section-01-history-limit-input" style="width: 75px;">
+                </span>
+                <span>
+                  Limit of webhook history record.
+                </span>
+              </div>
             </div>
+
           </div>
         </div>
 
         <div class="turnip-form-row align-items-end turnip-badge-header-group">
-          <label class="turnip-label-badge badge-info font-size-inherit">Service</label>
+          <label class="turnip-label-badge badge-info font-size-inherit">Service List</label>
           <div class="d-flex flex-column w-100 border-dash border-info turnip-badge-union p-3">
-            <div>
-              set webhook limit
+            <div class="hide" id="extension-turnip-extension-content-setting-section-01-service-items-template">
+              <div class="card turnip-setting-item turnip-service-item" id="extension-turnip-extension-content-setting-section-01-service-item-{{id}}">
+                <div class="card-header bg-dark">
+                  <span id="extension-turnip-extension-content-setting-section-01-service-item-{{id}}-id">
+                    {test-service-name}
+                  </span>
+                  <span class="badge" id="extension-turnip-extension-content-setting-section-01-service-item-{{id}}-enable">
+                    unknow
+                  </span>
+                </div>
+                <div class="card-body bg-secondary" id="extension-turnip-extension-content-setting-section-01-service-item-{{id}}-description">
+                  {test-service-description}
+                </div>
+              </div>
+            </div>
+            <div id="extension-turnip-extension-content-setting-section-01-service-container">
+              service list
             </div>
           </div>
         </div>

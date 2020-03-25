@@ -7,7 +7,7 @@ const mustache = require('mustache');
 const {Defaults, Errors} = require('../../constants/constants');
 
 class webhookService extends EventEmitter {
-  constructor(extension) {
+  constructor(extension, config) {
 
     //EventEmitter.call(this);
     console.log(`webhookService: constructor() >> `);

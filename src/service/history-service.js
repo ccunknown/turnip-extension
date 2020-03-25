@@ -6,7 +6,7 @@ const Database = require('../lib/my-database');
 const {Defaults, Errors} = require('../../constants/constants');
 
 class historyService extends EventEmitter {
-  constructor(extension) {
+  constructor(extension, config) {
 
     //EventEmitter.call(this);
     console.log(`historyService: constructor() >> `);
@@ -18,9 +18,8 @@ class historyService extends EventEmitter {
     this.configManager = this.extension.configManager;
     this.routesManager = this.extension.routesManager;
 
-    this.limit = 20;
-
     this.history = {};
+    this.limit = config.history.limit;
 
     this.init();
   }
@@ -48,7 +47,7 @@ class historyService extends EventEmitter {
     this.history[webhookName] = this.history[webhookName].sort(this.arrayCompare.reqTimestamp);
     //this.history[webhookName].map((h) => console.log(h.timestamp.req.unix));
     while(this.history[webhookName].length > this.limit)
-      this.history[webhookName].shift();
+      this.history[webhookName].pop();
     //console.log(JSON.stringify(this.history[webhookName]));
   }
 
@@ -65,7 +64,9 @@ class historyService extends EventEmitter {
   }
 
   getRecord(webhookName) {
-    return (webhookName) ? this.history[webhookName] : this.history;
+    let result = (webhookName) ? this.history[webhookName] : this.history;
+    result = (result) ? result : [];
+    return result;
   }
 
   clearRecord(webhookName) {

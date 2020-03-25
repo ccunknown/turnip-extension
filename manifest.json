@@ -12,6 +12,7 @@
       "js": [
         "static/js/turnipRaid.js",
         "static/js/webhook.js",
+        "static/js/setting.js",
         "static/js/extension.js"
       ]
     }

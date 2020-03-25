@@ -10,7 +10,7 @@ const {Defaults, Errors} = require('../../constants/constants');
 const Websocket = require('../lib/websocket');
 
 class wsocketService extends EventEmitter {
-  constructor(extension) {
+  constructor(extension, config) {
 
     //EventEmitter.call(this);
     console.log(`wsocketService: constructor() >> `);

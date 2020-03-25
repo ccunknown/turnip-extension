@@ -26,6 +26,19 @@ class laborsManager {
   loadService() {
     console.log(`laborsManager: loadService() >> `);
     return new Promise((resolve, reject) => {
+      this.configManager.getConfig()
+      .then((config) => {
+        let serviceList = config.service;
+        for(let i in serviceList) {
+          let service = serviceList[i];
+          let serviceClass = require(`${servicePrefix}${service.id}`);
+          service.obj = new serviceClass(this.extension, config);
+          console.log(`service : ${service.id}`);
+          this.serviceList.push(service);
+        }
+        resolve();
+      });
+      /*
       this.getConfigService()
       .then((serviceList) => {
         //console.log(`service list : ${JSON.stringify(serviceList, null, 2)}`);
@@ -38,6 +51,7 @@ class laborsManager {
         }
         resolve();
       });
+      */
     });
   }
 

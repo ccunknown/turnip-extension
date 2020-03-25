@@ -572,7 +572,7 @@ class TurnipExtensionWebhook {
         })
         .catch((err) => {
           alert(err);
-          this.display.form.loaded();
+          this.display.history.loaded();
         });
       }
     };
@@ -666,10 +666,7 @@ class TurnipExtensionWebhook {
             console.log(`deleteHistory result : ${resBody}`);
             resolve(resBody);
           })
-          .catch((err) => {
-            console.log(`Error : ${err}`);
-            reject(err)
-          });
+          .catch((err) => reject(err));
         });
       },
 

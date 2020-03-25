@@ -21,7 +21,8 @@ var Defaults = {
       {
         "id": "wsocket-service",
         "enable": true,
-        "status": "unknow"
+        "status": "unknow",
+        "description": "This service use to connect self gateway with account which is provide by user."
       },
       {
         "id": "webhook-service",
@@ -33,7 +34,10 @@ var Defaults = {
         ]
       }
     ],
-    "webhook": []
+    "webhook": [],
+    "history": {
+      "limit": 10
+    }
   },
   "schema": {
     "type": "object",
@@ -79,7 +83,7 @@ var Defaults = {
               "type": "string",
               "default": ""
             },
-            "dependency": {
+            "dependencies": {
               "type": "array",
               "default": [],
               "items": {
@@ -177,6 +181,18 @@ var Defaults = {
               "type": "string",
               "default": ""
             }
+          }
+        }
+      },
+      "history": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "limit"
+        ],
+        "properties": {
+          "limit": {
+            "type": "number"
           }
         }
       }

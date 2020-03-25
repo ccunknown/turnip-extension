@@ -353,6 +353,44 @@
   font: 400 13.3333px Arial;
 }
 
+/* Setting item */
+#turnip-container .turnip-setting-item {
+  margin-bottom: 5px;
+
+  border-color: var(--secondary);
+  transition: 0.2s;
+}
+
+#turnip-container .turnip-setting-item:hover {
+  border-color: var(--light);
+  transition: 0.2s;
+}
+
+#turnip-container .turnip-setting-item:last-child {
+  margin-bottom: 0px;
+}
+
+#turnip-container .turnip-setting-item > .card-header {
+  padding: 5px;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Service item */
+#turnip-container .turnip-service-item {
+  border-color: var(--secondary);
+}
+
+#turnip-container .turnip-service-item > .card-headers {
+  background-color: var(--dark);
+}
+
+#turnip-container .turnip-service-item > .card-bodys {
+  background-color: var(--secondary);
+}
+
 /* E-Form Customization */
 #turnip-container .turnip-form-container {
   display: flex;
