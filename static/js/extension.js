@@ -72,6 +72,12 @@
           this.turnipRaid = new TurnipRaid(idList);
           said = this.turnipRaid.stringAutoId.bind(this.turnipRaid);
           saidObj = this.turnipRaid.stringAutoIdObject.bind(this.turnipRaid);
+
+          //  Set rest and api.
+          this.turnipApi = new TurnipApi(this);
+          this.api = this.turnipApi.api;
+          this.rest = this.turnipApi.rest;
+
           ui = this.webUi();
 
           let content = new DOMParser().parseFromString(mainPage, "text/html");

@@ -20,6 +20,7 @@ class RoutesManager extends APIHandler{
 
   setRouter() {
     this.router = [
+
       /***  Resource : /config  ***/
       {
         "resource": /\/config/,
@@ -48,10 +49,30 @@ class RoutesManager extends APIHandler{
           }
         }
       },
+
       /***  Resource : /config/account  ***/
       {
         "resource": /\/config\/account/,
         "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              this.configManager.getConfig()
+              .then((config) => resolve(this.makeJsonRespond(JSON.stringify(config.account))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          },
+          "PUT": (req) => {
+            return new Promise((resolve, reject) => {
+              this.configManager.getConfig()
+              .then((config) => {
+                config.account = req.body;
+                return config;
+              })
+              .then((config) => this.configManager.saveConfig(config))
+              .then((config) => resolve(this.makeJsonRespond(JSON.stringify(config))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          },
           "PATCH": (req) => {
             return new Promise((resolve, reject) => {
               this.configManager.getConfig()
@@ -72,6 +93,7 @@ class RoutesManager extends APIHandler{
           }
         }
       },
+
       /***  Resource : /config/webhook/  ***/
       {
         "resource": /\/config\/webhook/,
@@ -115,6 +137,7 @@ class RoutesManager extends APIHandler{
           }
         }
       },
+
       /***  Resource : /config/webhook/{name}  ***/
       {
         "resource": /\/config\/webhook\/[^/]+/,
@@ -164,6 +187,7 @@ class RoutesManager extends APIHandler{
           }
         }
       },
+
       /***  Resource : /config/history  ***/
       {
         "resource": /\/config\/history/,
@@ -183,9 +207,28 @@ class RoutesManager extends APIHandler{
               .then((config) => resolve(this.makeJsonRespond(JSON.stringify(config.history))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
+          },
+          "DELETE": (req) => {
+            return new Promise(async (resolve, reject) => {
+              let historyConfig;
+              this.configManager.getDefaults()
+              .then((defaults) => {
+                historyConfig = defaults.history;
+                return ;
+              })
+              .then(() => this.configManager.getConfig())
+              .then((config) => {
+                config.history = historyConfig;
+                return config;
+              })
+              .then((config) => this.configManager.saveConfig(config))
+              .then((config) => resolve(this.makeJsonRespond(JSON.stringify(config.history))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
           }
         }
       },
+
       /***  Resource : /history  ***/
       {
         "resource": /\/history/,
@@ -214,6 +257,7 @@ class RoutesManager extends APIHandler{
           }
         }
       },
+
       /***  Resource : /history/{webhook}  ***/
       {
         "resource": /\/history\/[^/]+/,
@@ -245,6 +289,7 @@ class RoutesManager extends APIHandler{
           }
         }
       },
+      
       /***  Resource : /service  ***/
       {
         "resource": /\/service/,

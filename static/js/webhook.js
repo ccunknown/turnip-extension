@@ -135,7 +135,7 @@ class TurnipExtensionWebhook {
       console.log(`Event [Click] : turnip.content.webhook.slider.section-01.clear`);
 
       let webhookName = saidObj(`turnip.content.webhook.slider.section-01.title`).html();
-      this.rest.deleteHistory(webhookName)
+      this.api.deleteHistory(webhookName)
       .then(() => {
         console.log(`After deleteHistory`);
         this.display.history.sync(webhookName);
@@ -157,7 +157,7 @@ class TurnipExtensionWebhook {
 
       console.log(`Form : ${JSON.stringify(form, null, 2)}`);
 
-      ((mode == `edit`) ? this.rest.put(form.name, form) : this.rest.post(form))
+      ((mode == `edit`) ? this.api.putConfigWebhook(form.name, form) : this.api.postConfigWebhook(form))
       .then((webhook) => {
         console.log(webhook);
         this.display.base.sync();
@@ -256,7 +256,7 @@ class TurnipExtensionWebhook {
       //  Clear all .turnip-webhook-item
       $(`#${said(`turnip.content.webhook.base.container`)} .turnip-webhook-item`).remove();
 
-      ((webhookList) ? Promise.resolve(webhookList) : this.rest.get())
+      ((webhookList) ? Promise.resolve(webhookList) : this.api.getConfigWebhook())
       .then((webhookArray) => {
         for(let i in webhookArray) {
           let webhook = webhookArray[i];
@@ -287,7 +287,7 @@ class TurnipExtensionWebhook {
             if(!confirm(`Confirm to remove '${webhook.name}'.`))
               return ;
 
-            this.rest.delete(webhook.name)
+            this.api.deleteConfigWebhook(webhook.name)
             .then((webhookArray) => this.display.base.sync());
             //saidObj(`turnip.content.webhook.container.items.${webhook.name}`).remove();
           });
@@ -313,7 +313,7 @@ class TurnipExtensionWebhook {
     
     return new Promise((resolve, reject) => {
       saidObj(`turnip.content.webhook.slider.section-01.title`).html(webhookName);
-      this.rest.getHistory(webhookName)
+      this.api.getHistory(webhookName)
       .then((recordArray) => {
         let itemTemplate = saidObj(`turnip.content.webhook.slider.section-01.template`).html();
         saidObj(`turnip.content.webhook.slider.section-01.record`).html(``);
@@ -444,7 +444,7 @@ class TurnipExtensionWebhook {
     let saidObj = this.saidObj;
     //console.log(`renderForm(${(form && form.meta && form.meta.mode) ? form.meta.mode : ``}) >> `);
     return new Promise((resolve, reject) => {
-      ((webhookName) ? this.rest.get(webhookName) : Promise.resolve(JSON.parse(JSON.stringify(this.form.default))))
+      ((webhookName) ? this.api.getConfigWebhook(webhookName) : Promise.resolve(JSON.parse(JSON.stringify(this.form.default))))
       .then((form) => {
         console.log(`default : ${JSON.stringify(this.form.default, null, 2)}`);
         console.log(`form : ${JSON.stringify(form, null, 2)}`);
@@ -645,6 +645,9 @@ class TurnipExtensionWebhook {
   }
 
   initRestApiTool() {
+    this.rest = this.parent.rest;
+    this.api = this.parent.api;
+    /*
     this.rest = {
 
       getHistory: (name) => {
@@ -783,6 +786,7 @@ class TurnipExtensionWebhook {
       }
 
     };
+    */
   }
 }
 

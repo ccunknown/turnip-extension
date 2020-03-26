@@ -10,6 +10,7 @@
         "static/css/extension.css"
       ],
       "js": [
+        "static/js/turnip-api.js",
         "static/js/turnipRaid.js",
         "static/js/webhook.js",
         "static/js/setting.js",
