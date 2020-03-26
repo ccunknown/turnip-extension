@@ -69,7 +69,7 @@ class RoutesManager extends APIHandler{
                 return config;
               })
               .then((config) => this.configManager.saveConfig(config))
-              .then((config) => resolve(this.makeJsonRespond(JSON.stringify(config))))
+              .then((config) => resolve(this.makeJsonRespond(JSON.stringify(config.account))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
           },
@@ -87,7 +87,7 @@ class RoutesManager extends APIHandler{
               this.configManager.getConfig()
               .then((currConfig) => Object.assign(currConfig, {"account": this.configManager.getDefaults().config.account}))
               .then((config) => this.configManager.saveConfig(config))
-              .then((conf) => resolve(this.makeJsonRespond(JSON.stringify(conf))))
+              .then((conf) => resolve(this.makeJsonRespond(JSON.stringify(conf.account))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
           }
@@ -289,7 +289,7 @@ class RoutesManager extends APIHandler{
           }
         }
       },
-      
+
       /***  Resource : /service  ***/
       {
         "resource": /\/service/,

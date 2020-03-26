@@ -30,7 +30,7 @@ class TurnipExtensionSetting {
 
     return new Promise((resolve, reject) => {
       //  Render service list.
-      this.rest.getService()
+      this.api.getService()
       .then((serviceList) => {
         saidObj(`turnip.content.setting.section-01.service.container`).empty();
         let template = saidObj(`turnip.content.setting.section-01.service.items.template`).html();
@@ -51,7 +51,7 @@ class TurnipExtensionSetting {
           }
           saidObj(`turnip.content.setting.section-01.service.item.${service.id}.description`).html(`${service.description}`);
         });
-        return this.rest.getConfigHistory();
+        return this.api.getConfigHistory();
         //resolve();
       })
       .then((configHistory) => {
@@ -82,7 +82,7 @@ class TurnipExtensionSetting {
     saidObj(`turnip.content.setting.section-01.webhook-reset.button`).click(() => {
       console.log(`Event [Click] : turnip.content.setting.section-01.webhook-reset.button`);
       this.display.loading();
-      this.rest.deleteConfigWebhook()
+      this.api.deleteConfigWebhook()
       .then(() => {
         this.display.sync();
       })
@@ -94,7 +94,7 @@ class TurnipExtensionSetting {
     saidObj(`turnip.content.setting.section-01.history-reset.button`).click(() => {
       console.log(`Event [Click] : turnip.content.setting.section-01.history-reset.button`);
       this.display.loading();
-      this.rest.deleteHistory()
+      this.api.deleteHistory()
       .then(() => {
         this.display.sync();
       })
@@ -107,7 +107,7 @@ class TurnipExtensionSetting {
       console.log(`Event [Click] : turnip.content.setting.section-01.history-limit.set.button`);
       this.config.history.limit = saidObj(`turnip.content.setting.section-01.history-limit.input`);
       this.display.loading();
-      this.rest.putConfigHistory(this.config.history)
+      this.api.putConfigHistory(this.config.history)
       .then(() => {
         this.display.sync();
       })
@@ -152,135 +152,7 @@ class TurnipExtensionSetting {
   }
 
   initRestApiTool() {
-    this.rest = {
-      deleteConfig: () => {
-        console.log(`rest.deleteConfig()`);
-        return new Promise((resolve, reject) => {
-          this.API.delete(`/extensions/${this.parent.id}/api/config`)
-          .then((resBody) => {
-            resolve(resBody);
-          })
-          .catch((err) => reject(err));
-        });
-      },
-      deleteConfigAccount: () => {
-        console.log(`rest.deleteConfigAccount()`);
-        return new Promise((resolve, reject) => {
-          this.API.delete(`/extensions/${this.parent.id}/api/config/account`)
-          .then((resBody) => {
-            resolve(resBody);
-          })
-          .catch((err) => reject(err));
-        });
-      },
-      deleteConfigWebhook: () => {
-        console.log(`rest.deleteConfigWebhook()`);
-        return new Promise((resolve, reject) => {
-          this.API.delete(`/extensions/${this.parent.id}/api/config/webhook`)
-          .then((resBody) => {
-            resolve(resBody);
-          })
-          .catch((err) => reject(err));
-        });
-      },
-      deleteHistory: (name) => {
-        console.log(`rest.deleteHistory(${(name) ? `"${name}"` : ``})`);
-        return new Promise((resolve, reject) => {
-          this.API.delete(`/extensions/${this.parent.id}/api/history${(name) ? `/${name}` : ``}`)
-          .then((resBody) => {
-            console.log(`deleteHistory result : ${resBody}`);
-            resolve(resBody);
-          })
-          .catch((err) => reject(err));
-        });
-      },
-      getService: (name) => {
-        console.log(`rest.getService(${(name) ? `"${name}"` : ``})`);
-        return new Promise((resolve, reject) => {
-          this.API.getJson(`/extensions/${this.parent.id}/api/service${(name) ? `/${name}` : ``}`)
-          .then((resBody) => {
-            resolve(resBody);
-          })
-          .catch((err) => reject(err));
-        });
-      },
-      getConfigHistory: () => {
-        console.log(`rest.getConfigHistory()`);
-        return new Promise((resolve, reject) => {
-          this.API.getJson(`/extensions/${this.parent.id}/api/config/history`)
-          .then((resBody) => {
-            resolve(resBody);
-          })
-          .catch((err) => reject(err));
-        });
-      },
-      putConfigHistory: (historyConfig) => {
-        console.log(`rest.getConfigHistory()`);
-        return new Promise((resolve, reject) => {
-          this.API.putJson(`/extensions/${this.parent.id}/api/config/history`, historyConfig)
-          .then((resBody) => {
-            resolve(resBody);
-          })
-          .catch((err) => reject(err));
-        });
-      }
-    };
-
-    this.API = {
-      getJson(url) {
-        return new Promise((resolve, reject) => {
-          fetch(url, {
-            method: 'GET',
-            headers: window.API.headers()
-          })
-          .then((res) => (!res.ok) ? res.json().then((body) => reject({status: res.status, body: body})) : resolve(res.json()))
-          .catch((err) => reject(err));
-        });
-      },
-      postJson(url, data) {
-        return new Promise((resolve, reject) => {
-          fetch(url, {
-            method: 'POST',
-            headers: window.API.headers('application/json'),
-            body: JSON.stringify(data)
-          })
-          .then((res) => (!res.ok) ? res.json().then((body) => reject({status: res.status, body: body})) : resolve(res.json()))
-          .catch((err) => reject(err));
-        });
-      },
-      putJson(url, data) {
-        return new Promise((resolve, reject) => {
-          fetch(url, {
-            method: 'PUT',
-            headers: window.API.headers('application/json'),
-            body: JSON.stringify(data)
-          })
-          .then((res) => (!res.ok) ? res.json().then((body) => reject({status: res.status, body: body})) : resolve(res.json()))
-          .catch((err) => reject(err));
-        });
-      },
-      patchJson(url, data) {
-        return new Promise((resolve, reject) => {
-          fetch(url, {
-            method: 'PATCH',
-            headers: window.API.headers('application/json'),
-            body: JSON.stringify(data)
-          })
-          .then((res) => (!res.ok) ? res.json().then((body) => reject({status: res.status, body: body})) : resolve(res.json()))
-          .catch((err) => reject(err));
-        });
-      },
-      delete(url) {
-        return new Promise((resolve, reject) => {
-          fetch(url, {
-            method: 'DELETE',
-            headers: window.API.headers()
-          })
-          .then((res) => (!res.ok) ? res.json().then((body) => reject({status: res.status, body: body})) : resolve(res.json()))
-          .catch((err) => reject(err));
-        });
-      }
-    };
-
+    this.rest = this.parent.rest;
+    this.api = this.parent.api;
   }
 }

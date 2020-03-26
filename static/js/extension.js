@@ -1,14 +1,5 @@
 (function() {
 
-  const constants = {
-    "workMode": {
-      "noAccount": "noaccount",
-      "wrongToken": "wrongtoken",
-      "noWebhook": "nowebhook",
-      "allReady": "allready"
-    }
-  };
-
   // Used for call "TurnipRaid.stringAutoId" function instead of it's full name.
   var said;
   var saidObj;
@@ -24,6 +15,15 @@
 
       this.content = '';
       this.contents = {};
+
+      this.constants = {
+        "workMode": {
+          "noAccount": "noaccount",
+          "wrongToken": "wrongtoken",
+          "noWebhook": "nowebhook",
+          "allReady": "allready"
+        }
+      };
 
       //  Load script.
       let scriptAddrPrefix = `/extensions/${this.id}/`;
@@ -92,6 +92,7 @@
           //  Initial components.
           this.webhook = new TurnipExtensionWebhook(this, this.turnipRaid);
           this.setting = new TurnipExtensionSetting(this, this.turnipRaid);
+          this.account = new TurnipExtensionAccount(this, this.turnipRaid);
 
           resolve();
         });
@@ -102,10 +103,9 @@
     show() {
       Promise.all(this.promise).then(() => {
         this.view.innerHTML = this.content;
-        this.getConfig().then((config) => {
+        this.api.getConfig().then((config) => {
           if(!this.config) {
             this.config = config;
-            this.setEventFunction();
           }
           else
             this.config = config;
@@ -140,34 +140,13 @@
       }).get();
     }
 
-    getWorkMode() {
-      return new Promise((resolve, reject) => {
-        //  If config have jwt.
-        if(this.config.account.jwt) {
-          this.testToken(this.config.account.jwt).then((result) => {
-            //  On correct token.
-            if(!result)
-              resolve(constants.workMode.wrongToken);
-            else
-              if(!this.config.webhook.length)
-                resolve(constants.workMode.noWebhook);
-              else
-                resolve(constants.workMode.allReady);
-            });
-        }
-        //  If config don't have jwt.
-        else
-          resolve(constants.workMode.noAccount);
-      });
-    }
-
     pageRender() {
       console.log("pageRender() >> ");
       let workMode;
-      this.getConfig()
+      this.api.getConfig()
       .then((config) => {
         this.config = config;
-        return this.getWorkMode();
+        return this.api.getWorkMode();
       })
       .then((wMode) => (workMode = wMode))
       .then(() => this.renderNav(workMode))
@@ -188,25 +167,19 @@
     renderNav(workMode) {
       console.log("renderNav() >> ");
       switch(workMode) {
-        case constants.workMode.noAccount:
+        case this.constants.workMode.noAccount:
           ui.click(`turnip.nav.account`);
           ui.disable(`turnip.nav.webhook`);
           ui.disable(`turnip.nav.setting`);
           ui.enable(`turnip.nav.account`);
           break;
-        case constants.workMode.wrongToken:
+        case this.constants.workMode.wrongToken:
           ui.click(`turnip.nav.account`);
           ui.disable(`turnip.nav.webhook`);
           ui.disable(`turnip.nav.setting`);
           ui.enable(`turnip.nav.account`);
           break;
-        case constants.workMode.noWebhook:
-          ui.click(`turnip.nav.webhook`);
-          ui.enable(`turnip.nav.webhook`);
-          ui.enable(`turnip.nav.setting`);
-          ui.enable(`turnip.nav.account`);
-          break;
-        case constants.workMode.allReady:
+        case this.constants.workMode.allReady:
           ui.click(`turnip.nav.webhook`);
           ui.enable(`turnip.nav.webhook`);
           ui.enable(`turnip.nav.setting`);
@@ -220,74 +193,10 @@
 
     renderContent(workMode) {
       console.log("renderContent() >> ");
-      let list = Object.assign({}, this.renderSchema).renderList;
-      //console.log(`list : ${JSON.stringify(list, null, 2)}`);
-      for(let i in list) {
-        let elem = list[i];
-        //  Show/hide condition.
-        if(!elem.hasOwnProperty(`show`) || elem.show.map(a => a.toLowerCase()).includes(workMode)) {
-          console.log(`${elem.id} : show`);
-          ui.show(elem.id)
-        }
-        else {
-          console.log(`${elem.id} : hide`);
-          ui.hide(elem.id);
-        }
-        //  Value assignment.
-        if(elem.hasOwnProperty(`source`)) {
-          switch(elem.source.type) {
-            case "html":
-              saidObj(elem.id).html(eval(elem.source.val));
-              break;
-            case "val":
-              saidObj(elem.id).val(eval(elem.source.val));
-              break;
-            default:
-              console.error(`Render source type undefined : ${elem.source.type}`);
-              break;
-          }
-        }
-      }
 
       this.webhook.render();
       this.setting.render();
-    }
-
-    generateToken(token) {
-      let url = `/oauth/allow?response_type=code&client_id=local-token&scope=%2Fthings%3Areadwrite&state=asdf&redirect_uri=https%3A%2F%2Fgateway.localhost%2Foauth%2Flocal-token-service&jwt=${token}`;
-      return new Promise((resolve, reject) => {
-        fetch(url, {method: "GET", redirect: "follow"}).then((res) => {
-          console.log(res);
-          return res.text();
-        }).then((data) => {
-          //console.log(data);
-          let doc = new DOMParser().parseFromString(data, "text/html");
-          resolve(doc.getElementById("token").innerHTML);
-        });
-      });
-    }
-
-    testToken(token) {
-      var href = `/things`;
-      var opts = {
-        method: 'GET',
-        headers: {
-          "Authorization" : `Bearer ${token}`,
-          "Accept": "application/json"
-        }
-      };
-      return new Promise((resolve, reject) => {
-        fetch(href, opts).then((res) => {
-          console.log(res);
-          resolve(res.ok);
-        });
-      });
-    }
-
-    setEventFunction() {
-      this.setWebhookPageEventFunction();
-      this.setSettingPageEventFunction();
-      this.setAccountPageEventFunction();
+      this.account.render();
     }
 
     setWebhookPageEventFunction() {
@@ -299,6 +208,7 @@
     }
 
     setAccountPageEventFunction() {
+      /*
       let showGroup = (group) => {
         //  Pre-set web interface for loading.
         let groupList = [`loading`, `create`, `remove`];
@@ -396,46 +306,7 @@
           this.pageRender();
         });
       });
-    }
-
-    getConfig() {
-      return new Promise((resolve, reject) => {
-        window.API.getJson(`/extensions/${this.id}/api/config`).then((resBody) => {
-          //console.log(JSON.stringify(resBody));
-          resolve(resBody);
-        });
-      });
-    }
-
-    saveConfig(config) {
-      return new Promise((resolve, reject) => {
-        (config) ? config : this.config;
-        window.API.postJson(`/extensions/${this.id}/api/config`, config).then((resBody) => {
-          //console.log(JSON.stringify(resBody));
-          resolve(resBody);
-        });
-      });
-    }
-
-    updateAccount(account) {
-      return new Promise((resolve, reject) => {
-        //  Initial value.
-        account = (account) ? account : this.config.account;
-
-        window.API.patchJson(`/extensions/${this.id}/api/config/account`, account)
-        .then((resBody) => {
-          resolve(resBody);
-        });
-      });
-    }
-
-    deleteAccount() {
-      return new Promise((resolve, reject) => {
-        window.API.delete(`/extensions/${this.id}/api/config/account`).then((resBody) => {
-          //console.log(JSON.stringify(resBody));
-          resolve(resBody);
-        });
-      });
+      */
     }
   }
 

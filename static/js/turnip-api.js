@@ -1,6 +1,7 @@
 class TurnipApi {
   constructor(parent) {
     this.parent = parent;
+    this.constants = parent.constants;
     this.apiPrefix = `/extensions/${this.parent.id}/api`;
 
     this.init();
@@ -133,7 +134,7 @@ class TurnipApi {
         console.log(`rest.putConfigHistory()`);
         return this.restCall(`put`, `/config/history`, historyConfig);
       },
-      deleteConfigHistory: (name) => {
+      deleteConfigHistory: () => {
         console.log(`rest.deleteConfigHistory()`);
         return this.restCall(`delete`, `/config/history`);
       },
@@ -160,14 +161,84 @@ class TurnipApi {
         return this.restCall(`get`, `/service${(name) ? `/${name}` : ``}`);
       },
 
+      /***  Operation : getWorkMode()  ***/
+      getWorkMode: (account) => {
+        return new Promise((resolve, reject) => {
+          ((account) ? Promise.resolve(account) : this.api.getConfigAccount())
+          .then((account) => {
+            if(account.jwt) {
+              this.api.testToken(account.jwt).then((result) => {
+                (result) ? resolve(this.constants.workMode.allReady) : resolve(this.constants.workMode.wrongToken);
+              });
+            }
+            else
+              resolve(this.constants.workMode.noAccount);
+          })
+          .catch((err) => reject(err));
+        });
+      },
+
+      /***  Operation : testToken()  ***/
+      testToken: (token) => {
+        var opts = {
+          method: 'GET',
+          headers: {
+            "Authorization" : `Bearer ${token}`,
+            "Accept": "application/json"
+          }
+        };
+        return new Promise((resolve, reject) => {
+          fetch(`/things`, opts).then((res) => {
+            console.log(res);
+            resolve(res.ok);
+          });
+        });
+      },
+
+      /***  Operation : generateToken()  ***/
+      generateToken: (token) => {
+        let url = `/oauth/allow?response_type=code&client_id=local-token&scope=%2Fthings%3Areadwrite&state=asdf&redirect_uri=https%3A%2F%2Fgateway.localhost%2Foauth%2Flocal-token-service&jwt=${token}`;
+        return new Promise((resolve, reject) => {
+          fetch(url, {method: "GET", redirect: "follow"}).then((res) => {
+            console.log(res);
+            return res.text();
+          })
+          .then((data) => {
+            //console.log(data);
+            let doc = new DOMParser().parseFromString(data, "text/html");
+            resolve(doc.getElementById("token").innerHTML);
+          });
+        });
+      },
+
+      /***  Operation : generateToken()  ***/
+      deleteAccount: (account) => {
+        return new Promise((resolve, reject) => {
+          window.API.getAllUserInfo()
+          .then((userList) => {
+            let list = userList.filter((elem) => (elem.name == account.name && elem.email == account.email));
+            if(list.length == 1)
+              return window.API.deleteUser(list[0].id);
+            else if(list.length > 1) {
+              console.error(`Wrong user filter in remove button function : ${JSON.stringify(list, null, 2)}`);
+              resolve(false);
+            }
+            else
+              resolve(false);
+          })
+          .then(() => resolve(true))
+          .catch((err) => {
+            reject(err);
+          });
+        });
+      }
     };
   }
 
   restCall(method, path, body) {
     return new Promise((resolve, reject) => {
-      method = method.toLowerCase();
       let func;
-      switch(method) {
+      switch(method.toLowerCase()) {
         case `get`:
           func = this.rest.getJson;
           break;
