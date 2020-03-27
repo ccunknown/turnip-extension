@@ -134,6 +134,10 @@ class TurnipApi {
         console.log(`rest.putConfigHistory()`);
         return this.restCall(`put`, `/config/history`, historyConfig);
       },
+      patchConfigHistory: (historyConfig) => {
+        console.log(`rest.patchConfigHistory()`);
+        return this.restCall(`patch`, `/config/history`, historyConfig);
+      },
       deleteConfigHistory: () => {
         console.log(`rest.deleteConfigHistory()`);
         return this.restCall(`delete`, `/config/history`);
@@ -214,7 +218,11 @@ class TurnipApi {
       /***  Operation : generateToken()  ***/
       deleteAccount: (account) => {
         return new Promise((resolve, reject) => {
-          window.API.getAllUserInfo()
+          ((account) ? Promise.resolve(account) : this.api.getConfigAccount())
+          .then((configAccount) => {
+            account = configAccount;
+            return window.API.getAllUserInfo();
+          })
           .then((userList) => {
             let list = userList.filter((elem) => (elem.name == account.name && elem.email == account.email));
             if(list.length == 1)

@@ -22,11 +22,11 @@
           "wrongToken": "wrongtoken",
           "noWebhook": "nowebhook",
           "allReady": "allready"
-        }
+        },
+        "scriptAddrPrefix": `/extensions/${this.id}/`
       };
 
       //  Load script.
-      let scriptAddrPrefix = `/extensions/${this.id}/`;
       let scriptArr = [
         "static/js/jquery.min.js",
         "static/js/popper.min.js",
@@ -35,11 +35,17 @@
         "static/ace-builds/src-min-noconflict/ace.js",
         "static/ace-builds/src-min-noconflict/ext-language_tools.js",
         "static/js/mode-text_mustache.js",
-        "static/js/mode-json_mustache.js"
+        "static/js/mode-json_mustache.js",
+        
+        "static/js/turnip-api.js",
+        "static/js/turnipRaid.js",
+        "static/js/webhook.js",
+        "static/js/setting.js",
+        "static/js/account.js",
       ];
 
-      for(let i in scriptArr)
-        this.loadScriptSync(`${scriptAddrPrefix}${scriptArr[i]}`);
+      //for(let i in scriptArr)
+      //  this.loadScriptSync(`${scriptAddrPrefix}${scriptArr[i]}`);
 
       //  Load resource.
       let prom = Promise.all([
@@ -48,6 +54,7 @@
         this.loadResource(`/extensions/${this.id}/static/views/setting.html`),
         this.loadResource(`/extensions/${this.id}/static/views/account.html`),
         this.loadResource(`/extensions/${this.id}/static/json/render.json`, `json`),
+        this.loadScript(scriptArr)
         ])
       .then(([
         mainPage,
@@ -115,12 +122,44 @@
       });
     }
 
+    /*
     loadScriptSync (src) {
       var s = document.createElement('script');
       s.src = src;
       s.type = "text/javascript";
       s.async = false;
       document.getElementsByTagName('head')[0].appendChild(s);
+    }
+    */
+
+    loadScript(scriptList) {
+      return new Promise(async(resolve, reject) => {
+        for(let i in scriptList)
+          await this.loadScriptSync(`${this.constants.scriptAddrPrefix}${scriptList[i]}`);
+        resolve();
+      });
+    }
+
+    loadScriptSync(src) {
+      return new Promise((resolve, reject) => {
+        var s = document.createElement('script');
+        s.src = src;
+        s.type = "text/javascript";
+        s.async = false;
+
+        s.addEventListener("load", () => {
+          console.log(`loadScriptSync("${src}"") : finish`);
+          resolve();
+        });
+
+        s.addEventListener("error", (err) => {
+          console.log(`loadScriptSync("${src}"") : error`);
+          reject(err);
+        });
+
+        console.log(`loadScriptSync("${src}"") : start`);
+        document.getElementsByTagName('head')[0].appendChild(s);
+      });
     }
 
     loadResource(url, type) {
@@ -140,18 +179,21 @@
       }).get();
     }
 
-    pageRender() {
+    pageRender(config) {
       console.log("pageRender() >> ");
-      let workMode;
-      this.api.getConfig()
-      .then((config) => {
-        this.config = config;
-        return this.api.getWorkMode();
-      })
-      .then((wMode) => (workMode = wMode))
-      .then(() => this.renderNav(workMode))
-      .then(() => this.renderContent(workMode))
-      .then(() => this.turnipRaid.updateIdList(this.idRegex));
+
+      return new Promise((resolve, reject) => {
+        ((config) ? Promise.resolve(config) : this.api.getConfig())
+        .then((conf) => (config = conf))
+        .then(() => this.renderNav(config))
+        .then(() => this.renderContent(config))
+        .then(() => this.turnipRaid.updateIdList(this.idRegex))
+        .then(() => resolve())
+        .catch((err) => {
+          alert(err);
+          reject(err);
+        });
+      });
     }
 
     webUi() {
@@ -164,149 +206,64 @@
       }
     }
 
-    renderNav(workMode) {
+    renderNav(param) {
+      //  'param' can be {workmode} or {config}.
       console.log("renderNav() >> ");
-      switch(workMode) {
-        case this.constants.workMode.noAccount:
-          ui.click(`turnip.nav.account`);
-          ui.disable(`turnip.nav.webhook`);
-          ui.disable(`turnip.nav.setting`);
-          ui.enable(`turnip.nav.account`);
-          break;
-        case this.constants.workMode.wrongToken:
-          ui.click(`turnip.nav.account`);
-          ui.disable(`turnip.nav.webhook`);
-          ui.disable(`turnip.nav.setting`);
-          ui.enable(`turnip.nav.account`);
-          break;
-        case this.constants.workMode.allReady:
-          ui.click(`turnip.nav.webhook`);
-          ui.enable(`turnip.nav.webhook`);
-          ui.enable(`turnip.nav.setting`);
-          ui.enable(`turnip.nav.account`);
-          break;
-        default :
-          console.error("renderNav() >> error : workMode invalid : "+workMode);
-          break;
-      }
+      return new Promise((resolve, reject) => {
+        ((param) ? Promise.resolve(param) : this.api.getWorkMode())
+        .then((input) => (input.account) ? this.api.getWorkMode(input.account) : input)
+        .then((workmode) => {
+          console.log(`renderNav() : workmode : ${workmode}`);
+          switch(workmode) {
+            case this.constants.workMode.noAccount:
+              ui.click(`turnip.nav.account`);
+              ui.disable(`turnip.nav.webhook`);
+              ui.disable(`turnip.nav.setting`);
+              ui.enable(`turnip.nav.account`);
+              break;
+            case this.constants.workMode.wrongToken:
+              ui.click(`turnip.nav.account`);
+              ui.disable(`turnip.nav.webhook`);
+              ui.disable(`turnip.nav.setting`);
+              ui.enable(`turnip.nav.account`);
+              break;
+            case this.constants.workMode.allReady:
+              ui.click(`turnip.nav.webhook`);
+              ui.enable(`turnip.nav.webhook`);
+              ui.enable(`turnip.nav.setting`);
+              ui.enable(`turnip.nav.account`);
+              break;
+            default :
+              console.error("renderNav() >> error : workMode invalid : "+workmode);
+              break;
+          }
+          resolve(workmode);
+        })
+        .catch((err) => {
+          alert(err);
+          reject(err);
+        });
+      });
     }
 
-    renderContent(workMode) {
+    renderContent(config) {
       console.log("renderContent() >> ");
 
-      this.webhook.render();
-      this.setting.render();
-      this.account.render();
-    }
-
-    setWebhookPageEventFunction() {
-
-    }
-
-    setSettingPageEventFunction() {
-
-    }
-
-    setAccountPageEventFunction() {
-      /*
-      let showGroup = (group) => {
-        //  Pre-set web interface for loading.
-        let groupList = [`loading`, `create`, `remove`];
-        for(let i in groupList)
-          saidObj(`turnip.content.account.${groupList[i]}`).addClass("hide");
-        saidObj(`turnip.content.account.${group}`).removeClass("hide");
-      };
-
-      //  Add event listener of create button.
-      saidObj(`turnip.content.account.create.button.create`).click(() => {
-        console.log(`Event [Click] : turnip.content.account.create.button.create`);
-        showGroup(`loading`);
-
-        //  Create new user using information from form.
-        let email = $(`#${said(`turnip.content.account.create.email`)}`).val();
-        let name = $(`#${said(`turnip.content.account.create.name`)}`).val();
-        let password = $(`#${said(`turnip.content.account.create.password`)}`).val();
-
-        window.API.addUser(name, email, password)
-        .then((res) => {
-          console.log(JSON.stringify(res));
-          //  Save new config.
-          this.config.account.email = email;
-          this.config.account.name = name;
-          this.config.account.password = password;
-          return this.generateToken(res.jwt);
+      return new Promise((resolve, reject) => {
+        ((config) ? Promise.resolve(config) : this.api.getConfig())
+        .then((conf) => {
+          config = conf;
+          return config;
         })
-        .then((token) => (!token) ? this.config: this.updateAccount({
-          "name": saidObj(`turnip.content.account.create.name`).val(),
-          "email": saidObj(`turnip.content.account.create.email`).val(),
-          "password": saidObj(`turnip.content.account.create.password`).val(),
-          "jwt": (this.config.account.jwt = token)
-        }))
-        .then((config) => {
-          this.config = config;
-          this.pageRender();
-        })
-        .catch((e) => {
-          console.error(e);
-          this.config = this.getConfig();
-          this.pageRender();
+        .then(() => this.webhook.render(config))
+        .then(() => this.setting.render(config))
+        .then(() => this.account.render(config))
+        .then(() => resolve(config))
+        .catch((err) => {
+          alert(err);
+          reject(err);
         });
       });
-
-      //  Add event listener of update button.
-      saidObj(`turnip.content.account.remove.button.update`).click(() => {
-        console.log(`Event [Click] : turnip.content.account.remove.button.update`);
-        showGroup(`loading`);
-        //console.log(`jwt remove html : ${saidObj(`turnip.content.account.remove.jwt`).html()}`);
-        //console.log(`jwt remove val : ${saidObj(`turnip.content.account.remove.jwt`).val()}`);
-        this.updateAccount({
-          "name": saidObj(`turnip.content.account.remove.name`).val(),
-          "email": saidObj(`turnip.content.account.remove.email`).val(),
-          "jwt": saidObj(`turnip.content.account.remove.jwt`).val()
-        })
-        .then((config) => {
-          console.log(JSON.stringify(config, null, 2));
-          this.config = config;
-          this.pageRender();
-        })
-        .catch((e) => {
-          console.error(e);
-          this.config = this.getConfig();
-          this.pageRender();
-        });
-      });
-
-      //  Add event listener of remove button.
-      saidObj(`turnip.content.account.remove.button.remove`).click(() => {
-        console.log(`Event [Click] : turnip.content.account.remove.button.remove`);
-        showGroup(`loading`);
-        window.API.getAllUserInfo()
-        .then((userList) => {
-          let list = userList.filter((elem) => {
-            return elem.name == saidObj(`turnip.content.account.remove.name`).val()
-              && elem.email == saidObj(`turnip.content.account.remove.email`).val();
-          });
-          if(list.length == 1)
-            return window.API.deleteUser(list[0].id);
-          else if(list.length > 1)
-            return console.error(`Wrong user filter in remove button function : ${JSON.stringify(list, null, 2)}`);
-          else
-            return null;
-        })
-        .then(() => this.deleteAccount())
-        .then(() => this.getConfig())
-        .then((config) => {
-          console.log(JSON.stringify(config, null, 2));
-          this.config = config;
-          this.pageRender();
-        })
-        .catch((e) => {
-          console.error(e);
-          this.config = this.getConfig();
-          this.pageRender();
-        });
-      });
-      */
     }
   }
 

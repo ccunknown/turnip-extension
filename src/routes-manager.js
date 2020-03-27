@@ -78,7 +78,7 @@ class RoutesManager extends APIHandler{
               this.configManager.getConfig()
               .then((serverConfig) => Object.assign(serverConfig, {"account": Object.assign(serverConfig.account, req.body)}))
               .then((config) => this.configManager.saveConfig(config))
-              .then((conf) => resolve(this.makeJsonRespond(JSON.stringify(conf))))
+              .then((config) => resolve(this.makeJsonRespond(JSON.stringify(config.account))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
           },
@@ -203,6 +203,15 @@ class RoutesManager extends APIHandler{
             return new Promise(async (resolve, reject) => {
               this.configManager.getConfig()
               .then((config) => Object.assign(config, {history: req.body}))
+              .then((config) => this.configManager.saveConfig(config))
+              .then((config) => resolve(this.makeJsonRespond(JSON.stringify(config.history))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          },
+          "PATCH": (req) => {
+            return new Promise(async (resolve, reject) => {
+              this.configManager.getConfig()
+              .then((config) => Object.assign(config, {"history": Object.assign(config.history, req.body)}))
               .then((config) => this.configManager.saveConfig(config))
               .then((config) => resolve(this.makeJsonRespond(JSON.stringify(config.history))))
               .catch((err) => resolve(this.catchErrorRespond(err)));

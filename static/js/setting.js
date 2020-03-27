@@ -15,13 +15,14 @@ class TurnipExtensionSetting {
     this.config.history = null;
 
     this.initRestApiTool();
-    this.initButtonFunction();
+    //this.initButtonFunction();
     this.initDisplay();
   }
 
   render() {
     console.log(`TurnipExtensionSetting: render() >> `);
     this.display.sync();
+    this.initButtonFunction();
   }
 
   renderService() {
@@ -71,48 +72,82 @@ class TurnipExtensionSetting {
 
     saidObj(`turnip.content.setting.section-01.factory-reset.button`).click(() => {
       console.log(`Event [Click] : turnip.content.setting.section-01.factory-reset.button`);
-
+      return new Promise((resolve, reject) => {
+        this.display.loading();
+        let workMode;
+        this.api.deleteAccount()
+        .then(() => this.api.deleteConfig())
+        .then((config) => this.parent.pageRender(config))
+        .then(() => resolve())
+        .catch((err) => {
+          alert(err);
+          this.display.loaded();
+          reject(err);
+        });
+      });
     });
 
     saidObj(`turnip.content.setting.section-01.account-reset.button`).click(() => {
       console.log(`Event [Click] : turnip.content.setting.section-01.account-reset.button`);
-
+      return new Promise((resolve, reject) => {
+        this.display.loading();
+        let workMode;
+        this.api.deleteAccount()
+        .then(() => this.api.deleteConfigAccount())
+        .then((account) => this.parent.pageRender())
+        .then(() => resolve())
+        .catch((err) => {
+          alert(err);
+          this.display.loaded();
+          reject(err);
+        });
+      });
     });
 
     saidObj(`turnip.content.setting.section-01.webhook-reset.button`).click(() => {
       console.log(`Event [Click] : turnip.content.setting.section-01.webhook-reset.button`);
-      this.display.loading();
-      this.api.deleteConfigWebhook()
-      .then(() => {
-        this.display.sync();
-      })
-      .catch((err) => {
-        console.error(err);
+      return new Promise((resolve, reject) => {
+        this.display.loading();
+        this.api.deleteConfigWebhook()
+        .then((account) => this.parent.pageRender())
+        .then(() => resolve())
+        .catch((err) => {
+          alert(err);
+          this.display.loaded();
+          reject(err);
+        });
       });
     });
 
     saidObj(`turnip.content.setting.section-01.history-reset.button`).click(() => {
       console.log(`Event [Click] : turnip.content.setting.section-01.history-reset.button`);
-      this.display.loading();
-      this.api.deleteHistory()
-      .then(() => {
-        this.display.sync();
-      })
-      .catch((err) => {
-        console.error(err);
+      return new Promise((resolve, reject) => {
+        this.display.loading();
+        this.api.deleteHistory()
+        .then(() => this.display.sync())
+        .then(() => this.display.loaded())
+        .then(() => resolve())
+        .catch((err) => {
+          alert(err);
+          this.display.loaded();
+          reject(err);
+        });
       });
     });
 
     saidObj(`turnip.content.setting.section-01.history-limit.set.button`).click(() => {
       console.log(`Event [Click] : turnip.content.setting.section-01.history-limit.set.button`);
-      this.config.history.limit = saidObj(`turnip.content.setting.section-01.history-limit.input`);
-      this.display.loading();
-      this.api.putConfigHistory(this.config.history)
-      .then(() => {
-        this.display.sync();
-      })
-      .catch((err) => {
-        console.error(err);
+      return new Promise((resolve, reject) => {
+        this.display.loading();
+        this.api.patchConfigHistory({"limit": parseInt(saidObj(`turnip.content.setting.section-01.history-limit.input`).val())})
+        .then(() => this.display.sync())
+        .then(() => this.display.loaded())
+        .then(() => resolve())
+        .catch((err) => {
+          alert(err);
+          this.display.loaded();
+          reject(err);
+        });
       });
     });
   }
