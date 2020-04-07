@@ -157,6 +157,9 @@ class webhookService extends EventEmitter {
       }
 
       let optionStr = mustache.render(JSON.stringify(option), data);
+      //console.log(`data : ${JSON.stringify(data, null, 2)}`);
+      //console.log(`option : ${JSON.stringify(option, null, 2)}`);
+      //console.log(`optionStr : ${JSON.stringify(optionStr, null, 2)}`);
       let req = JSON.parse(optionStr);
       
       let timestamp = {};
@@ -174,6 +177,7 @@ class webhookService extends EventEmitter {
           request: req,
           respond: res
         };
+        //console.log(`record req : ${JSON.stringify(record.request, null, 2)}`);
         this.historyService.pushRecord(webhook.name, record);
         //console.log(JSON.stringify(result));
         //console.log(res);

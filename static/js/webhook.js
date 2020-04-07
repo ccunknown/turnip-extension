@@ -58,21 +58,21 @@ class TurnipExtensionWebhook {
     var staticWordCompleter = {
       getCompletions: function(editor, session, pos, prefix, callback) {
         var wordList = [
-          "{{timestamp.unix}}",
-          "{{timestamp.isoString}}",
-          "{{device.id}}",
-          "{{device.title}}",
-          "{{device.type}}",
-          "{{device.description}}",
-          "{{device.href}}",
-          "{{device.connected}}",
-          "{{property.name}}",
-          "{{property.origin}}",
-          "{{property.type}}",
-          "{{property.value}}",
-          "{{property.isString}}",
-          "{{property.isNumber}}",
-          "{{property.isBoolean}}"
+          "{{{timestamp.unix}}}",
+          "{{{timestamp.isoString}}}",
+          "{{{device.id}}}",
+          "{{{device.title}}}",
+          "{{{device.type}}}",
+          "{{{device.description}}}",
+          "{{{device.href}}}",
+          "{{{device.connected}}}",
+          "{{{property.name}}}",
+          "{{{property.origin}}}",
+          "{{{property.type}}}",
+          "{{{property.value}}}",
+          "{{{property.isString}}}",
+          "{{{property.isNumber}}}",
+          "{{{property.isBoolean}}}"
         ];
 
         let line = session.getLine(pos.row);
@@ -244,6 +244,14 @@ class TurnipExtensionWebhook {
     this.onHeaderChange();
   }
 
+  transformToHtmlString(str) {
+    let result = str;
+    result = result.replace(/</g, `&lt;`);
+    result = result.replace(/>/g, `&gt;`);
+
+    return result;
+  }
+
   renderBase(webhookList) {
     console.log(`renderBase() >> `);
     let saidObj = this.saidObj;
@@ -325,14 +333,18 @@ class TurnipExtensionWebhook {
           this.turnipRaid.updateIdList(this.parent.idRegex);
           console.log(this.turnipRaid.idList);
           
-          saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-meta`).html(JSON.stringify(elem));
+          let metaElem = this.transformToHtmlString(JSON.stringify(elem));
+          saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-meta`).html(metaElem);
           saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-timestamp-req`).html(elem.timestamp.req.isoString);
           saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-timestamp-timediff`).html(`${elem.timestamp.res.unix - elem.timestamp.req.unix} ms`);
           saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-req.method`).html(elem.request.method.toUpperCase());
           saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-req.method`).addClass(`turnip-badge-http-method-${elem.request.method.toLowerCase()}`);
           saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-req.url`).html(elem.request.url);
+
           saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-req-show`).click(() => {
-            let data = saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-meta`).html();
+            console.log(`Event [Click] : turnip.content.webhook.slider.section-01.history.item-${i}-req-show`);
+            //let data = saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-meta`).html();
+            let data = JSON.stringify(elem);
             let json = JSON.parse(data);
             let result = json.request;
             result.timestamp = json.timestamp.req;
@@ -350,12 +362,14 @@ class TurnipExtensionWebhook {
           console.log(`code : ${elem.respond.code}`);
 
           if(elem.respond.hasOwnProperty(`body`))
-            saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-res.body`).html(elem.respond.body);
+            saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-res.body`).html(this.transformToHtmlString(elem.respond.body));
           else
             saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-res.body`).html(``);
 
           saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-res-show`).click(() => {
-            let data = saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-meta`).html();
+            console.log(`Event [Click] : turnip.content.webhook.slider.section-01.history.item-${i}-res-show`);
+            //let data = saidObj(`turnip.content.webhook.slider.section-01.history.item-${i}-meta`).html();
+            let data = JSON.stringify(elem);
             let json = JSON.parse(data);
             let result = json.respond;
             result.timestamp = json.timestamp.res;

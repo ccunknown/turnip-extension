@@ -11,11 +11,25 @@ ace.define('ace/mode/text_mustache_highlight_rules', ["require", "exports", "mod
       "start" : [
         {
           token: "string.regex",
-          regex: "{{",
+          regex: "{{{",
           next: "mustache"
+        }, {
+          token: "string.regex",
+          regex: "{{",
+          next: "mustache-html-escape"
         }
       ],
       "mustache": [
+        {
+          token : "string.regex",
+          regex : "}}}",
+          next  : "start"
+        },
+        {
+          defaultToken: "string.regex"
+        }
+      ],
+      "mustache-html-escape": [
         {
           token : "string.regex",
           regex : "}}",

@@ -143,6 +143,8 @@ class wsocketService extends EventEmitter {
           }
         };
         this.things.push(schema);
+        //console.log(`schema build id : ${schema.id}`);
+        //console.log(`schema build title : ${schema.meta.title}`);
       });
       //console.log(`this.things : ${JSON.stringify(this.things)}`);
       resolve();
