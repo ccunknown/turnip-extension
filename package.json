@@ -53,6 +53,7 @@
     "jsonschema": "^1.2.5",
     "mustache": "^4.0.1",
     "node-fetch": "^2.6.0",
+    "request": "^2.88.2",
     "websocket": "^1.0.31"
   }
 }
