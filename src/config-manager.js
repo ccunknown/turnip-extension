@@ -1,27 +1,38 @@
 'use strict';
 
 const Validator = require('jsonschema').Validator;
+const EventEmitter = require('events').EventEmitter;
 const Database = require('./lib/my-database');
 const {Defaults, Errors} = require('../constants/constants.js');
+
+const util = require('util');
 
 class ConfigManager {
   constructor(extension) {
     this.addonManager = extension.addonManager;
     this.manifest = extension.manifest;
     this.validator = new Validator();
+    this.event = new EventEmitter();
   }
 
   getConfig() {
-    console.log("getConfig() >> ");
+    console.log(`ConfigManager: getConfig() >> `);
     return new Promise((resolve, reject) => {
       try {
         this.getConfigFromDatabase().then((config) => {
           if(this.isEmptyObject(config))
-            resolve(this.initialConfig());
+            config = this.initialConfig();
+          let validateInfo = this.validate(config);
+          if(validateInfo.errors.length) {
+            console.warn(`Invalid config!!!`);
+            console.warn(JSON.stringify(validateInfo.errors, null, 2));
+          }
           else
-            resolve(config);
+            console.log(`Valid config.`);
+          resolve(config);
         });
       } catch(err) {
+        console.log(`getConfig error.`);
         err = (err) ? err : new Errors.ErrorObjectNotReturn();
         reject(err);
       }
@@ -41,19 +52,6 @@ class ConfigManager {
     });
   }
 
-  saveConfig(config) {
-    console.log("saveConfig() >> ");
-    return new Promise((resolve, reject) => {
-      this.saveConfigToDatabase(config)
-      .then((conf) => resolve(conf))
-      .catch((err) => {
-        //console.log(`saveConfig() : found error : ${err}`);
-        err = (err) ? err : new Errors.ErrorObjectNotReturn();
-        reject(err);
-      });
-    });
-  }
-
   saveConfigWebhook(webhook) {
     console.log("saveConfigWebhook() >> ");
     return new Promise((resolve, reject) => {
@@ -66,6 +64,94 @@ class ConfigManager {
         err = (err) ? err : new Errors.ErrorObjectNotReturn();
         reject(err);
       });
+    });
+  }
+
+  saveConfig(config) {
+    console.log(`ConfigManager: saveConfig() >> `);
+    return new Promise((resolve, reject) => {
+      this.saveConfigToDatabase(config)
+      .then((conf) => resolve(conf))
+      .catch((err) => {
+        //console.log(`saveConfig() : found error : ${err}`);
+        err = (err) ? err : new Errors.ErrorObjectNotReturn();
+        reject(err);
+      });
+    });
+  }
+
+  updateConfig(update, path) {
+    console.log(`ConfigManager: updateConfig() >> `);
+    return new Promise((resolve, reject) => {
+      this.getConfig()
+      .then((config) => {
+        let res = this.updateJsonElement(config, path, update);
+        if(res)
+          return JSON.parse(JSON.stringify(config));
+        else
+          throw(new Errors.PathNotFound(path));
+      })
+      .then((conf) => this.saveConfigToDatabase(conf))
+      .then(() => resolve(update))
+      .catch((err) => {
+        console.log(`updateConfig error.`);
+        err = (err) ? err : new Errors.ErrorObjectNotReturn();
+        reject(err);
+      });
+    });
+  }
+
+  addToConfig(newElem, path) {
+    console.log(`ConfigManager: addToConfig() >> `);
+    return new Promise((resolve, reject) => {
+      this.getConfig()
+      .then((config) => {
+        let err = this.addJsonElement(config, path, newElem)
+        if(err)
+          throw(err);
+        else
+          return config;
+      })
+      .then((conf) => this.saveConfigToDatabase(conf))
+      .then(() => resolve(newElem))
+      .catch((err) => {
+        console.log(`add config element error.`);
+        err = (err) ? err : new Errors.ErrorObjectNotReturn();
+        reject(err);
+      });
+    });
+  }
+
+  deleteConfig(path) {
+    console.log(`ConfigManager: deleteConfig() >> `);
+    return new Promise((resolve, reject) => {
+      if(path) {
+        this.getConfig()
+        .then((config) => {
+          let err = this.deleteJsonElement(config, path)
+          console.log(`config: ${JSON.stringify(config, null ,2)}`);
+          if(err)
+            throw(err);
+          else
+            return config
+        })
+        .then((conf) => this.saveConfigToDatabase(conf))
+        .then(() => resolve({}))
+        .catch((err) => {
+          console.log(`add config element error.`);
+          err = (err) ? err : new Errors.ErrorObjectNotReturn();
+          reject(err);
+        });
+      }
+      else {
+        this.deleteConfigFromDatabase()
+        .then(() => this.getConfig())
+        .then((conf) => resolve(conf))
+        .catch((err) => {
+          err = (err) ? err : new Errors.ErrorObjectNotReturn();
+          reject(err);
+        });
+      }
     });
   }
 
@@ -112,7 +198,7 @@ class ConfigManager {
             resolve(validateInfo.instance);
           });
         }
-        else{
+        else {
           console.error(`{Database} not found!!!`);
           reject(new Errors.DatabaseObjectUndefined(Database));
         }
@@ -120,9 +206,27 @@ class ConfigManager {
     });
   }
 
+  deleteConfigFromDatabase() {
+    console.log("deleteConfigFromDatabase() >> ");
+    return new Promise((resolve, reject) => {
+      if(Database) {
+        this.db = new Database(this.manifest.name);
+        this.db.open()
+        .then(() => {
+          this.db.saveConfig({});
+          this.db.close();
+          resolve({});
+        });
+      }
+      else {
+        console.error(`{Database} not found!!!`);
+        reject(new Errors.DatabaseObjectUndefined(Database));
+      }
+    });
+  }
+
   initialConfig() {
-    //console.log("Defaults : "+JSON.stringify(Defaults, null, 2));
-    var config = Object.assign({}, Defaults.config);
+    let config = JSON.parse(JSON.stringify(Defaults.config));
     return config;
   }
 
@@ -131,11 +235,11 @@ class ConfigManager {
   }
 
   getDefaults() {
-    return Object.assign({}, Defaults);
+    return JSON.parse(JSON.stringify(Defaults));
   }
 
   getSchema() {
-    return Object.assign({}, Defaults.schema);
+    return JSON.parse(JSON.stringify(Defaults.schema));
   }
 
   validate(data, schema) {
@@ -146,6 +250,66 @@ class ConfigManager {
   validateAccount(data) {
     let schema = (schema) ? schema : this.getSchema().account;
     return this.validator.validate(data, schema);
+  }
+
+  updateJsonElement(src, path, data) {
+    if(path && path.length) {
+      let indexArr = path.split(`.`);
+      let index = indexArr.shift();
+      return (src.hasOwnProperty(index)) ? this.updateJsonElement(src[index], indexArr.join(`.`), data) : false;
+    }
+    else {
+      for(let i in data)
+        src[i] = data[i];
+      return true;
+    }
+  }
+
+  addJsonElement(src, path, data) {
+    let indexArr = path.split(`.`);
+    let arrLen = indexArr.length;
+    let index = indexArr.shift();
+
+    if(arrLen == 0)
+      return new Errors.PathInvalid(path);
+    else if(arrLen == 1) {
+      if(src.hasOwnProperty(index))
+        return new Errors.FoundDuplicate(index);
+      else {
+        src[index] = {};
+        for(let i in data)
+          src[index][i] = data[i];
+        return ;
+      }
+    }
+    else {
+      if(src.hasOwnProperty(index))
+        return this.addJsonElement(src[index], indexArr.join(`.`), data);
+      else
+        return new Errors.PathInvalid(path);
+    }
+  }
+
+  deleteJsonElement(src, path) {
+    let indexArr = path.split(`.`);
+    let arrLen = indexArr.length;
+    let index = indexArr.shift();
+
+    if(arrLen == 0)
+      return new Errors.PathInvalid(path);
+    else if(arrLen == 1) {
+      if(src.hasOwnProperty(index))
+        delete src[index];
+      else {
+        return new Errors.ObjectNotFound(index);
+      }
+    }
+    else {
+      if(src.hasOwnProperty(index))
+        return this.deleteJsonElement(src[index], indexArr.join(`.`));
+      else
+        return new Errors.PathInvalid(path);
+    }
   }
 }
 

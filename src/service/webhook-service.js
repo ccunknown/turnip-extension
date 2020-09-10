@@ -108,12 +108,15 @@ class webhookService extends EventEmitter {
   }
 
   dataImprove(data) {
+    let propMeta = (data.property.name == 'connected') ? {} :  data.meta.properties[data.property.origin];
     let type = (data.property.name == 'connected') ? `string` :  data.meta.properties[data.property.origin].type;
+
     let result = {
       timestamp: {
         unix: Date.now(),
         isoString: new Date().toISOString()
       },
+      meta: data.meta,
       device: {
         id: data.id,
         title: data.meta.title,
@@ -123,8 +126,11 @@ class webhookService extends EventEmitter {
         connected: data.connected
       },
       property: {
-        name: data.property.name,
-        origin: data.property.origin,
+        id: data.property.name,
+        originId: data.property.origin,
+        title: propMeta.title,
+        unit: propMeta.unit,
+        readOnly: propMeta.readOnly,
         type: type,
         value: data.property.value,
         isString: type.toLowerCase() == `string`,
@@ -137,7 +143,7 @@ class webhookService extends EventEmitter {
 
   onThingUpdate(data) {
     console.log(`webhookService: onThingUpdate() >> `);
-    //console.log(JSON.stringify(data));
+    // console.log(JSON.stringify(data, null, 2));
     this.webhookList.map((webhook) => {
       if(!webhook.enable)
         return ;
@@ -157,9 +163,9 @@ class webhookService extends EventEmitter {
       }
 
       let optionStr = mustache.render(JSON.stringify(option), data);
-      //console.log(`data : ${JSON.stringify(data, null, 2)}`);
-      //console.log(`option : ${JSON.stringify(option, null, 2)}`);
-      //console.log(`optionStr : ${JSON.stringify(optionStr, null, 2)}`);
+      // console.log(`data : ${JSON.stringify(data, null, 2)}`);
+      // console.log(`option : ${JSON.stringify(option, null, 2)}`);
+      // console.log(`optionStr : ${JSON.stringify(optionStr, null, 2)}`);
       let req = JSON.parse(optionStr);
       
       let timestamp = {};
