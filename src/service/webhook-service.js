@@ -142,7 +142,7 @@ class webhookService extends EventEmitter {
   }
 
   onThingUpdate(data) {
-    console.log(`webhookService: onThingUpdate() >> `);
+    // console.log(`webhookService: onThingUpdate() >> `);
     // console.log(JSON.stringify(data, null, 2));
     this.webhookList.map((webhook) => {
       if(!webhook.enable)

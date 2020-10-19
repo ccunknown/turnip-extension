@@ -39,7 +39,7 @@ class historyService extends EventEmitter {
   }
 
   pushRecord(webhookName, record) {
-    console.log(`historyService: pushRecord(${webhookName}, [record]) >> `);
+    // console.log(`historyService: pushRecord(${webhookName}, [record]) >> `);
     if(!this.history.hasOwnProperty(webhookName)) {
       this.history[webhookName] = [];
     }

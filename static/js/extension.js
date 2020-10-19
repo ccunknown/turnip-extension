@@ -36,7 +36,7 @@
         "static/ace-builds/src-min-noconflict/ext-language_tools.js",
         "static/js/mode-text_mustache.js",
         "static/js/mode-json_mustache.js",
-        
+
         "static/js/turnip-api.js",
         "static/js/turnipRaid.js",
         "static/js/webhook.js",
