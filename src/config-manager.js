@@ -15,24 +15,80 @@ class ConfigManager {
     this.event = new EventEmitter();
   }
 
-  getConfig() {
-    console.log(`ConfigManager: getConfig() >> `);
+  // getConfig() {
+  //   console.log(`ConfigManager: getConfig() >> `);
+  //   return new Promise((resolve, reject) => {
+  //     try {
+  //       this.getConfigFromDatabase().then((config) => {
+  //         if(this.isEmptyObject(config))
+  //           config = this.initialConfig();
+  //         let validateInfo = this.validate(config);
+  //         if(validateInfo.errors.length) {
+  //           console.warn(`Invalid config!!!`);
+  //           console.warn(JSON.stringify(validateInfo.errors, null, 2));
+  //         }
+  //         else
+  //           console.log(`Valid config.`);
+  //         resolve(config);
+  //       });
+  //     } catch(err) {
+  //       console.log(`getConfig error.`);
+  //       err = (err) ? err : new Errors.ErrorObjectNotReturn();
+  //       reject(err);
+  //     }
+  //   });
+  // }
+
+  getConfig(path) {
+    console.log(`[${this.constructor.name}]`, `getConfig() >> `);
+    return new Promise((resolve, reject) => {
+      Promise.resolve()
+      .then(() => this.getConfigFromDatabase())
+      .then((config) => {
+        if(this.isEmptyObject(config))
+          config = this.initialConfig();
+        let validateInfo = this.validate(config);
+        if(validateInfo.errors.length) {
+          console.warn(`[${this.constructor.name}]`, `Invalid config!!!`);
+          console.warn(`[${this.constructor.name}]`, JSON.stringify(validateInfo.errors, null, 2));
+        }
+        else
+          console.log(`[${this.constructor.name}]`, `Valid config.`);
+        return path ? this.getConfigPath(config, path) : Promise.resolve(config);
+        // resolve(config);
+      })
+      .then((config) => resolve(config))
+      .catch((err) => {
+        console.log(`[${this.constructor.name}]`, `getConfig error.`);
+        reject(err);
+      });
+    });
+  }
+
+  getConfigPath(config, path, pathArr) {
+    console.log(`[${this.constructor.name}]`, `getConfigPath() >> `);
+    pathArr = pathArr || path.split(`.`);
+    if(pathArr.length) {
+      let curr = pathArr.shift();
+      if(!config.hasOwnProperty(curr))
+        return new Error(`Path "${path}" not found in config`);
+      else if(pathArr.length)
+        return this.getConfigPath(config[curr], path, pathArr);
+      else
+        return config[curr];
+    }
+    else {
+      return new Error(`Path "${path}" not found in config`);
+    }
+  }
+
+  getConfigJob() {
+    console.log(`[${this.constructor.name}]`, "getConfigJob() >> ");
     return new Promise((resolve, reject) => {
       try {
-        this.getConfigFromDatabase().then((config) => {
-          if(this.isEmptyObject(config))
-            config = this.initialConfig();
-          let validateInfo = this.validate(config);
-          if(validateInfo.errors.length) {
-            console.warn(`Invalid config!!!`);
-            console.warn(JSON.stringify(validateInfo.errors, null, 2));
-          }
-          else
-            console.log(`Valid config.`);
-          resolve(config);
-        });
+        this.getConfig()
+        .then((conf) => resolve(conf.job))
       } catch(err) {
-        console.log(`getConfig error.`);
         err = (err) ? err : new Errors.ErrorObjectNotReturn();
         reject(err);
       }
@@ -40,7 +96,7 @@ class ConfigManager {
   }
 
   getConfigWebhook() {
-    console.log("getConfigWebhook() >> ");
+    console.log(`[${this.constructor.name}]`, "getConfigWebhook() >> ");
     return new Promise((resolve, reject) => {
       try {
         this.getConfig()
@@ -53,7 +109,7 @@ class ConfigManager {
   }
 
   saveConfigWebhook(webhook) {
-    console.log("saveConfigWebhook() >> ");
+    console.log(`[${this.constructor.name}]`, "saveConfigWebhook() >> ");
     return new Promise((resolve, reject) => {
       this.getConfig()
       .then((serverConfig) => Object.assign(serverConfig, {"webhook": webhook}))
@@ -68,7 +124,7 @@ class ConfigManager {
   }
 
   saveConfig(config) {
-    console.log(`ConfigManager: saveConfig() >> `);
+    console.log(`[${this.constructor.name}]`, `saveConfig() >> `);
     return new Promise((resolve, reject) => {
       this.saveConfigToDatabase(config)
       .then((conf) => resolve(conf))
@@ -81,7 +137,7 @@ class ConfigManager {
   }
 
   updateConfig(update, path) {
-    console.log(`ConfigManager: updateConfig() >> `);
+    console.log(`[${this.constructor.name}]`, `updateConfig() >> `);
     return new Promise((resolve, reject) => {
       this.getConfig()
       .then((config) => {
@@ -94,7 +150,7 @@ class ConfigManager {
       .then((conf) => this.saveConfigToDatabase(conf))
       .then(() => resolve(update))
       .catch((err) => {
-        console.log(`updateConfig error.`);
+        console.log(`[${this.constructor.name}]`, `updateConfig error.`);
         err = (err) ? err : new Errors.ErrorObjectNotReturn();
         reject(err);
       });
@@ -102,7 +158,7 @@ class ConfigManager {
   }
 
   addToConfig(newElem, path) {
-    console.log(`ConfigManager: addToConfig() >> `);
+    console.log(`[${this.constructor.name}]`, `addToConfig() >> `);
     return new Promise((resolve, reject) => {
       this.getConfig()
       .then((config) => {
@@ -115,7 +171,7 @@ class ConfigManager {
       .then((conf) => this.saveConfigToDatabase(conf))
       .then(() => resolve(newElem))
       .catch((err) => {
-        console.log(`add config element error.`);
+        console.log(`[${this.constructor.name}]`, `add config element error.`);
         err = (err) ? err : new Errors.ErrorObjectNotReturn();
         reject(err);
       });
@@ -123,13 +179,13 @@ class ConfigManager {
   }
 
   deleteConfig(path) {
-    console.log(`ConfigManager: deleteConfig() >> `);
+    console.log(`[${this.constructor.name}]`, `deleteConfig() >> `);
     return new Promise((resolve, reject) => {
       if(path) {
         this.getConfig()
         .then((config) => {
           let err = this.deleteJsonElement(config, path)
-          console.log(`config: ${JSON.stringify(config, null ,2)}`);
+          console.log(`[${this.constructor.name}]`, `config: ${JSON.stringify(config, null ,2)}`);
           if(err)
             throw(err);
           else
@@ -138,7 +194,7 @@ class ConfigManager {
         .then((conf) => this.saveConfigToDatabase(conf))
         .then(() => resolve({}))
         .catch((err) => {
-          console.log(`add config element error.`);
+          console.log(`[${this.constructor.name}]`, `add config element error.`);
           err = (err) ? err : new Errors.ErrorObjectNotReturn();
           reject(err);
         });
@@ -156,7 +212,7 @@ class ConfigManager {
   }
 
   getConfigFromDatabase() {
-    console.log("getConfigFromDatabase() >> ");
+    console.log(`[${this.constructor.name}]`, "getConfigFromDatabase() >> ");
     return new Promise((resolve, reject) => {
       if(Database) {
         //console.log("{Database} found.");
@@ -171,14 +227,14 @@ class ConfigManager {
         });
       }
       else {
-        console.error(`{Database} not found!!!`);
+        console.error(`[${this.constructor.name}]`, `{Database} not found!!!`);
         reject(new Errors.DatabaseObjectUndefined(Database));
       }
     });
   }
 
   saveConfigToDatabase(config) {
-    console.log("saveConfigToDatabase() >> ");
+    console.log(`[${this.constructor.name}]`, "saveConfigToDatabase() >> ");
     return new Promise((resolve, reject) => {
       //  Validate config.
       let validateInfo = this.validate(config);
@@ -199,7 +255,7 @@ class ConfigManager {
           });
         }
         else {
-          console.error(`{Database} not found!!!`);
+          console.error(`[${this.constructor.name}]`, `{Database} not found!!!`);
           reject(new Errors.DatabaseObjectUndefined(Database));
         }
       }
@@ -207,7 +263,7 @@ class ConfigManager {
   }
 
   deleteConfigFromDatabase() {
-    console.log("deleteConfigFromDatabase() >> ");
+    console.log(`[${this.constructor.name}]`, "deleteConfigFromDatabase() >> ");
     return new Promise((resolve, reject) => {
       if(Database) {
         this.db = new Database(this.manifest.name);
@@ -219,7 +275,7 @@ class ConfigManager {
         });
       }
       else {
-        console.error(`{Database} not found!!!`);
+        console.error(`[${this.constructor.name}]`, `{Database} not found!!!`);
         reject(new Errors.DatabaseObjectUndefined(Database));
       }
     });

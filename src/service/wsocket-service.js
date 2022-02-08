@@ -181,6 +181,7 @@ class wsocketService extends EventEmitter {
       request(option , (err, resp, body) => {
         if(err)
           reject(err);
+        console.log(`body: ${body}`);
         resolve(body);
       });
     });

@@ -14,6 +14,12 @@ var Defaults = {
     },
     "service": [
       {
+        "id": "network-service",
+        "enable": true,
+        "status": "unknow",
+        "description": "This service use to check internet connection and redis (install if not exist)."
+      },
+      {
         "id": "history-service",
         "enable": true,
         "status": "unknow"
@@ -34,6 +40,35 @@ var Defaults = {
         ]
       }
     ],
+    "job": {
+      "queue": {
+        "maxlength": 100,
+        "timeout": 2000
+      },
+      "process": {
+        "concurrency": 5,
+        "timeout": 5000
+      },
+      "request": {
+        "timeout": 5000
+      }
+    },
+    "network": {
+      "check": {
+        "endpoint": [
+          "www.google.com",
+          "www.wot.meca.in.th"
+        ]
+      },
+      "redis": {
+        "install": true,
+        "endpoint": {
+          "host": "localhost",
+          "port": 6379,
+          "secure": false
+        }
+      }
+    },
     "webhook": [],
     "history": {
       "limit": 10
@@ -105,6 +140,110 @@ var Defaults = {
             "reason": {
               "type": "string",
               "default": ""
+            }
+          }
+        }
+      },
+      "job": {
+        "type": "object",
+        "required": [],
+        "additionalProperties": false,
+        "properties": {
+          "queue": {
+            "type": "object",
+            "required": ["maxlength", "timeout"],
+            "additionalProperties": false,
+            "properties": {
+              "maxlength": {
+                "type": "number",
+                "default": 100
+              },
+              "timeout": {
+                "type": "number",
+                "default": 2000
+              }
+            }
+          },
+          "process": {
+            "type": "object",
+            "required": ["concurrency", "timeout"],
+            "additionalProperties": false,
+            "properties": {
+              "concurrency": {
+                "type": "number",
+                "default": 5
+              },
+              "timeout": {
+                "type": "number",
+                "default": 5000
+              }
+            }
+          },
+          "request": {
+            "type": "object",
+            "required": ["timeout"],
+            "additionalProperties": false,
+            "properties": {
+              "timeout": {
+                "type": "number",
+                "default": 5000
+              }
+            }
+          }
+        }
+      },
+      "network": {
+        "type": "object",
+        "required": ["check", "redis"],
+        "additionalProperties": false,
+        "properties": {
+          "check": {
+            "type": "object",
+            "required": ["endpoint"],
+            "additionalProperties": false,
+            "properties": {
+              "endpoint": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "redis": {
+            "type": "object",
+            "required": ["install", "endpoint"],
+            "additionalProperties": false,
+            "properties": {
+              "install": {
+                "type": "boolean",
+                "default": true
+              },
+              "endpoint": {
+                "type": "object",
+                "required": ["host", "port"],
+                "additionalProperties": false,
+                "properties": {
+                  "host": {
+                    "type": "string",
+                    "default": "localhost"
+                  },
+                  "port": {
+                    "type": "number",
+                    "default": 6379
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "secure": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                }
+              }
             }
           }
         }

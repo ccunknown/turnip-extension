@@ -1,8 +1,13 @@
 'use strict';
 
+const Config = require(`../config/config`);
+const fetch = require('node-fetch');
 const EventEmitter = require('events').EventEmitter;
 const request = require('request');
+// const AbortController = globalThis.AbortController || await import('abort-controller');
+// const AbortController = globalThis.AbortController;
 const mustache = require('mustache');
+const Queue = require(`bull`);
 
 const {Defaults, Errors} = require('../../constants/constants');
 
@@ -19,6 +24,8 @@ class webhookService extends EventEmitter {
     this.configManager = this.extension.configManager;
     this.routesManager = this.extension.routesManager;
     this.laborsManager = this.extension.laborsManager;
+    this.requestQueue = new Queue(`requestQueue`);
+    // this.historyQueue = new Queue(`historyQueue`);
 
     this.webhookList = [];
     this.service = {};
@@ -39,9 +46,11 @@ class webhookService extends EventEmitter {
     console.log(`webhookService: init() >> `);
     return new Promise((resolve, reject) => {
       this.initDependencies()
+      .then(() => this.initJobConfig())
       .then(() => this.initWebhookList())
       .then(() => this.initMessageHandler())
       .then(() => this.initRequestHandler())
+      .then(() => this.initRequestQueueProcess())
       .then(() => resolve());
     });
   }
@@ -58,6 +67,17 @@ class webhookService extends EventEmitter {
         this.historyService = arr[1].obj;
         resolve();
       });
+    });
+  }
+
+  initJobConfig() {
+    console.log(this.constructor.name, `: initJobConfig() >> `);
+    return new Promise((resolve, reject) => {
+      Promise.resolve()
+      .then(() => this.configManager.getConfigJob())
+      .then((jobConfig) => this.jobConfig = jobConfig)
+      .then(() => resolve(this.jobConfig))
+      .catch((err) => reject(err));
     });
   }
 
@@ -100,6 +120,70 @@ class webhookService extends EventEmitter {
     this.routesManager.eventEmitter.on(`POST/\\/config\\/webhook/`, (req) => this.onRouterProcess(req));
     this.routesManager.eventEmitter.on(`PUT/\\/config\\/webhook/`, (req) => this.onRouterProcess(req));
     this.routesManager.eventEmitter.on(`DELETE/\\/config\\/webhook/`, (req) => this.onRouterProcess(req));
+    return ;
+  }
+
+  initRequestQueueProcess() {
+    console.log(`[${this.constructor.name}]`, `initRequestQueueProcess() >> `);
+    this.requestQueue.process(
+      `webhook`,
+      this.jobConfig.process.concurrency,
+      // Config.job.process.concurrency,
+      // Number(process.env[`JOB_PROCESS_CONCURRENCY`]), 
+      // 5,
+      (job, done) => {
+        console.log(`JOB Process requestQueue() >> `);
+        console.log(`job id[${job.id}]`);
+        Promise.resolve()
+        .then(() => this.requestQueueProcess(job.data.webhookName, job.data.options))
+        .then((res) => done(res))
+        .catch((err) => done(err));
+      }
+    );
+    return ;
+  }
+
+  requestQueueProcess(webhookName, reqOptions) {
+    return new Promise((resolve, reject) => {
+      let timeout;
+      let timestamp = {
+        req: {},
+        res: {}
+      };
+      let record = {};
+      Promise.resolve()
+      .then(() => {
+        timestamp.req.unix = Date.now();
+        timestamp.req.isoString = new Date(timestamp.req.unix).toISOString();
+        timeout = setTimeout(() => {
+          throw new Error(`Job process timeout!`);
+        }, Config.job.process.timeout);
+        // }, Number(process.env[`JOB_PROCESS_TIMEOUT`]));
+        // }, 10000);
+      })
+      .then(() => {
+        console.log(`[${this.constructor.name}]`, `pre-call makeRequest()`);
+        return this.makeRequest(reqOptions);
+      })
+      .then((res) => {
+        clearTimeout(timeout);
+        timestamp.res.unix = Date.now();
+        timestamp.res.isoString = new Date(timestamp.req.unix).toISOString();
+        record = {
+          timestamp: timestamp,
+          request: reqOptions,
+          respond: res
+        };
+        return record;
+      })
+      .then((record) => this.historyService.pushRecord(webhookName, record))
+      .then(() => resolve(record))
+      .catch((err) => reject(err));
+    });
+  }
+
+  initHistoryQueueProcess() {
+
   }
 
   onRouterProcess(req) {
@@ -144,6 +228,7 @@ class webhookService extends EventEmitter {
   onThingUpdate(data) {
     // console.log(`webhookService: onThingUpdate() >> `);
     // console.log(JSON.stringify(data, null, 2));
+    console.log(`[${this.constructor.name}]`, `onThingUpdate() >> `);
     this.webhookList.map((webhook) => {
       if(!webhook.enable)
         return ;
@@ -153,6 +238,7 @@ class webhookService extends EventEmitter {
         method: webhook.method,
         headers: {},
         insecure: webhook.unverify,
+        // insecureHTTPParser: webhook.unverify,
         rejectUnauthorized: !webhook.unverify,
         strictSSL: !webhook.unverify,
         body: webhook.payload
@@ -163,52 +249,87 @@ class webhookService extends EventEmitter {
       }
 
       let optionStr = mustache.render(JSON.stringify(option), data);
-      // console.log(`data : ${JSON.stringify(data, null, 2)}`);
-      // console.log(`option : ${JSON.stringify(option, null, 2)}`);
-      // console.log(`optionStr : ${JSON.stringify(optionStr, null, 2)}`);
-      let req = JSON.parse(optionStr);
-      
-      let timestamp = {};
-      timestamp.req = {};
-      timestamp.res = {};
-      timestamp.req.unix = Date.now();
-      timestamp.req.isoString = new Date(timestamp.req.unix).toISOString();
 
-      this.makeRequest(req)
-      .then((res) => {
-        timestamp.res.unix = Date.now();
-        timestamp.res.isoString = new Date(timestamp.res.unix).toISOString();
-        let record = {
-          timestamp: timestamp,
-          request: req,
-          respond: res
-        };
-        //console.log(`record req : ${JSON.stringify(record.request, null, 2)}`);
-        this.historyService.pushRecord(webhook.name, record);
-        //console.log(JSON.stringify(result));
-        //console.log(res);
-      });
+      //  Add to queue.
+      try {
+        console.log(`[${this.constructor.name}]`, `pre-add`);
+        this.requestQueue.add(
+          `webhook`, 
+          {
+            webhookName: webhook.name,
+            options: JSON.parse(optionStr)
+          },
+          {
+            // timeout: Number(process.env[`JOB_QUEUE_TIMEOUT`])
+            timeout: Config.job.queue.timeout
+          }
+        );
+        console.log(`[${this.constructor.name}]`, `post-add`);
+      } catch(err) {
+        console.error(err);
+      }
     });
   }
 
-  makeRequest(option) {
+  makeRequest(options) {
+    console.log(`[${this.constructor.name}]`, `makeRequest() >> `);
+    // console.log(`options: ${JSON.stringify(options, null, 2)}`);
     return new Promise((resolve, reject) => {
-      request(option , (err, resp, body) => {
-        if(err) {
-          //reject(err);
-          //console.error(err);
-          resolve(err);
-        }
-        else {
-          resolve({
-            code: resp.statusCode,
-            headers: resp.headers,
-            body: body
-          });
-        }
-      });
+      let controller;
+      let timeout;
+      let response = {};
+      Promise.resolve()
+      .then(() => {
+        console.log(`options: ${JSON.stringify(options, null, 2)}`);
+        // controller = new AbortController();
+        // timeout = setTimeout(() => {
+        //   controller.abort();
+        // }, Number(process.env[`JOB_REQUEST_TIMEOUT`]));
+        // options.signal = controller.signal;
+        // console.log(`options 2: ${JSON.stringify(options, null, 2)}`);
+        return ;
+      })
+      .then(() => {
+        console.log(`[${this.constructor.name}]`, `pre-fetch`);
+        return fetch(`${options.url}`, options);
+      })
+      .then((res) => {
+        response.code = res.status;
+        response.headers = res.headers;
+        return res.text();
+      })
+      .then((body) => {
+        response.body = body;
+        return response;
+      })
+      .then((res) => {
+        clearTimeout(timeout);
+        console.log(`res: ${JSON.stringify(res, null, 2)}`);
+        console.log(`[${this.constructor.name}]`, `pre-resolve`);
+        resolve(res);
+      })
+      .catch((err) => reject(err));
     });
   }
+
+  // makeRequest(option) {
+  //   return new Promise((resolve, reject) => {
+  //     request(option , (err, resp, body) => {
+  //       if(err) {
+  //         //reject(err);
+  //         //console.error(err);
+  //         resolve(err);
+  //       }
+  //       else {
+  //         resolve({
+  //           code: resp.statusCode,
+  //           headers: resp.headers,
+  //           body: body
+  //         });
+  //       }
+  //     });
+  //   });
+  // }
 }
 
 //inherits(webhookService, EventEmitter);

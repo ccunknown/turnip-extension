@@ -220,9 +220,10 @@ class RoutesManager extends APIHandler{
           "DELETE": (req) => {
             return new Promise(async (resolve, reject) => {
               let historyConfig;
-              this.configManager.getDefaults()
+              Promise.resolve()
+              .then(() => this.configManager.getDefaults())
               .then((defaults) => {
-                historyConfig = defaults.history;
+                historyConfig = defaults.config.history;
                 return ;
               })
               .then(() => this.configManager.getConfig())
@@ -231,6 +232,10 @@ class RoutesManager extends APIHandler{
                 return config;
               })
               .then((config) => this.configManager.saveConfig(config))
+              .then((config) => {
+                console.log(`config: ${JSON.stringify(config, null, 2)}`);
+                return config;
+              })
               .then((config) => resolve(this.makeJsonRespond(JSON.stringify(config.history))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
@@ -293,6 +298,113 @@ class RoutesManager extends APIHandler{
                 console.log(JSON.stringify(list));
                 resolve(this.makeJsonRespond(JSON.stringify(list)));
               })
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          }
+        }
+      },
+
+      /***  Resource : /network/resolve  ***/
+      {
+        "resource": /\/network\/resolve/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              console.log(Object.keys(req));
+              console.log(req.query);
+              this.laborsManager.getService(`network-service`)
+              .then((service) => {
+                this.networkService = service.obj;
+                return this.networkService.dnsResolve(
+                  Array.isArray(req.query.endpoints)
+                  ? req.query.endpoints
+                  : null
+                );
+              })
+              .then((ret) => {
+                // console.log(ret);
+                console.log(JSON.stringify(ret, null, 2));
+                resolve(this.makeJsonRespond(JSON.stringify(ret)));
+              })
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          }
+        }
+      },
+
+      /***  Resource : /network/redis/available  ***/
+      {
+        "resource": /\/network\/redis\/available/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              this.laborsManager.getService(`network-service`)
+              .then((service) => {
+                this.networkService = service.obj;
+                return this.networkService.isRedisAvailable();
+              })
+              .then((available) => ({ available: available }))
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          }
+        }
+      },
+
+      /***  Resource : /network/redis/status  ***/
+      {
+        "resource": /\/network\/redis\/status/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              this.laborsManager.getService(`network-service`)
+              .then((service) => {
+                this.networkService = service.obj;
+                return this.networkService.getRedisStatus();
+              })
+              .then((status) => {
+                console.log(`status: ${JSON.stringify(status, null, 2)}`);
+                return status;
+              })
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          }
+        }
+      },
+
+      /***  Resource : /network/redis/install  ***/
+      {
+        "resource": /\/network\/redis\/install/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              this.laborsManager.getService(`network-service`)
+              .then((service) => {
+                this.networkService = service.obj;
+                return this.networkService.installRedis();
+              })
+              .then((ret) => ({ install: ret }))
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          }
+        }
+      },
+
+      /***  Resource : /network/redis/uninstall  ***/
+      {
+        "resource": /\/network\/redis\/uninstall/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              this.laborsManager.getService(`network-service`)
+              .then((service) => {
+                this.networkService = service.obj;
+                return this.networkService.uninstallRedis();
+              })
+              .then((ret) => ({ uninstall: ret }))
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
           }
