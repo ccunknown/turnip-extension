@@ -379,6 +379,7 @@ class TurnipExtensionWebhook {
             result.timestamp = json.timestamp.res;
             this.renderModal(result);
             saidObj(`turnip.content.webhook.slider.section-01.modal`).modal('show');
+            // $('#myModal').appendTo("body").modal('show');
           });
         }
         //saidObj(`turnip.content.webhook.slider.section-01.record`).html(str);

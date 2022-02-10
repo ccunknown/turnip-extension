@@ -67,10 +67,10 @@ class wsocketService extends EventEmitter {
     //const message = JSON.parse(event.data);
     if(event && event.type && event.type == `utf8` && event.utf8Data) {
       let message = JSON.parse(event.utf8Data);
-      //console.log(`wsocketService: onMessage : ${JSON.stringify(message)}`);
+      // console.log(`[${this.constructor.name}]`, `onMessage : ${JSON.stringify(message)}`);
       
       let updateThing = (thing) => {
-        //console.log(`t : ${JSON.stringify(thing, null, 2)}`);
+        // console.log(`[${this.constructor.name}]`, `thing : ${JSON.stringify(thing, null, 2)}`);
         switch(message.messageType) {
           case `connected`:
             thing.connected = message.data;
@@ -131,7 +131,7 @@ class wsocketService extends EventEmitter {
     return new Promise((resolve, reject) => {
       this.things = [];
       thingsSchema.map((thing, id) => {
-        let result = JSON.parse(JSON.stringify(thing));
+        // let result = JSON.parse(JSON.stringify(thing));
         let schema = {
           meta: thing,
           id: thing.href.replace(`/things/`, ``),

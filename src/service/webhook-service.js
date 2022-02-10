@@ -222,6 +222,11 @@ class webhookService extends EventEmitter {
         isBoolean: type.toLowerCase() == `boolean`
       }
     };
+    // (result.property.isNumber)
+    // ? (typeof result.property.value == `number`)
+    //   ? {}
+    //   : result.property.value = 0
+    // : {};
     return result;
   }
 
@@ -252,7 +257,7 @@ class webhookService extends EventEmitter {
 
       //  Add to queue.
       try {
-        console.log(`[${this.constructor.name}]`, `pre-add`);
+        // console.log(`[${this.constructor.name}]`, `pre-add`);
         this.requestQueue.add(
           `webhook`, 
           {
@@ -280,7 +285,7 @@ class webhookService extends EventEmitter {
       let response = {};
       Promise.resolve()
       .then(() => {
-        console.log(`options: ${JSON.stringify(options, null, 2)}`);
+        // console.log(`options: ${JSON.stringify(options, null, 2)}`);
         // controller = new AbortController();
         // timeout = setTimeout(() => {
         //   controller.abort();
@@ -290,7 +295,7 @@ class webhookService extends EventEmitter {
         return ;
       })
       .then(() => {
-        console.log(`[${this.constructor.name}]`, `pre-fetch`);
+        // console.log(`[${this.constructor.name}]`, `pre-fetch`);
         return fetch(`${options.url}`, options);
       })
       .then((res) => {
@@ -304,8 +309,8 @@ class webhookService extends EventEmitter {
       })
       .then((res) => {
         clearTimeout(timeout);
-        console.log(`res: ${JSON.stringify(res, null, 2)}`);
-        console.log(`[${this.constructor.name}]`, `pre-resolve`);
+        // console.log(`res: ${JSON.stringify(res, null, 2)}`);
+        // console.log(`[${this.constructor.name}]`, `pre-resolve`);
         resolve(res);
       })
       .catch((err) => reject(err));
