@@ -57,7 +57,7 @@ class TurnipExtensionSetting {
       })
       .then((configHistory) => {
         this.config.history = configHistory;
-        saidObj(`turnip.content.setting.section-01.history.limit.input`).val(configHistory.limit);
+        saidObj(`turnip.content.setting.section-01.history.limit.input`).val(configHistory.webhook.limit);
         resolve();
       })
       .catch((err) => {
@@ -139,7 +139,7 @@ class TurnipExtensionSetting {
       console.log(`Event [Click] : turnip.content.setting.section-01.history-limit.set.button`);
       return new Promise((resolve, reject) => {
         this.display.loading();
-        this.api.patchConfigHistory({"limit": parseInt(saidObj(`turnip.content.setting.section-01.history-limit.input`).val())})
+        this.api.patchConfigHistoryWebhook({"limit": parseInt(saidObj(`turnip.content.setting.section-01.history-limit.input`).val())})
         .then(() => this.display.sync())
         .then(() => this.display.loaded())
         .then(() => resolve())

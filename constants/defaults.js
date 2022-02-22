@@ -71,7 +71,28 @@ var Defaults = {
     },
     "webhook": [],
     "history": {
-      "limit": 10
+      "webhook": {
+        "limit": 10
+      },
+      "things": {
+        "database": {
+          "sqlite": {
+            "fname": `things-history.sqlite3`
+          },
+          "record": {
+            // Time limit (Second)
+            // month: 2592000
+            // week: 604800
+            // day: 86400
+            // hour: 3600
+            "duration": 3600
+          },
+        },
+        "job": {
+          // Update timeout (milli-second)
+          "timeout": 5000
+        }
+      }
     }
   },
   "schema": {
@@ -301,8 +322,8 @@ var Defaults = {
               "items": {
                 "type": "object",
                 "required": [
-                "key",
-                "value"
+                  "key",
+                  "value"
                 ],
                 "additionalProperties": false,
                 "properties": {
@@ -327,11 +348,80 @@ var Defaults = {
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "limit"
+          "webhook",
+          "things"
         ],
         "properties": {
-          "limit": {
-            "type": "number"
+          "webhook": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "limit"
+            ],
+            "properties": {
+              "limit": {
+                "type": "number",
+                "default": 10
+              }
+            }
+          },
+          "things": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "database",
+              "job"
+            ],
+            "properties": {
+              "database": {
+                "type": "object",
+                "required": [
+                  "record"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "sqlite": {
+                    "type": "object",
+                    "required": [
+                      "fname"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "fname": {
+                        "type": "string",
+                        "default": "things-history.sqlite3"
+                      }
+                    }
+                  },
+                  "record": {
+                    "type": "object",
+                    "required": [
+                      "duration"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "duration": {
+                        "type": "number",
+                        "default": 3600
+                      }
+                    }
+                  },
+                }
+              },
+              "job": {
+                "type": "object",
+                "required": [
+                  "timeout"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "timeout": {
+                    "type": "number",
+                    "default": 5000
+                  }
+                }
+              }
+            }
           }
         }
       }

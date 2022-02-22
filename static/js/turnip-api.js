@@ -138,6 +138,10 @@ class TurnipApi {
         console.log(`rest.patchConfigHistory()`);
         return this.restCall(`patch`, `/config/history`, historyConfig);
       },
+      patchConfigHistoryWebhook: (config) => {
+        console.log(`rest.patchConfigHistory()`);
+        return this.restCall(`patch`, `/config/history/webhook`, config);
+      },
       deleteConfigHistory: () => {
         console.log(`rest.deleteConfigHistory()`);
         return this.restCall(`delete`, `/config/history`);

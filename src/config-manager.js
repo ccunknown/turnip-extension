@@ -7,8 +7,11 @@ const {Defaults, Errors} = require('../constants/constants.js');
 
 const util = require('util');
 
-class ConfigManager {
+class ConfigManager extends EventEmitter {
   constructor(extension) {
+    super(extension.addonManager, extension.manifest.id);
+    console.log(`[${this.constructor.name}]`, `constructor() >> `);
+
     this.addonManager = extension.addonManager;
     this.manifest = extension.manifest;
     this.validator = new Validator();
@@ -219,12 +222,13 @@ class ConfigManager {
         this.db = new Database(this.manifest.name);
         //console.log("{Database} imported.");
         this.db.open()
-        .then(() => {
-          //console.log("opened database.");
-          var config = this.db.loadConfig();
+        .then(() => this.db.loadConfig())
+        .then((conf) => {
           this.db.close();
-          resolve(config);
-        });
+          return conf;
+        })
+        .then((ret) => resolve(ret))
+        .catch((err) => reject(err));
       }
       else {
         console.error(`[${this.constructor.name}]`, `{Database} not found!!!`);
@@ -247,12 +251,17 @@ class ConfigManager {
           this.db = new Database(this.manifest.name);
           //console.log("{Database} imported.");
           this.db.open()
+          .then(() => this.db.saveConfig(validateInfo.instance))
           .then(() => {
-            //console.log("opened database.");
-            this.db.saveConfig(validateInfo.instance);
             this.db.close();
-            resolve(validateInfo.instance);
-          });
+            return validateInfo.instance
+          })
+          .then((conf) => {
+            this.emit(`CONFIG_SAVE`, conf);
+            return conf;
+          })
+          .then((ret) => resolve(ret))
+          .catch((err) => reject(err));
         }
         else {
           console.error(`[${this.constructor.name}]`, `{Database} not found!!!`);
@@ -268,11 +277,13 @@ class ConfigManager {
       if(Database) {
         this.db = new Database(this.manifest.name);
         this.db.open()
+        .then(() => this.db.saveConfig({}))
         .then(() => {
-          this.db.saveConfig({});
           this.db.close();
-          resolve({});
-        });
+          return {}
+        })
+        .then((ret) => resolve(ret))
+        .catch((err) => reject(err));
       }
       else {
         console.error(`[${this.constructor.name}]`, `{Database} not found!!!`);
@@ -315,8 +326,12 @@ class ConfigManager {
       return (src.hasOwnProperty(index)) ? this.updateJsonElement(src[index], indexArr.join(`.`), data) : false;
     }
     else {
-      for(let i in data)
-        src[i] = data[i];
+      if(typeof data == `object`) {
+        for(let i in data)
+          src[i] = data[i];
+      }
+      else
+        src = data;
       return true;
     }
   }

@@ -243,6 +243,32 @@ class RoutesManager extends APIHandler{
         }
       },
 
+      /***  Resource : /config/... {path} ...  ***/
+      {
+        "resource": /\/config\/[^?]+/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              let path = req.path.split(`/`).slice(2).join(`.`);
+              console.log(`[${this.constructor.name}]`, `path: ${path}`);
+              Promise.resolve()
+              .then(() => this.configManager.getConfig(path))
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => this.catchErrorRespond(err));
+            })
+          },
+          "PATCH": (req) => {
+            return new Promise((resolve, reject) => {
+              let path = req.path.split(`/`).slice(2).join(`.`);
+              Promise.resolve()
+              .then(() => this.configManager.updateConfig(req.body, path))
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            })
+          }
+        }
+      },
+
       /***  Resource : /history  ***/
       {
         "resource": /\/history/,
@@ -252,7 +278,7 @@ class RoutesManager extends APIHandler{
               this.laborsManager.getService(`history-service`)
               .then((service) => {
                 this.historyService = service.obj;
-                return this.historyService.getRecord();
+                return this.historyService.getWebhookRecord();
               })
               .then((list) => resolve(this.makeJsonRespond(JSON.stringify(list))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
@@ -263,7 +289,7 @@ class RoutesManager extends APIHandler{
               this.laborsManager.getService(`history-service`)
               .then((service) => {
                 this.historyService = service.obj;
-                return this.historyService.clearRecord();
+                return this.historyService.clearWebhookRecord();
               })
               .then((list) => resolve(this.makeJsonRespond(JSON.stringify(list))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
@@ -272,6 +298,9 @@ class RoutesManager extends APIHandler{
         }
       },
 
+      /***  Resource : /history/webhook  ***/
+
+      /***  Resource : /history/webhook/{webhook}  ***/
       /***  Resource : /history/{webhook}  ***/
       {
         "resource": /\/history\/[^/]+/,
@@ -281,7 +310,7 @@ class RoutesManager extends APIHandler{
               this.laborsManager.getService(`history-service`)
               .then((service) => {
                 this.historyService = service.obj;
-                return this.historyService.getRecord(req.path.split(`/`).pop());
+                return this.historyService.getWebhookRecord(req.path.split(`/`).pop());
               })
               .then((list) => resolve(this.makeJsonRespond(JSON.stringify(list))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
@@ -292,7 +321,7 @@ class RoutesManager extends APIHandler{
               this.laborsManager.getService(`history-service`)
               .then((service) => {
                 this.historyService = service.obj;
-                return this.historyService.clearRecord(req.path.split(`/`).pop());
+                return this.historyService.clearWebhookRecord(req.path.split(`/`).pop());
               })
               .then((list) => {
                 console.log(JSON.stringify(list));
@@ -303,6 +332,12 @@ class RoutesManager extends APIHandler{
           }
         }
       },
+
+      /***  Resource : /history/things  ***/
+
+      /***  Resource : /history/things/{things}  ***/
+
+      /***  Resource : /history/things/{things}/{property}  ***/
 
       /***  Resource : /network/resolve  ***/
       {

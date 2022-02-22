@@ -13,8 +13,8 @@ class wsocketService extends EventEmitter {
   constructor(extension, config) {
 
     //EventEmitter.call(this);
-    console.log(`wsocketService: constructor() >> `);
     super(extension.addonManager, extension.manifest.id);
+    console.log(`[${this.constructor.name}]`, `constructor() >> `);
 
     this.extension = extension;
     this.manifest = extension.manifest;

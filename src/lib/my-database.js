@@ -1,4 +1,4 @@
-const {Database} = require('gateway-addon');
+const { Database } = require('gateway-addon');
 
 class myDatabase extends Database {
 	

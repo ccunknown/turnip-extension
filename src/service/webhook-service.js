@@ -15,8 +15,8 @@ class webhookService extends EventEmitter {
   constructor(extension, config) {
 
     //EventEmitter.call(this);
-    console.log(`webhookService: constructor() >> `);
     super(extension.addonManager, extension.manifest.id);
+    console.log(`[${this.constructor.name}]`, `constructor() >> `);
 
     this.extension = extension;
     this.manifest = extension.manifest;
@@ -34,7 +34,7 @@ class webhookService extends EventEmitter {
   }
 
   start() {
-    console.log(`webhookService: start() >> `);
+    console.log(`[${this.constructor.name}]`, `start() >> `);
     return this.init();
   }
 
@@ -43,7 +43,7 @@ class webhookService extends EventEmitter {
   }
 
   init() {
-    console.log(`webhookService: init() >> `);
+    console.log(`[${this.constructor.name}]`, `init() >> `);
     return new Promise((resolve, reject) => {
       this.initDependencies()
       .then(() => this.initJobConfig())
@@ -56,7 +56,7 @@ class webhookService extends EventEmitter {
   }
 
   initDependencies() {
-    console.log(`webhookService: initDependencies() >> `);
+    console.log(`[${this.constructor.name}]`, `initDependencies() >> `);
     return new Promise((resolve, reject) => {
       Promise.all([
         this.laborsManager.getService(`wsocket-service`), 
@@ -82,7 +82,7 @@ class webhookService extends EventEmitter {
   }
 
   initWebhookList(list) {
-    console.log(`webhookService: initWebhookList() >> `);
+    console.log(`[${this.constructor.name}]`, `initWebhookList() >> `);
     return new Promise((resolve, reject) => {
       if(list) {
         this.webhookList = list;
@@ -96,7 +96,7 @@ class webhookService extends EventEmitter {
           this.webhookList.map((webhook) => {
             tmp.push(`${webhook.name}`);
           });
-          console.log(`webhookService: webhookList : ${tmp}`);
+          console.log(`[${this.constructor.name}]`, `webhookList : ${tmp}`);
           resolve(this.webhookList);
         });
       }
@@ -104,7 +104,7 @@ class webhookService extends EventEmitter {
   }
 
   initMessageHandler() {
-    console.log(`webhookService: initMessageHandler() >> `);
+    console.log(`[${this.constructor.name}]`, `initMessageHandler() >> `);
     return new Promise((resolve, reject) => {
       resolve(this.wsocketService.on(`UPDATE`, (wsocket, data) => this.onThingUpdate(this.dataImprove(data))));
     });
@@ -132,8 +132,8 @@ class webhookService extends EventEmitter {
       // Number(process.env[`JOB_PROCESS_CONCURRENCY`]), 
       // 5,
       (job, done) => {
-        console.log(`JOB Process requestQueue() >> `);
-        console.log(`job id[${job.id}]`);
+        console.log(`[${this.constructor.name}]`, `JOB Process requestQueue() >> `);
+        console.log(`[${this.constructor.name}]`, `job id[${job.id}]`);
         Promise.resolve()
         .then(() => this.requestQueueProcess(job.data.webhookName, job.data.options))
         .then((res) => done(res))
@@ -176,7 +176,7 @@ class webhookService extends EventEmitter {
         };
         return record;
       })
-      .then((record) => this.historyService.pushRecord(webhookName, record))
+      .then((record) => this.historyService.pushWebhookRecord(webhookName, record))
       .then(() => resolve(record))
       .catch((err) => reject(err));
     });
@@ -187,7 +187,7 @@ class webhookService extends EventEmitter {
   }
 
   onRouterProcess(req) {
-    console.log(`webhookService: onRouterProcess(${req.method}: ${req.path}) >> `);
+    console.log(`[${this.constructor.name}]`, `onRouterProcess(${req.method}: ${req.path}) >> `);
     this.initWebhookList();
   }
 
