@@ -298,6 +298,34 @@ class RoutesManager extends APIHandler{
         }
       },
 
+      /***  Resource : /history/things  ***/
+      {
+        "resource": /\/history\/things/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              Promise.resolve()
+              .then(() => this.laborsManager.getService(`history-service`))
+              .then((service) => service.obj)
+              .then((historyService) => historyService.getThingsHistory({
+                unique: [ `device` ],
+                fields: [ `device` ]
+              }))
+              .then((ret) => {
+                console.log(`ret: ${JSON.stringify(ret)}`);
+                return ret;
+              })
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            })
+          }
+        }
+      },
+
+      /***  Resource : /history/things/{device}  ***/
+
+      /***  Resource : /history/things/{device}/{property}  ***/
+
       /***  Resource : /history/webhook  ***/
 
       /***  Resource : /history/webhook/{webhook}  ***/
@@ -332,12 +360,6 @@ class RoutesManager extends APIHandler{
           }
         }
       },
-
-      /***  Resource : /history/things  ***/
-
-      /***  Resource : /history/things/{things}  ***/
-
-      /***  Resource : /history/things/{things}/{property}  ***/
 
       /***  Resource : /network/resolve  ***/
       {

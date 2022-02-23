@@ -2,7 +2,7 @@
 
 const Path = require(`path`);
 const Queue = require(`bull`);
-const { Sequelize, DataTypes } = require(`sequelize`);
+const { Sequelize, DataTypes, Op } = require(`sequelize`);
 const EventEmitter = require('events').EventEmitter;
 
 const Database = require('../lib/my-database');
@@ -23,15 +23,15 @@ class historyService extends EventEmitter {
 
     this.history = {};
     this.config = config.history;
-    this.thingsUpdateQueue = new Queue(`thingsUpdateQueue`);
+    this.thingsHistoryQueue = new Queue(`thingsHistoryQueue`);
 
     this.thingsDbPath = Path.join(
       this.addonManager.getUserProfile().dataDir,
       this.extension.manifest.id,
       this.config.things.database.sqlite.fname
     );
-
     this.model = {};
+    this.handler = {};
 
     this.init();
   }
@@ -54,12 +54,17 @@ class historyService extends EventEmitter {
       dialect: `sqlite`,
       storage: this.thingsDbPath
     });
-    this.model.thingUpdateRecord = this.sequelize.define(`ThingsHistory`, {
-      timestamp: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        // defaultValue: Sequelize.literal(`CURRENT_TIMESTAMP`),
-        defaultValue: DataTypes.NOW,
+    this.model.thingRecord = this.sequelize.define(`ThingsHistory`, {
+      // timestamp: {
+      //   type: DataTypes.DATE,
+      //   allowNull: false,
+      //   // defaultValue: Sequelize.literal(`CURRENT_TIMESTAMP`),
+      //   defaultValue: DataTypes.NOW,
+      // },
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
       },
       device: {
         type: DataTypes.STRING,
@@ -81,8 +86,9 @@ class historyService extends EventEmitter {
     console.log(`[${this.constructor.name}]`, `start() >> `);
     return new Promise((resolve, reject) => {
       Promise.resolve()
-      .then(() => this.initThingsUpdateQueueProcess())
-      .then(() => this.initThingsHandler())
+      .then(() => this.initThingsQueueProcess())
+      .then(() => this.initThingsUpdateHandler())
+      .then(() => this.initThingsCleanupHandler())
       .then((ret) => resolve(ret))
       .catch((err) => reject(err));
     });
@@ -92,65 +98,234 @@ class historyService extends EventEmitter {
 
   }
 
-  initThingsHandler() {
-    console.log(`[${this.constructor.name}]`, `initThingsHandler() >> `);
+  initThingsUpdateHandler() {
+    console.log(`[${this.constructor.name}]`, `initThingsUpdateHandler() >> `);
     return new Promise((resolve, reject) => {
       Promise.resolve()
       .then(() => this.laborsManager.getService(`wsocket-service`))
       .then((wsocketServiceSchema) => wsocketServiceSchema.obj)
-      .then((wsocketService) => {
-        wsocketService.on(`UPDATE`, (service, message) => {
-          console.log(`[${this.constructor.name}]`, JSON.stringify(message));
-          this.thingsUpdateQueue.add(
-            `thing-update`,
-            message
-          ),
-          {
-            timeout: this.config.things.job.timeout
-          }
-        });
-        resolve();
-      })
+      .then((wsocketService) => wsocketService.on(
+        `UPDATE`, 
+        this.onWsocketMessage().bind(this)
+      ))
+      .then((ret) => resolve(ret))
       .catch((err) => reject(err));
     })
   }
 
-  initThingsUpdateQueueProcess() {
-    console.log(`[${this.constructor.name}]`, `initThingsUpdateQueueProcess() >> `);
-    this.thingsUpdateQueue.process(
-      `thing-update`,
-      1, // processor concurency
-      (job, done) => {
-        console.log(`[${this.constructor.name}]`, `JOB Process thingsUpdateQueue() >> `);
-        console.log(`[${this.constructor.name}]`, `job id[${job.id}]`);
-        Promise.resolve()
-        .then(() => this.thingsUpdateQueueProcess(job.data))
-        .then((ret) => done(res))
-        .catch((err) => done(err));
+  onWsocketMessage() {
+  // get onWsocketMessage() {
+    return (service, message) => {
+      console.log(`[${this.constructor.name}]`, `${service.constructor.name} event`);
+      console.log(`[${this.constructor.name}]`, JSON.stringify(message));
+      this.thingsHistoryQueue.add(
+        `thing`,
+        {
+          cmd: `update`,
+          payload: message
+        }
+      ),
+      {
+        timeout: this.config.things.job.timeout
       }
-    );
-    return ;
+    };
   }
 
-  thingsUpdateQueueProcess(data) {
-    console.log(`[${this.constructor.name}]`, `thingsUpdateQueueProcess() >> `);
+  initThingsCleanupHandler() {
+    console.log(`[${this.constructor.name}]`, `initThingsCleanupHandler() >> `);
+    this.handler.cleanup = setInterval(
+      this.onCleanupPeriod().bind(this), 
+      this.config.things.database.record.cleanup.interval * 1000
+    );
+  }
+
+  onCleanupPeriod() {
+  // get onCleanupPeriod() {
+    return () => {
+      console.log(`[${this.constructor.name}]`, `onCleanupPeriod`);
+      this.thingsHistoryQueue.add(
+        `thing`,
+        {
+          cmd: `interval-cleanup`,
+          payload: {
+            duration: this.config.things.database.record.duration
+          }
+        }
+      )
+    }
+  }
+
+  getThingsHistory(options) {
+    console.log(`[${this.constructor.name}]`, `getThingsHistory() >> `);
     return new Promise((resolve, reject) => {
       Promise.resolve()
-      .then(() => {
-        console.log(
-          `[${this.constructor.name}]`,
-          `insert: ${data.id} [${data.property.name}] ${data.property.value}`
-        );
-        return this.model.thingUpdateRecord.create({
-          device: data.id,
-          property: data.property.name,
-          value: data.property.value
-        });
+      .then(() => this.thingsHistoryQueue.add(
+        `thing`,
+        {
+          cmd: `query`,
+          payload: options
+        }
+      ))
+      .then((job) => job.finished())
+      .then((ret) => {
+        console.log(`[${this.constructor.name}]`, `job finished`);
+        console.log(`[${this.constructor.name}]`, ret);
+        return ret;
       })
+      .then((ret) => resolve(ret))
+      .catch((err) => reject(err));
+    })
+  }
+
+  initThingsQueueProcess() {
+    console.log(`[${this.constructor.name}]`, `initThingsQueueProcess() >> `);
+    this.thingsHistoryQueue.process(
+      `thing`,
+      1, // processor concurency
+      (job, done) => {
+        console.log(`[${this.constructor.name}]`, `JOB Process thingsHistoryQueue() >> `);
+        console.log(`[${this.constructor.name}]`, `job id[${job.id}]`);
+        console.log(`[${this.constructor.name}]`, `job cmd: ${job.data.cmd}`);
+        console.log(`[${this.constructor.name}]`, `payload: ${JSON.stringify(job.data.payload)}`);
+        Promise.resolve()
+        .then(() => {
+          if(job.data.cmd == `update`) 
+            return this.thingsUpdate(job.data.payload);
+          else if(job.data.cmd == `interval-cleanup`)
+            return this.thingsCleanup(job.data.payload);
+          else if(job.data.cmd == `query`) {
+            return this.thingsQuery(job.data.payload);
+          }
+          else
+            throw new Error(`Command "${job.data.cmd}" is not support.`);
+        })
+        .then((ret) => {
+          console.log(
+            `[${this.constructor.name}]`,
+            `${job.data.cmd}:`,
+            `${JSON.stringify(ret, null, 2)}`
+          );
+          return ret;
+        })
+        .then((ret) => done(null, ret))
+        .catch((err) => {
+          console.error(err);
+          done(err)
+        });
+      }
+    );
+  }
+
+  thingsUpdate(data) {
+    console.log(`[${this.constructor.name}]`, `thingsUpdate() >> `);
+    return new Promise((resolve, reject) => {
+      Promise.resolve()
+      .then(() => this.sequelize.sync())
+      .then(() => console.log(
+        `[${this.constructor.name}]`,
+        `insert: ${data.id} [${data.property.name}] ${data.property.value}`
+      ))
+      .then(() => this.model.thingRecord.create({
+        device: data.id,
+        property: data.property.name,
+        value: data.property.value
+      }))
       .then((ret) => resolve(ret))
       .catch((err) => reject(err));
     });
   }
+
+  thingsCleanup(data) {
+    console.log(`[${this.constructor.name}]`, `thingsCleanup() >> `);
+    return new Promise((resolve, reject) => {
+      Promise.resolve()
+      .then(() => this.sequelize.sync())
+      .then(() => this.model.thingRecord.destroy({
+        where: {
+          createdAt: {
+            // [Op.lt]: new Date(new Date() - this.config.things.database.record.duration * 1000)
+            [Op.lt]: new Date(new Date() - data.duration * 1000)
+          }
+        }
+      }))
+      .then((ret) => resolve(ret))
+      .catch((err) => reject(err));
+    })
+  }
+
+  thingsQuery(options) {
+    console.log(`[${this.constructor.name}]`, `thingsQuery() >> `);
+    return new Promise((resolve, reject) => {
+      let fields = (
+        (options && options.fields)
+        ? options.fields
+        : [
+            `device`,
+            `property`,
+            `value`,
+            [ `createdAt`, `timestamp` ]
+          ]
+      );
+      fields = fields.map((e) => {
+        let f = Array.isArray(e) ? e[0] : e;
+        let fa = Array.isArray(e) ? e[1] : e;
+        if(options && options.unique && options.unique.includes(e))
+          return [ Sequelize.fn(`DISTINCT`, Sequelize.col(f)), fa ];
+        else
+          return [ f, fa ];
+      })
+      Promise.resolve()
+      .then(() => this.sequelize.sync())
+      .then(() => {
+        let query = {
+          attributes: fields
+        };
+        (options && options.duration)
+        ? query.where = {
+            createdAt: {
+              [Op.gt]: new Date(new Date() - (options && options.duration * 1000 || 0))
+            }
+          }
+        : {};
+        return query;
+      })
+      .then((query) => this.model.thingRecord.findAll(query))
+      .then((ret) => resolve (ret))
+      .catch((err) => reject(err));
+    })
+  }
+
+  // thingsProcess(data) {
+  //   console.log(`[${this.constructor.name}]`, `thingsProcess() >> `);
+  //   return new Promise((resolve, reject) => {
+  //     let result;
+  //     Promise.resolve()
+  //     .then(() => this.sequelize.sync())
+  //     .then(() => 
+  //       data.cmd == `update`
+  //       ? this.thingsUpdate(data.payload)
+  //       : data.cmd == `cleanup`
+  //         ? this.thingsCleanup(data.payload)
+  //         : new Error(`Command ${data.cmd} is not support.`)
+  //     )
+  //     .then(() => {
+  //       console.log(
+  //         `[${this.constructor.name}]`,
+  //         `insert: ${data.payload.id} [${data.payload.property.name}] ${data.payload.property.value}`
+  //       );
+  //       return this.model.thingRecord.create({
+  //         device: data.payload.id,
+  //         property: data.payload.property.name,
+  //         value: data.payload.property.value
+  //       });
+  //     })
+  //     .then((ret) => result = ret)
+  //     // .then(() => this.sequelize.sync())
+  //     .then(() => result)
+  //     .then((ret) => resolve(ret))
+  //     .catch((err) => reject(err));
+  //   });
+  // }
 
   pushWebhookRecord(webhookName, record) {
     // console.log(`historyService: pushWebhookRecord(${webhookName}, [record]) >> `);

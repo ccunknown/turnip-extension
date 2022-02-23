@@ -85,7 +85,10 @@ var Defaults = {
             // week: 604800
             // day: 86400
             // hour: 3600
-            "duration": 3600
+            "duration": 3600,
+            "cleanup": {
+              "interval": 30
+            }
           },
         },
         "job": {
@@ -396,13 +399,27 @@ var Defaults = {
                   "record": {
                     "type": "object",
                     "required": [
-                      "duration"
+                      "duration",
+                      "cleanup"
                     ],
                     "additionalProperties": false,
                     "properties": {
                       "duration": {
                         "type": "number",
                         "default": 3600
+                      },
+                      "cleanup": {
+                        "type": "object",
+                        "required": [
+                          `interval`
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "interval": {
+                            "type": "number",
+                            "default": 3600
+                          }
+                        }
                       }
                     }
                   },
