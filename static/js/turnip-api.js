@@ -153,20 +153,32 @@ class TurnipApi {
         return this.restCall(`get`, `/config/service`);
       },
 
-      /***  Resource : /history  ***/
+      /***  Resource : /history/webhook  ***/
       getHistory: (name) => {
         console.log(`rest.getHistory()`);
-        return this.restCall(`get`, `/history${(name) ? `/${name}` : ``}`);
+        return this.restCall(`get`, `/history/webhook${(name) ? `/${name}` : ``}`);
       },
       deleteHistory: (name) => {
         console.log(`rest.deleteHistory()`);
-        return this.restCall(`delete`, `/history${(name) ? `/${name}` : ``}`);
+        return this.restCall(`delete`, `/history/webhook${(name) ? `/${name}` : ``}`);
       },
 
-      /***  Resource : /history  ***/
+      /***  Resource : /history/things  ***/
+      getHistoryThings: (device, property, duration) => {
+        console.log(`rest.getHistory()`);
+        return this.restCall(`get`, `/history/things${(device) ? (property) ? `/${device}/${property}` : `/${device}` : ``}${duration ? `?duration=${duration}` : ``}`);
+      },
+
+      /***  Resource : /service  ***/
       getService: (name) => {
         console.log(`rest.getService()`);
         return this.restCall(`get`, `/service${(name) ? `/${name}` : ``}`);
+      },
+
+      /***  Webthings API : get things schema  ***/
+      getThings: () => {
+        console.log(`rest.getThings()`);
+        return window.API.getThings();
       },
 
       /***  Operation : getWorkMode()  ***/

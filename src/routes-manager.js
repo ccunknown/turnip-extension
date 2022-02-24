@@ -307,9 +307,81 @@ class RoutesManager extends APIHandler{
               Promise.resolve()
               .then(() => this.laborsManager.getService(`history-service`))
               .then((service) => service.obj)
+              // .then((historyService) => historyService.getThingsHistory({
+              //   unique: [ `device` ],
+              //   fields: [ `device` ]
+              // }))
               .then((historyService) => historyService.getThingsHistory({
-                unique: [ `device` ],
-                fields: [ `device` ]
+                group: [ `device`, `property` ],
+                fields: [ `device`, `property` ]
+              }))
+              .then((ret) => {
+                console.log(`ret: ${JSON.stringify(ret)}`);
+                return ret;
+              })
+              .then((arr) => {
+                let result = [];
+                arr.forEach((e) => {
+                  let m;
+                  if(m = result.find((c) => c.device == e.device))
+                    m.properties[e.property] = {};
+                  else
+                    result.push({ device: e.device, properties: { [e.property]: {} } });
+                });
+                return result;
+              })
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            })
+          }
+        }
+      },
+
+      /***  Resource : /history/things/{device}  ***/
+      {
+        "resource": /\/history\/things\/[^/]+/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              let device = req.path.replace(/\/+$/, ``).split(`/`).pop();
+              Promise.resolve()
+              .then(() => this.laborsManager.getService(`history-service`))
+              .then((service) => service.obj)
+              .then((historyService) => historyService.getThingsHistory({
+                unique: [ `property` ],
+                fields: [ `property` ],
+                device: { name: device }
+              }))
+              .then((ret) => {
+                console.log(`ret: ${JSON.stringify(ret)}`);
+                return ret;
+              })
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            })
+          }
+        }
+      },
+
+      /***  Resource : /history/things/{device}/{property}  ***/
+      {
+        "resource": /\/history\/things\/[^/]+\/[^/]+/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              let arr = req.path.replace(/\/+$/, ``).split(`/`);
+              let property = arr.pop();
+              let device = arr.pop();
+              let duration = req.query.duration || 3600;
+              Promise.resolve()
+              .then(() => this.laborsManager.getService(`history-service`))
+              .then((service) => service.obj)
+              .then((historyService) => historyService.getThingsHistory({
+                // unique: [ `device` ],
+                fields: [ [`createdAt`, `timestamp`], `device`, `property`, `value` ],
+                duration: duration,
+                device: { name: device },
+                property: { name: property }
               }))
               .then((ret) => {
                 console.log(`ret: ${JSON.stringify(ret)}`);
@@ -331,7 +403,7 @@ class RoutesManager extends APIHandler{
       /***  Resource : /history/webhook/{webhook}  ***/
       /***  Resource : /history/{webhook}  ***/
       {
-        "resource": /\/history\/[^/]+/,
+        "resource": /\/history\/webhook\/[^/]+/,
         "method": {
           "GET": (req) => {
             return new Promise((resolve, reject) => {

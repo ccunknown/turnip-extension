@@ -278,15 +278,27 @@ class historyService extends EventEmitter {
       .then(() => this.sequelize.sync())
       .then(() => {
         let query = {
-          attributes: fields
+          attributes: fields,
+          where: {}
         };
-        (options && options.duration)
-        ? query.where = {
-            createdAt: {
-              [Op.gt]: new Date(new Date() - (options && options.duration * 1000 || 0))
-            }
+        if(options && options.group) {
+          query.group = options.group;
+        }
+        if(options && options.duration) {
+          query.where.createdAt = {
+            [Op.gt]: new Date(new Date() - (options && options.duration * 1000 || 0))
+          };
+        }
+        if(options && options.device && options.device.name) {
+          query.where.device = {
+            [Op.like]: options.device.name
+          };
+        }
+        if(options && options.property && options.property.name) {
+          query.where.property = {
+            [Op.like]: options.property.name
           }
-        : {};
+        }
         return query;
       })
       .then((query) => this.model.thingRecord.findAll(query))

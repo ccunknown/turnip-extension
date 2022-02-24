@@ -40,6 +40,7 @@
         "static/js/turnip-api.js",
         "static/js/turnipRaid.js",
         "static/js/webhook.js",
+        "static/js/history.js",
         "static/js/setting.js",
         "static/js/account.js",
       ];
@@ -51,25 +52,29 @@
       let prom = Promise.all([
         this.loadResource(`/extensions/${this.id}/static/views/main.html`),
         this.loadResource(`/extensions/${this.id}/static/views/webhook.html`),
+        this.loadResource(`/extensions/${this.id}/static/views/history.html`),
         this.loadResource(`/extensions/${this.id}/static/views/setting.html`),
         this.loadResource(`/extensions/${this.id}/static/views/account.html`),
-        this.loadResource(`/extensions/${this.id}/static/json/render.json`, `json`),
+        // this.loadResource(`/extensions/${this.id}/static/json/render.json`, `json`),
         this.loadScript(scriptArr)
         ])
       .then(([
         mainPage,
         webhookPage,
+        historyPage,
         settingPage,
         accountPage,
-        renderSchema
+        // renderSchema
       ]) => {
         return new Promise((resolve, reject) => {
           this.contents.mainPage = new DOMParser().parseFromString(mainPage, "text/html");
           this.contents.webhookPage = new DOMParser().parseFromString(webhookPage, "text/html");
+          this.contents.historyPage = new DOMParser().parseFromString(historyPage, "text/html");
           this.contents.settingPage = new DOMParser().parseFromString(settingPage, "text/html");
           this.contents.accountPage = new DOMParser().parseFromString(accountPage, "text/html");
-          this.renderSchema = renderSchema;
-          console.log(`render schema : ${JSON.stringify(this.renderSchema, null, 2)}`);
+          // this.renderSchema = renderSchema;
+          // console.log(`render schema : ${JSON.stringify(this.renderSchema, null, 2)}`);
+          console.log(this.contents.historyPage);
           let idList = [];
           for(let i in this.contents)
             idList = [...idList, ...this.idOfText(this.contents[i])];
@@ -90,6 +95,7 @@
           let content = new DOMParser().parseFromString(mainPage, "text/html");
           
           content.getElementById(said(`turnip.content.webhook`)).innerHTML = this.contents.webhookPage.body.innerHTML;
+          content.getElementById(said(`turnip.content.history`)).innerHTML = this.contents.historyPage.body.innerHTML;
           content.getElementById(said(`turnip.content.setting`)).innerHTML = this.contents.settingPage.body.innerHTML;
           content.getElementById(said(`turnip.content.account`)).innerHTML = this.contents.accountPage.body.innerHTML;
 
@@ -98,6 +104,7 @@
 
           //  Initial components.
           this.webhook = new TurnipExtensionWebhook(this, this.turnipRaid);
+          this.history = new TurnipExtensionHistory(this, this.turnipRaid);
           this.setting = new TurnipExtensionSetting(this, this.turnipRaid);
           this.account = new TurnipExtensionAccount(this, this.turnipRaid);
 
@@ -218,18 +225,21 @@
             case this.constants.workMode.noAccount:
               ui.click(`turnip.nav.account`);
               ui.disable(`turnip.nav.webhook`);
+              ui.disable(`turnip.nav.history`);
               ui.disable(`turnip.nav.setting`);
               ui.enable(`turnip.nav.account`);
               break;
             case this.constants.workMode.wrongToken:
               ui.click(`turnip.nav.account`);
               ui.disable(`turnip.nav.webhook`);
+              ui.disable(`turnip.nav.history`);
               ui.disable(`turnip.nav.setting`);
               ui.enable(`turnip.nav.account`);
               break;
             case this.constants.workMode.allReady:
               ui.click(`turnip.nav.webhook`);
               ui.enable(`turnip.nav.webhook`);
+              ui.enable(`turnip.nav.history`);
               ui.enable(`turnip.nav.setting`);
               ui.enable(`turnip.nav.account`);
               break;
@@ -256,6 +266,7 @@
           return config;
         })
         .then(() => this.webhook.render(config))
+        .then(() => this.history.render(config))
         .then(() => this.setting.render(config))
         .then(() => this.account.render(config))
         .then(() => resolve(config))
