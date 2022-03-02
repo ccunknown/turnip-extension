@@ -27,6 +27,9 @@
   --breakpoint-xl: 1200px;
   --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --extension-container-space-top: calc(7.6rem + 10px);
+  --extension-container-space-bottom: 10px;
 }
 
 #main-menu #extension-turnip-extension-menu-item {
@@ -35,11 +38,11 @@
 
 /* Container and Nav */
 #extension-turnip-extension-view {
-  height: calc(100% - 7.6rem);
+  height: calc(100% - var(--extension-container-space-top) - var(--extension-container-space-bottom));
   box-sizing: border-box;
   overflow: auto;
   position: absolute;
-  top: 8.6rem;
+  top: var(--extension-container-space-top);
 }
 
 #turnip-container .turnip-container-nav {

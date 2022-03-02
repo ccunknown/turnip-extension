@@ -85,9 +85,9 @@ var Defaults = {
             // week: 604800
             // day: 86400
             // hour: 3600
-            "duration": 3600,
+            "duration": 2592000,
             "cleanup": {
-              "interval": 30
+              "interval": 300
             }
           },
         },

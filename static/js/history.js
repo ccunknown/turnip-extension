@@ -13,6 +13,7 @@ class TurnipExtensionHistory {
 
     this.initRestApiTool();
     this.initDisplay();
+    // this.initButtonFunction();
   }
 
   initRestApiTool() {
@@ -43,7 +44,8 @@ class TurnipExtensionHistory {
       },
       render: (device, property) => {
         console.log(`[${this.constructor.name}]`, `display.render() >> `);
-        return this.renderService(device, property);
+        // return this.renderService(device, property);
+        return (device && property) ? this.renderProperty(device, property) : this.renderDevices();
       },
       sync: (device, property) => {
         console.log(`[${this.constructor.name}]`, `display.sync() >> `);
@@ -60,15 +62,93 @@ class TurnipExtensionHistory {
     }
   }
 
+  initButtonFunction() {
+    console.log(`[${this.constructor.name}]`, `initButtonFunction() >> `);
+    let said = this.said;
+    let saidObj = this.saidObj;
+
+    saidObj(`turnip.content.history.section-02.title.back`).click(() => {
+      console.log(
+        `[${this.constructor.name}]`,
+        `Event [Click] : turnip.content.setting.section-01.factory-reset.button`
+      );
+      return this.display.sync();
+    });
+  }
+
+  initChart() {
+    console.log(`[${this.constructor.name}]`, `initChart() >> `);
+    let saidObj = this.saidObj;
+    let ctx = saidObj(`turnip.content.history.section-02.body.chart`);
+    let config = {
+      type: `line`,
+      data: {
+        labels: [`label`],
+        datasets: [{
+          data: [{
+            x: '2011-10-05T14:48:00.000Z',
+            y: 50
+          }],
+          fill: false,
+          borderColor: `rgb(75, 192, 192)`,
+          tension: 0.1
+        }],
+        backgroundColor: [`rgba(0, 0, 0, 0.3)`],
+        borderWidth: 1
+      },
+      options: {
+        scales: {
+          // xAxes: [{
+          //   ticks: {
+          //       display: false //this will remove only the label
+          //   }
+          // }],
+          x: {
+            // min: `2021-11-07 00:00:00`
+            min: `2011-10-05T14:48:00.000Z`,
+            display: false
+            // type: `time`,
+            // time: {
+            //   unit: `millisecond`
+            // }
+          }
+        }
+      }
+    };
+    this.chart = new Chart(ctx, config);
+  }
+
+  updateChart(
+    dataset,    /* array like [ {x: ..., y: ...}, {x: ..., y: ...} ] */
+    timescale,   /* hour, day, week, month */
+    label
+  ) {
+    let t =
+      timescale == `hour`
+      ? new Date(new Date() - 60 * 60 * 1000)
+      : timescale == `day`
+        ? new Date(new Date() - 24 * 60 * 60 * 1000)
+        : timescale == `week`
+          ? new Date(new Date() - 7 * 24 * 60 * 60 * 1000)
+          : timescale == `month`
+            ? new Date(new Date() - 30 * 24 * 60 * 60 * 1000)
+            : new Date(new Date() - 30 * 24 * 60 * 60 * 1000);
+    this.chart.options.scales.x.min = t.toISOString();
+    this.chart.data.datasets[0].data = dataset;
+    this.chart.data.datasets[0].label = label;
+    this.chart.update();
+  }
+
   render(device, property) {
     console.log(`[${this.constructor.name}]`, `render() >> `);
     this.display.sync(device, property);
-    // this.initButtonFunction();
+    this.initButtonFunction();
+    this.initChart();
   }
 
-  renderService(device, property) {
-    return (device && property) ? this.renderProperty(device, property) : this.renderDevices();
-  }
+  // renderService(device, property) {
+  //   return (device && property) ? this.renderProperty(device, property) : this.renderDevices();
+  // }
 
   renderDevices() {
     let saidObj = this.saidObj;
@@ -106,20 +186,22 @@ class TurnipExtensionHistory {
       .then(() => {
         let text = ``;
         thingsSchema.forEach((d) => {
-          let device = d.href.replace(/^\/things\//, ``);
+          let deviceId = d.href.replace(/^\/things\//, ``);
+          let deviceName = d.title || ``;
+          let deviceLabel = d.title ? `${d.title} [id: ${deviceId}]` : `[id: ${deviceId}]`;
           let deviceText = `
             <div class="card bg-dark border-light">
 
-              <div class="card-header" id="extension-turnip-extension-content-history-section-01-heading-${device}">
+              <div class="card-header" id="extension-turnip-extension-content-history-section-01-heading-${deviceId}">
                 <h4 class="mb-0">
-                  ${device}
+                  ${deviceLabel}
                 </h4>
               </div>
           
               <div
-                id="extension-turnip-extension-content-history-section-01-collapse-${device}"
+                id="extension-turnip-extension-content-history-section-01-collapse-${deviceId}"
                 class="collapse show"
-                aria-labelledby="extension-turnip-extension-content-history-section-01-heading-${device}"
+                aria-labelledby="extension-turnip-extension-content-history-section-01-heading-${deviceId}"
                 data-parent="#extension-turnip-extension-content-history-section-01-accordion"
               >
                 <div class="card-body">
@@ -132,13 +214,17 @@ class TurnipExtensionHistory {
           `;
           let propertyText = ``;
           Object.keys(d.properties).forEach((p) => {
-            let propertyId = `extension-turnip-extension-content-history-section-01-list-:${device}:-:${p}:`
+            let property = d.properties[p];
+            let propertyId = `extension-turnip-extension-content-history-section-01-list-:${deviceId}:-:${p}:`
             let propertiesText = `
               <a
                 id="${propertyId}"
                 class="ml-4 d-flex justify-content-between align-items-center"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="[id: ${p}]"
               >
-                ${p}
+                ${property.title ? `${property.title}` : `${p}`}
                 <span class="badge badge-primary badge-pill">view</span>
               </a>
             `;
@@ -158,7 +244,8 @@ class TurnipExtensionHistory {
           let device = d.href.replace(/^\/things\//, ``);
           Object.keys(d.properties).forEach((p) => {
             saidObj(`turnip.content.history.section-01.list.:${device}:.:${p}:`).click(() => {
-              this.render(device, p);
+              // this.render(device, p);
+              this.display.sync(device, p);
             });
           })
         });
@@ -168,25 +255,76 @@ class TurnipExtensionHistory {
     });
   }
 
-  renderProperty(device, property) {
+  renderProperty(device, property, timerange = 3600) {
+    let timerangeText = `hour`;
     let saidObj = this.saidObj;
     console.log(`[${this.constructor.name}]`, `renderProperty(${device}, ${property}) >> `);
 
     return new Promise((resolve, reject) => {
+      let dataSet = [];
+      let prop = null;
       Promise.resolve()
-      .then(() => this.api.getHistoryThings(device, property, 3600))
+
+      //  Render Schema
+      .then(() => this.api.getThings())
+      .then((schema) => {
+        console.log(schema);
+        return schema;
+      })
+      .then((schema) => schema.find(e => e.href.match(new RegExp(`\/${device}`))))
+      .then((d) => {
+        console.log(d);
+        return d;
+      })
+      .then((d) => {
+        let p = property.replace(/^prop-/, ``);
+        console.log(p);
+        if(d && d.properties && d.properties[p]) {
+          prop = d.properties[p];
+          return JSON.stringify(prop, null, 2);
+        }
+        else {
+          return `{}`;
+        }
+      })
+      .then((p) => {
+        console.log(p);
+        $(`#extension-turnip-extension-content-history-section-02-body-schema`).val(p);
+      })
+
+      // Render Value
+      .then(() => this.api.getHistoryThings(device, property, timerange))
       .then((dataArr) => {
         let text = ``;
         dataArr.forEach((e) => {
-          let line = `${e.timestamp} [${e.device}: ${e.property}] ${e.value}`;
-          // text = `${line}${text.length ? `&#13;&#10;${text}` : text}`;
+          let timestamp = new Date(e.timestamp);
+          let line = `${timestamp.toISOString()}: ${e.value}`;
           text = `${line}${text.length ? `\n${text}` : text}`;
+          dataSet.push({ x: timestamp.toISOString(), y: e.value });
         });
         console.log(text);
-        saidObj(`turnip.content.history.section-02.title`).html(`${device}: ${property}`);
-        // saidObj(`turnip.content.history.section-02.textarea`).val(text);
-        $(`#extension-turnip-extension-content-history-section-02-textarea`).val(text);
+        saidObj(`turnip.content.history.section-02.title.label`).html(`${device}: ${property}`);
+        $(`#extension-turnip-extension-content-history-section-02-body-value`).val(text);
       })
+
+      // Render Timezone
+      .then(() => {
+        let timezoneObj = saidObj(`turnip.content.history.section-02.body.timezone`);
+        let timezone = (new Date()).toString().match(/GMT.+$/)[0];
+        timezoneObj.val(timezone);
+      })
+
+      // Render graph
+      .then(() => {
+        if(prop && typeof prop.value == `number`) {
+          this.updateChart(dataSet, timerangeText, `${prop.title} (${prop.unit})`);
+          console.log(dataSet);
+        }
+        else {
+          this.updateChart({}, timerangeText, label);
+        }
+      })
+
       .then(() => resolve())
       .catch((err) => reject(err));
     });
