@@ -121,7 +121,7 @@ class TurnipExtensionHistory {
   updateChart(
     dataset,    /* array like [ {x: ..., y: ...}, {x: ..., y: ...} ] */
     timescale,   /* hour, day, week, month */
-    label
+    label = `undefined`
   ) {
     let t =
       timescale == `hour`
