@@ -1,9 +1,8 @@
 <div id="extension-turnip-extension-contents" style="height: 100%;">
   <div id="turnip-container" style="height: 100%;">
-    <div class="container h-100">
-      <div class="row h-100">
-        <div class="nav flex-column nav-pills turnip-container-nav" role="tablist" aria-orientation="vertical">
-
+    <div class="turnip-workspace">
+      <div class="d-flex justify-content-end turnip-nav" id="extension-lime-nav" role="tablist" aria-orientation="vertical">
+        <div class="nav nav-pills nav-bar" role="tablist" aria-orientation="vertical">
           <a
             id="extension-turnip-extension-nav-webhook"
             class="nav-link"
@@ -13,7 +12,7 @@
             aria-controls="extension-turnip-extension-content-webhook"
             aria-selected="false"
           >
-            <center><i class="fas fa-cloud-upload-alt fa-3x"></i></center>
+            <center><i class="fas fa-cloud-upload-alt fa-2x"></i></center>
           </a>
 
           <a
@@ -25,7 +24,7 @@
             aria-controls="extension-turnip-extension-content-history"
             aria-selected="false"
           >
-            <center><i class="fas fa-chart-bar fa-3x"></i></center>
+            <center><i class="fas fa-chart-bar fa-2x"></i></center>
           </a>
 
           <a
@@ -37,7 +36,7 @@
             aria-controls="extension-turnip-extension-content-setting"
             aria-selected="false"
           >
-            <center><i class="fas fa-cogs fa-3x"></i></center>
+            <center><i class="fas fa-cogs fa-2x"></i></center>
           </a>
 
           <a
@@ -49,68 +48,68 @@
             aria-controls="extension-turnip-extension-content-account"
             aria-selected="true"
           >
-            <center><i class="fas fa-user fa-3x"></i></center>
+            <center><i class="fas fa-user fa-2x"></i></center>
           </a>
         </div>
-        <div class="col bg-dark text-light tab-content turnip-container-content py-4">
+      </div>
+      <div class="col bg-dark text-light tab-content turnip-container-content py-4">
 
-          <div
-            id="extension-turnip-extension-content-loading"
-            class="tab-pane fade turnip-tab-content active show"
-            role="tabpanel"
-            aria-labelledby="extension-turnip-extension-nav-loading"
-          >
-            <div class="turnip-content-section">
-              <div>
-                <button class="btn btn-primary" type="button" disabled="">
-                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  &nbsp;Loading...
-                </button>
-              </div>
+        <div
+          id="extension-turnip-extension-content-loading"
+          class="tab-pane fade turnip-tab-content active show"
+          role="tabpanel"
+          aria-labelledby="extension-turnip-extension-nav-loading"
+        >
+          <div class="turnip-content-section">
+            <div>
+              <button class="btn btn-primary" type="button" disabled="">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                &nbsp;Loading...
+              </button>
             </div>
           </div>
-
-          <!-- ==== Webhook Menu ==== -->
-          <div
-          id="extension-turnip-extension-content-webhook"
-            class="tab-pane fade turnip-tab-content"
-            role="tabpanel"
-            aria-labelledby="extension-turnip-extension-nav-webhook"
-          >
-            ...
-          </div>
-
-          <!-- ==== History Menu ==== -->
-          <div
-            id="extension-turnip-extension-content-history"
-            class="tab-pane fade turnip-tab-content"
-            role="tabpanel"
-            aria-labelledby="extension-turnip-extension-nav-history"
-          >
-            ...
-          </div>
-
-          <!-- ==== Setting Menu ==== -->
-          <div
-            id="extension-turnip-extension-content-setting"
-            class="tab-pane fade turnip-tab-content"
-            role="tabpanel"
-            aria-labelledby="extension-turnip-extension-nav-setting"
-          >
-            ...
-          </div>
-
-          <!-- ==== Account Menu ==== -->
-          <div
-            id="extension-turnip-extension-content-account"
-            class="tab-pane fade turnip-tab-content"
-            role="tabpanel"
-            aria-labelledby="extension-turnip-extension-nav-account"
-          >
-            ...
-          </div>
-
         </div>
+
+        <!-- ==== Webhook Menu ==== -->
+        <div
+        id="extension-turnip-extension-content-webhook"
+          class="tab-pane fade turnip-tab-content"
+          role="tabpanel"
+          aria-labelledby="extension-turnip-extension-nav-webhook"
+        >
+          ...
+        </div>
+
+        <!-- ==== History Menu ==== -->
+        <div
+          id="extension-turnip-extension-content-history"
+          class="tab-pane fade turnip-tab-content"
+          role="tabpanel"
+          aria-labelledby="extension-turnip-extension-nav-history"
+        >
+          ...
+        </div>
+
+        <!-- ==== Setting Menu ==== -->
+        <div
+          id="extension-turnip-extension-content-setting"
+          class="tab-pane fade turnip-tab-content"
+          role="tabpanel"
+          aria-labelledby="extension-turnip-extension-nav-setting"
+        >
+          ...
+        </div>
+
+        <!-- ==== Account Menu ==== -->
+        <div
+          id="extension-turnip-extension-content-account"
+          class="tab-pane fade turnip-tab-content"
+          role="tabpanel"
+          aria-labelledby="extension-turnip-extension-nav-account"
+        >
+          ...
+        </div>
+
       </div>
     </div>
   </div>

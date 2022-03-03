@@ -40,20 +40,46 @@
 #extension-turnip-extension-view {
   height: calc(100% - var(--extension-container-space-top) - var(--extension-container-space-bottom));
   box-sizing: border-box;
-  overflow: auto;
+  /* overflow: auto; */
+  overflow: visible;
   position: absolute;
   top: var(--extension-container-space-top);
 }
 
-#turnip-container .turnip-container-nav {
+#turnip-container .turnip-workspace {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0px 5px 0px 5px;
   height: fit-content;
+  max-height: 100%;
+  overflow: auto;
+}
+
+/* #turnip-container .turnip-container-nav {
+  height: fit-content;
+  position: absolute;
+  top: -30px;
+} */
+
+#turnip-container .turnip-nav {
+  width: 100%;
+  overflow: auto;
+  height: fit-content;
+}
+
+#turnip-container .nav-bar {
+  display: flex;
+  position: fixed;
+  top: calc(var(--extension-container-space-top) - 30px);
 }
 
 #turnip-container .nav .nav-link {
   background: var(--light);
-  margin-bottom: 5px;
+  margin-left: 5px;
   color: var(--dark);
-  border-radius: 0.5rem 0rem 0rem 0.5rem;
+  border-radius: 5px 5px 0 0;
+  width: 50px;
 }
 
 #turnip-container .nav .nav-link:hover {
@@ -73,8 +99,9 @@
 }
 
 #turnip-container .turnip-container-content {
+  width: 100%;
   max-height: 100%;
-  overflow: auto;
+  /* overflow: auto; */
   height: fit-content;
 }
 
@@ -565,6 +592,14 @@
   #turnip-container .turnip-webhook-item {
     min-width: calc(100% - 20px);
   }
+
+  #turnip-container .turnip-nav {
+    max-width: 700px;
+  }
+
+  #turnip-container .turnip-container-content {
+    max-width: 700px;
+  }
 }
 
 @media (min-width: 768px) {
@@ -572,12 +607,28 @@
     min-width: calc(50% - 20px);
     width: calc(50% - 20px);
   }
+
+  #turnip-container .turnip-nav {
+    max-width: 900px;
+  }
+
+  #turnip-container .turnip-container-content {
+    max-width: 900px;
+  }
 }
 
 @media (min-width: 1200px) {
   #turnip-container .turnip-webhook-item {
     min-width: calc(33% - 20px);
     width: calc(33% - 20px);
+  }
+
+  #turnip-container .turnip-nav {
+    max-width: 950px;
+  }
+
+  #turnip-container .turnip-container-content {
+    max-width: 950px;
   }
 }
 
