@@ -297,10 +297,10 @@ class TurnipExtensionHistory {
       .then((dataArr) => {
         let text = ``;
         dataArr.forEach((e) => {
-          let timestamp = new Date(e.timestamp);
-          let line = `${timestamp.toISOString()}: ${e.value}`;
+          let timestamp = this.toIsoString(new Date(e.timestamp));
+          let line = `${timestamp}: ${e.value}`;
           text = `${line}${text.length ? `\n${text}` : text}`;
-          dataSet.push({ x: timestamp.toISOString(), y: e.value });
+          dataSet.push({ x: timestamp, y: e.value });
         });
         console.log(text);
         saidObj(`turnip.content.history.section-02.title.label`).html(`${device}: ${property}`);
@@ -328,5 +328,19 @@ class TurnipExtensionHistory {
       .then(() => resolve())
       .catch((err) => reject(err));
     });
+  }
+
+  toIsoString(date, gmt = false) {
+    let tzo = -date.getTimezoneOffset();
+    let dif = tzo >= 0 ? '+' : '-';
+    let pad = (num) => (num < 10 ? '0' : '') + num;
+
+    return date.getFullYear() +
+      '-' + pad(date.getMonth() + 1) +
+      '-' + pad(date.getDate()) +
+      'T' + pad(date.getHours()) +
+      ':' + pad(date.getMinutes()) +
+      ':' + pad(date.getSeconds()) +
+      (gmt ? `${dif}${pad(Math.floor(Math.abs(tzo) / 60))}:${pad(Math.abs(tzo) % 60)}` : ``);
   }
 }
