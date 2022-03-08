@@ -136,8 +136,11 @@ class webhookService extends EventEmitter {
         console.log(`[${this.constructor.name}]`, `job id[${job.id}]`);
         Promise.resolve()
         .then(() => this.requestQueueProcess(job.data.webhookName, job.data.options))
-        .then((res) => done(res))
-        .catch((err) => done(err));
+        .then((res) => done(null, res))
+        .catch((err) => {
+          console.error(err);
+          done(err);
+        });
       }
     );
     return ;
@@ -156,7 +159,9 @@ class webhookService extends EventEmitter {
         timestamp.req.unix = Date.now();
         timestamp.req.isoString = new Date(timestamp.req.unix).toISOString();
         timeout = setTimeout(() => {
-          throw new Error(`Job process timeout!`);
+          // throw new Error(`Job process timeout!`);
+          let err = new Error(`Job process timeout!`);
+          reject(err);
         }, Config.job.process.timeout);
         // }, Number(process.env[`JOB_PROCESS_TIMEOUT`]));
         // }, 10000);
