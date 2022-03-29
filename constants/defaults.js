@@ -20,6 +20,12 @@ var Defaults = {
         "description": "This service use to check internet connection and redis (install if not exist)."
       },
       {
+        "id": "channel-service",
+        "enable": true,
+        "status": "unknow",
+        "description": "This service use to create WebRTC channel for real-time communicate between backend and frontend."
+      },
+      {
         "id": "history-service",
         "enable": true,
         "status": "unknow"
@@ -40,6 +46,27 @@ var Defaults = {
         ]
       }
     ],
+    "channel": {
+      "server": {
+        "config": {
+          "ice": {
+            "iceServer": [
+              {
+                "urls": [
+                  "stun:stun1.l.google.com:19302",
+                  "stun:stun2.l.google.com:19302"
+                ]
+              }
+            ],
+            "iceCandidatePoolSize": 10
+          }
+        }
+      },
+      "abort": {
+        "successRate": 0.1,
+        "period": 30000
+      }
+    },
     "job": {
       "queue": {
         "maxlength": 100,
@@ -164,6 +191,66 @@ var Defaults = {
             "reason": {
               "type": "string",
               "default": ""
+            }
+          }
+        }
+      },
+      "channel": {
+        "type": "object",
+        "required": [ "server" ],
+        "additionalProperties": false,
+        "properties": {
+          "server": {
+            "type": "object",
+            "required": [ "config" ],
+            "additionalProperties": false,
+            "properties": {
+              "config": {
+                "type": "object",
+                "required": [ "ice" ],
+                "additionalProperties": false,
+                "properties": {
+                  "ice": {
+                    "type": "object",
+                    "required": [ "iceServer" ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "iceServer": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [ "urls" ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "urls": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "iceCandidatePoolSize": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "abort": {
+            "type": "object",
+            "required": [ "successRate", "period" ],
+            "additionalProperties": false,
+            "properties": {
+              "successRate": {
+                "type": "number"
+              },
+              "period": {
+                "type": "number"
+              }
             }
           }
         }

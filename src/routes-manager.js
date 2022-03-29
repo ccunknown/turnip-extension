@@ -433,6 +433,151 @@ class RoutesManager extends APIHandler{
         }
       },
 
+      /***  Resource : /channel/session  ***/
+      {
+        "resource": /\/channel\/session/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              this.laborsManager.getService(`channel-service`)
+              .then((service) => {
+                this.channelService = service.obj;
+                return this.channelService.getSession()
+              })
+              .then((list) => resolve(this.makeJsonRespond(JSON.stringify(list))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            })
+          },
+          "POST": (req) => {
+            return new Promise((resolve, reject) => {
+              Promise.resolve()
+              .then(() => this.laborsManager.getService(`channel-service`))
+              .then((service) => this.channelService = service.obj)
+              .then(() => this.channelService.createSession(req.body.channelOptions, req.body.config))
+              .then((session) => { return { id: session.id }; })
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            })
+          },
+          "DELETE": (req) => {
+            return new Promise((resolve, reject) => {
+              Promise.resolve()
+              .then(() => this.laborsManager.getService(`channel-service`))
+              .then((service) => this.channelService = service.obj)
+              .then(() => this.channelService.deleteSession())
+              .then(() => { return { "result": true } })
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            })
+          }
+        }
+      },
+
+      /***  Resource : /channel/session/{sessionId}  ***/
+      {
+        "resource": /\/channel\/session\/[^/]+/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              let id = this.getPathElement(req.path);
+              Promise.resolve()
+              .then(() => this.laborsManager.getService(`channel-service`))
+              .then((service) => this.channelService = service.obj)
+              .then(() => this.channelService.getSession(id))
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          },
+          "DELETE": (req) => {
+            return new Promise((resolve, reject) => {
+              let id = this.getPathElement(req.path);
+              Promise.resolve()
+              .then(() => this.laborsManager.getService(`channel-service`))
+              .then((service) => this.channelService = service.obj)
+              .then(() => this.channelService.deleteSession(id))
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          }
+        }
+      },
+
+      /***  Resource : /channel/session/{sessionId}/offer  ***/
+      {
+        "resource": /\/channel\/session\/[^/]+\/offer/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              let id = this.getPathElement(req.path, 2);
+              Promise.resolve()
+              .then(() => this.laborsManager.getService(`channel-service`))
+              .then((service) => this.channelService = service.obj)
+              .then(() => this.channelService.getOffer(id))
+              // .then((ret) => {
+              //   console.log(`[${this.constructor.name}]`, JSON.stringify(ret, null, 2));
+              //   return ret;
+              // })
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          }
+        }
+      },
+
+      /***  Resource : /channel/session/{sessionId}/offer-candidate  ***/
+      {
+        "resource": /\/channel\/session\/[^/]+\/offer-candidate/,
+        "method": {
+          "GET": (req) => {
+            return new Promise((resolve, reject) => {
+              let id = this.getPathElement(req.path, 2);
+              Promise.resolve()
+              .then(() => this.laborsManager.getService(`channel-service`))
+              .then((service) => this.channelService = service.obj)
+              .then(() => this.channelService.getOfferCandidate(id))
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          }
+        }
+      },
+
+      /***  Resource : /channel/session/{sessionId}/answer  ***/
+      {
+        "resource": /\/channel\/session\/[^/]+\/answer/,
+        "method": {
+          "POST": (req) => {
+            return new Promise((resolve, reject) => {
+              let id = this.getPathElement(req.path, 2);
+              Promise.resolve()
+              .then(() => this.laborsManager.getService(`channel-service`))
+              .then((service) => this.channelService = service.obj)
+              .then(() => this.channelService.addAnswer(id, req.body))
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          }
+        }
+      },
+
+      /***  Resource : /channel/session/{sessionId}/answer-candidate  ***/
+      {
+        "resource": /\/channel\/session\/[^/]+\/answer-candidate/,
+        "method": {
+          "POST": (req) => {
+            return new Promise((resolve, reject) => {
+              let id = this.getPathElement(req.path, 2);
+              Promise.resolve()
+              .then(() => this.laborsManager.getService(`channel-service`))
+              .then((service) => this.channelService = service.obj)
+              .then(() => this.channelService.addAnswerCandidate(id, req.body))
+              .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
+              .catch((err) => resolve(this.catchErrorRespond(err)));
+            });
+          }
+        }
+      },
+
       /***  Resource : /network/resolve  ***/
       {
         "resource": /\/network\/resolve/,
@@ -562,6 +707,13 @@ class RoutesManager extends APIHandler{
         }
       }
     ];
+  }
+
+  getPathElement(path, index) {
+    let pathArr = path.replace(/^\//, ``).replace(/\/$/, ``).split(`/`);
+    if(index && index > pathArr.length)
+      return null;
+    return pathArr[index ? index : pathArr.length - 1];
   }
 
   handleRequest(req) {

@@ -144,6 +144,9 @@ class TurnipExtensionHistory {
     this.display.sync(device, property);
     this.initButtonFunction();
     this.initChart();
+    Promise.resolve()
+    .then(() => this.channel = new TurnipWebRTCChannel(this.parent, { name: `rtSensorData`, type: `data` }))
+    .then(() => this.channel.start())
   }
 
   // renderService(device, property) {

@@ -40,6 +40,7 @@
 
         "static/js/turnip-api.js",
         "static/js/turnipRaid.js",
+        "static/js/channel.js",
         "static/js/webhook.js",
         "static/js/history.js",
         "static/js/setting.js",

@@ -52,7 +52,8 @@ class historyService extends EventEmitter {
     console.log(`[${this.constructor.name}]`, `initSequelize() >> `);
     this.sequelize = new Sequelize({
       dialect: `sqlite`,
-      storage: this.thingsDbPath
+      storage: this.thingsDbPath,
+      logging: false
     });
     this.model.thingRecord = this.sequelize.define(`ThingsHistory`, {
       // timestamp: {
@@ -89,6 +90,7 @@ class historyService extends EventEmitter {
       .then(() => this.initThingsQueueProcess())
       .then(() => this.initThingsUpdateHandler())
       .then(() => this.initThingsCleanupHandler())
+      .then(() => this.initChannel())
       .then((ret) => resolve(ret))
       .catch((err) => reject(err));
     });
@@ -96,6 +98,17 @@ class historyService extends EventEmitter {
 
   stop() {
 
+  }
+ 
+  initChannel() {
+    console.log(`[${this.constructor.name}]`, `initChannel() >> `);
+    return new Promise((resolve, reject) => {
+      Promise.resolve()
+      .then(() => this.laborsManager.getService(`channel-service`))
+      .then((service) => this.channelService = service.obj)
+      .then(() => resolve())
+      .catch((err) => reject(err));
+    })
   }
 
   initThingsUpdateHandler() {
@@ -116,8 +129,8 @@ class historyService extends EventEmitter {
   onWsocketMessage() {
   // get onWsocketMessage() {
     return (service, message) => {
-      console.log(`[${this.constructor.name}]`, `${service.constructor.name} event`);
-      console.log(`[${this.constructor.name}]`, JSON.stringify(message));
+      // console.log(`[${this.constructor.name}]`, `${service.constructor.name} event`);
+      // console.log(`[${this.constructor.name}]`, JSON.stringify(message));
       this.thingsHistoryQueue.add(
         `thing`,
         {
@@ -183,10 +196,10 @@ class historyService extends EventEmitter {
       `thing`,
       1, // processor concurency
       (job, done) => {
-        console.log(`[${this.constructor.name}]`, `JOB Process thingsHistoryQueue() >> `);
-        console.log(`[${this.constructor.name}]`, `job id[${job.id}]`);
-        console.log(`[${this.constructor.name}]`, `job cmd: ${job.data.cmd}`);
-        console.log(`[${this.constructor.name}]`, `payload: ${JSON.stringify(job.data.payload)}`);
+        // console.log(`[${this.constructor.name}]`, `JOB Process thingsHistoryQueue() >> `);
+        // console.log(`[${this.constructor.name}]`, `job id[${job.id}]`);
+        // console.log(`[${this.constructor.name}]`, `job cmd: ${job.data.cmd}`);
+        // console.log(`[${this.constructor.name}]`, `payload: ${JSON.stringify(job.data.payload)}`);
         Promise.resolve()
         .then(() => {
           if(job.data.cmd == `update`) 
@@ -200,11 +213,11 @@ class historyService extends EventEmitter {
             throw new Error(`Command "${job.data.cmd}" is not support.`);
         })
         .then((ret) => {
-          console.log(
-            `[${this.constructor.name}]`,
-            `${job.data.cmd}:`,
-            `${JSON.stringify(ret, null, 2)}`
-          );
+          // console.log(
+          //   `[${this.constructor.name}]`,
+          //   `${job.data.cmd}:`,
+          //   `${JSON.stringify(ret, null, 2)}`
+          // );
           return ret;
         })
         .then((ret) => done(null, ret))
@@ -217,19 +230,21 @@ class historyService extends EventEmitter {
   }
 
   thingsUpdate(data) {
-    console.log(`[${this.constructor.name}]`, `thingsUpdate() >> `);
+    // console.log(`[${this.constructor.name}]`, `thingsUpdate() >> `);
     return new Promise((resolve, reject) => {
+      let record = {
+        device: data.id,
+        property: data.property.name,
+        value: data.property.value
+      };
       Promise.resolve()
       .then(() => this.sequelize.sync())
       .then(() => console.log(
         `[${this.constructor.name}]`,
         `insert: ${data.id} [${data.property.name}] ${data.property.value}`
       ))
-      .then(() => this.model.thingRecord.create({
-        device: data.id,
-        property: data.property.name,
-        value: data.property.value
-      }))
+      .then(() => this.model.thingRecord.create(record))
+      .then(() => this.channelService.send(`rtSensorData`, JSON.stringify(record)))
       .then((ret) => resolve(ret))
       .catch((err) => reject(err));
     });
@@ -306,38 +321,6 @@ class historyService extends EventEmitter {
       .catch((err) => reject(err));
     })
   }
-
-  // thingsProcess(data) {
-  //   console.log(`[${this.constructor.name}]`, `thingsProcess() >> `);
-  //   return new Promise((resolve, reject) => {
-  //     let result;
-  //     Promise.resolve()
-  //     .then(() => this.sequelize.sync())
-  //     .then(() => 
-  //       data.cmd == `update`
-  //       ? this.thingsUpdate(data.payload)
-  //       : data.cmd == `cleanup`
-  //         ? this.thingsCleanup(data.payload)
-  //         : new Error(`Command ${data.cmd} is not support.`)
-  //     )
-  //     .then(() => {
-  //       console.log(
-  //         `[${this.constructor.name}]`,
-  //         `insert: ${data.payload.id} [${data.payload.property.name}] ${data.payload.property.value}`
-  //       );
-  //       return this.model.thingRecord.create({
-  //         device: data.payload.id,
-  //         property: data.payload.property.name,
-  //         value: data.payload.property.value
-  //       });
-  //     })
-  //     .then((ret) => result = ret)
-  //     // .then(() => this.sequelize.sync())
-  //     .then(() => result)
-  //     .then((ret) => resolve(ret))
-  //     .catch((err) => reject(err));
-  //   });
-  // }
 
   pushWebhookRecord(webhookName, record) {
     // console.log(`historyService: pushWebhookRecord(${webhookName}, [record]) >> `);

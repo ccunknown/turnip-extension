@@ -29,7 +29,7 @@ class TurnipApi {
           fetch(url, {
             method: 'POST',
             headers: window.API.headers('application/json'),
-            body: JSON.stringify(data)
+            body: data ? JSON.stringify(data) : ``
           })
           .then((res) => (!res.ok) ? res.json().then((body) => reject({status: res.status, body: body})) : resolve(res.json()))
           .catch((err) => reject(err));
@@ -261,6 +261,7 @@ class TurnipApi {
 
   restCall(method, path, body) {
     return new Promise((resolve, reject) => {
+      console.log(`[${this.constructor.name}]`, `restCall() >> `);
       let func;
       switch(method.toLowerCase()) {
         case `get`:
