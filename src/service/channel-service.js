@@ -100,8 +100,8 @@ class channelService extends EventEmitter {
   }
 
   deleteSession(session) {
-    console.log(`[${this.constructor.name}]`, `deleteSession(${id || ``}) >> `);
-    if(id) {
+    console.log(`[${this.constructor.name}]`, `deleteSession(${session ? session.id || session : ``}) >> `);
+    if(session) {
       session = typeof session == `object` ? session : this.getSession(session);
       if(session) {
         if(session.peerConnection) {
@@ -121,7 +121,7 @@ class channelService extends EventEmitter {
             (event) => this.deleteSession(session.id)
           );
         }
-        this.sessions = this.sessions.filter(e => e.id != sessionId);
+        this.sessions = this.sessions.filter(e => e.id != session.id);
       }
     }
     else {

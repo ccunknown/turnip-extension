@@ -25,9 +25,12 @@ class TurnipWebRTCChannel extends EventTarget {
     console.log(`[${this.constructor.name}]`, `initDataChannel() >> `);
     this.channel = this.peerConnection.createDataChannel(options.name);
     this.channel.addEventListener(`message`, event => {
-      console.log(`[${this.constructor.name}]`, `on message`, options.name, event.data);
-      // this.emit(`channel-${options.name}`, event.data);
-      this.dispatchEvent(new CustomEvent(`channel-${options.name}`, event.data));
+      let data = JSON.parse(event.data);
+      // console.log(`[${this.constructor.name}]`, `on message`, options.name, data);
+      this.dispatchEvent(new CustomEvent(
+        `channel-${options.name}`, 
+        { detail: data }
+      ));
     });
   }
 

@@ -5,6 +5,12 @@ class TurnipExtensionHistory {
     this.said = this.turnipRaid.stringAutoId.bind(this.turnipRaid);
     this.saidObj = this.turnipRaid.stringAutoIdObject.bind(this.turnipRaid);
 
+    this.current = {
+      device: null,
+      property: null,
+      timescale: `hour`
+    };
+
     this.init();
   }
 
@@ -123,6 +129,32 @@ class TurnipExtensionHistory {
     timescale,   /* hour, day, week, month */
     label = `undefined`
   ) {
+    let t = this.getCurrentTimeRange(timescale);
+    this.chart.options.scales.x.min = t.toISOString();
+    this.chart.data.datasets[0].data = dataset;
+    this.chart.data.datasets[0].label = label;
+    this.chart.update();
+  }
+
+  addToChart(data) {
+    // this.chart.data.datasets[0].data.push(data);
+    this.chart.data.datasets[0].data.push(data);
+    let t = this.getCurrentTimeRange(this.current.timescale);
+    this.chart.update();
+
+    let count = 0;
+    console.log(`data 0   `, this.chart.data.datasets[0].data[0].x);
+    console.log(`current t`, t);
+    while(new Date(this.chart.data.datasets[0].data[0].x) < t) {
+      count = count + 1;
+      this.chart.data.datasets[0].data.shift();
+    }
+    console.log(`[${this.constructor.name}]`, `shiftout: `, count);
+    this.chart.options.scales.x.min = t.toISOString();
+    this.chart.update();
+  }
+
+  getCurrentTimeRange(timescale) {
     let t =
       timescale == `hour`
       ? new Date(new Date() - 60 * 60 * 1000)
@@ -133,10 +165,20 @@ class TurnipExtensionHistory {
           : timescale == `month`
             ? new Date(new Date() - 30 * 24 * 60 * 60 * 1000)
             : new Date(new Date() - 30 * 24 * 60 * 60 * 1000);
-    this.chart.options.scales.x.min = t.toISOString();
-    this.chart.data.datasets[0].data = dataset;
-    this.chart.data.datasets[0].label = label;
-    this.chart.update();
+    return t;
+  }
+
+  onChannelMessage(event) {
+    console.log(`[${this.constructor.name}]`, `onChannelMessage`, event.detail);
+    let data = event.detail;
+
+    if(data.device == this.current.device && data.property == this.current.property) {
+      let timestamp = this.toIsoString(new Date(data.createdAt));
+      this.addToChart({
+        x: timestamp,
+        y: data.value
+      });
+    }
   }
 
   render(device, property) {
@@ -144,9 +186,18 @@ class TurnipExtensionHistory {
     this.display.sync(device, property);
     this.initButtonFunction();
     this.initChart();
+    let channelOptions = {
+      name: `rtSensorData`,
+      type: `data`
+    }
     Promise.resolve()
-    .then(() => this.channel = new TurnipWebRTCChannel(this.parent, { name: `rtSensorData`, type: `data` }))
+    .then(() => this.channel = new TurnipWebRTCChannel(this.parent, channelOptions))
     .then(() => this.channel.start())
+    .then(() => this.channel.addEventListener(
+      `channel-${channelOptions.name}`, 
+      (event) => this.onChannelMessage(event)
+    ))
+    .catch((err) => console.error(err));
   }
 
   // renderService(device, property) {
@@ -326,6 +377,13 @@ class TurnipExtensionHistory {
         else {
           this.updateChart({}, timerangeText, label);
         }
+      })
+
+      // Set current device & current property
+      .then(() => {
+        this.current.device = device;
+        this.current.property = property;
+        this.current.timescale = timerangeText;
       })
 
       .then(() => resolve())
