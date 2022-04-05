@@ -165,7 +165,7 @@ class TurnipApi {
 
       /***  Resource : /history/things  ***/
       getHistoryThings: (device, property, duration) => {
-        console.log(`rest.getHistory()`);
+        console.log(`rest.getHistory(${device}, ${property}, ${duration})`);
         return this.restCall(`get`, `/history/things${(device) ? (property) ? `/${device}/${property}` : `/${device}` : ``}${duration ? `?duration=${duration}` : ``}`);
       },
 

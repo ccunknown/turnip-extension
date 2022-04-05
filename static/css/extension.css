@@ -476,6 +476,33 @@
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
+#turnip-container .turnip-label-badge-group {
+  display: flex;
+  flex-direction: row;
+}
+
+#turnip-container .turnip-label-badge-group .turnip-label-badge {
+  border-radius: 0 0 0 0;
+}
+
+#turnip-container .turnip-label-badge-group .turnip-label-badge:first-child {
+  /* border-radius: 3px 0 0 0; */
+  border-top-left-radius: 3px;
+}
+
+#turnip-container .turnip-label-badge-group .turnip-label-badge:last-child {
+  /* border-radius: 0 3px 0 0; */
+  border-top-right-radius: 3px;
+}
+
+#turnip-container .turnip-label-badge-button {
+  cursor: pointer;
+}
+
+#turnip-container .turnip-label-badge-button:hover {
+  filter: brightness(85%);
+}
+
 #turnip-container .turnip-badge-union {
   position: relative;
   top: calc(-1px);

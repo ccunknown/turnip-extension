@@ -8,7 +8,8 @@ class TurnipExtensionHistory {
     this.current = {
       device: null,
       property: null,
-      timescale: `hour`
+      timescale: `hour`,
+      data: []
     };
 
     this.init();
@@ -16,7 +17,6 @@ class TurnipExtensionHistory {
 
   init() {
     console.log(`[${this.constructor.name}]`, `init() >> `);
-
     this.initRestApiTool();
     this.initDisplay();
     // this.initButtonFunction();
@@ -79,6 +79,14 @@ class TurnipExtensionHistory {
         `Event [Click] : turnip.content.setting.section-01.factory-reset.button`
       );
       return this.display.sync();
+    });
+
+    saidObj(`turnip.content.history.section-02.title.reload`).click(() => {
+      console.log(
+        `[${this.constructor.name}]`,
+        `Event [Click] : turnip.content.setting.section-01.factory-reset.reload`
+      );
+      return this.display.sync(this.current.device, this.current.property);
     });
   }
 
@@ -166,6 +174,19 @@ class TurnipExtensionHistory {
             ? new Date(new Date() - 30 * 24 * 60 * 60 * 1000)
             : new Date(new Date() - 30 * 24 * 60 * 60 * 1000);
     return t;
+  }
+
+  scaleToDuration(timescale = this.current.timescale) {
+    switch(timescale) {
+      case `hour`: return 60 * 60;
+      case `day`: return 60 * 60 * 24;
+      case `week`: return 60 * 60 * 24 * 7;
+      case `month`: return 60 * 60 * 24 * 30;
+      default : 
+        let last = (new Date()).getTime();
+        let begin = (new Date(this.current.timescale)).getTime();
+        return Math.floor((last - begin) / 1000);
+    };
   }
 
   onChannelMessage(event) {
@@ -309,7 +330,11 @@ class TurnipExtensionHistory {
     });
   }
 
-  renderProperty(device, property, timerange = 3600) {
+  renderProperty(
+    device = this.current.device, 
+    property = this.current.property, 
+    timerange = this.scaleToDuration(this.current.timescale)
+  ) {
     let timerangeText = `hour`;
     let saidObj = this.saidObj;
     console.log(`[${this.constructor.name}]`, `renderProperty(${device}, ${property}) >> `);
@@ -370,11 +395,16 @@ class TurnipExtensionHistory {
 
       // Render graph
       .then(() => {
-        if(prop && typeof prop.value == `number`) {
-          this.updateChart(dataSet, timerangeText, `${prop.title} (${prop.unit})`);
+        console.log(`[${this.constructor.name}]`, `prop: `, prop);
+        // console.log(`[${this.constructor.name}]`, `type: `, typeof prop.value);
+        if(prop && prop.type == `number`) {
+          let label = `${prop.title} (${prop.unit})`;
+          console.log(`[${this.constructor.name}]`, `render prop:`, label);
+          this.updateChart(dataSet, timerangeText, label);
           console.log(dataSet);
         }
         else {
+          console.log(`[${this.constructor.name}]`, `render prop:`, `unrecognize`);
           this.updateChart({}, timerangeText, label);
         }
       })
