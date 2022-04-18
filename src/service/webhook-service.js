@@ -238,7 +238,7 @@ class webhookService extends EventEmitter {
   onThingUpdate(data) {
     // console.log(`webhookService: onThingUpdate() >> `);
     // console.log(JSON.stringify(data, null, 2));
-    console.log(`[${this.constructor.name}]`, `onThingUpdate() >> `);
+    // console.log(`[${this.constructor.name}]`, `onThingUpdate() >> `);
     this.webhookList.map((webhook) => {
       if(!webhook.enable)
         return ;

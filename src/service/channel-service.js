@@ -49,7 +49,7 @@ class channelService extends EventEmitter {
   }
 
   send(channelName, message) {
-    console.log(`[${this.constructor.name}]`, `send() >> `);
+    // console.log(`[${this.constructor.name}]`, `send() >> `);
     this.sessions.forEach(session => {
       if(session.channel && session.channel.readyState == `open` && session.channel.label == channelName) {
         console.log(`[${this.constructor.name}]`, `message >> `, message);

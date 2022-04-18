@@ -27,6 +27,7 @@ class historyService extends EventEmitter {
 
     this.thingsDbPath = Path.join(
       this.addonManager.getUserProfile().dataDir,
+      // `/home/pi/.mozilla-iot/data`,
       this.extension.manifest.id,
       this.config.things.database.sqlite.fname
     );
@@ -239,10 +240,10 @@ class historyService extends EventEmitter {
       };
       Promise.resolve()
       .then(() => this.sequelize.sync())
-      .then(() => console.log(
-        `[${this.constructor.name}]`,
-        `insert: ${data.id} [${data.property.name}] ${data.property.value}`
-      ))
+      // .then(() => console.log(
+      //   `[${this.constructor.name}]`,
+      //   `insert: ${data.id} [${data.property.name}] ${data.property.value}`
+      // ))
       .then(() => this.model.thingRecord.create(record))
       // .then((ret) => console.log(`[${this.constructor.name}]`, ret.dataValues))
       .then((ret) => this.channelService.send(`rtSensorData`, JSON.stringify(ret.dataValues)))
