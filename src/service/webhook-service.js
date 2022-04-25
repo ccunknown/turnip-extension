@@ -132,8 +132,8 @@ class webhookService extends EventEmitter {
       // Number(process.env[`JOB_PROCESS_CONCURRENCY`]), 
       // 5,
       (job, done) => {
-        console.log(`[${this.constructor.name}]`, `JOB Process requestQueue() >> `);
-        console.log(`[${this.constructor.name}]`, `job id[${job.id}]`);
+        // console.log(`[${this.constructor.name}]`, `JOB Process requestQueue() >> `);
+        console.log(`[${this.constructor.name}]`, `webhook job id[${job.id}]`);
         Promise.resolve()
         .then(() => this.requestQueueProcess(job.data.webhookName, job.data.options))
         .then((res) => done(null, res))
@@ -167,7 +167,7 @@ class webhookService extends EventEmitter {
         // }, 10000);
       })
       .then(() => {
-        console.log(`[${this.constructor.name}]`, `pre-call makeRequest()`);
+        // console.log(`[${this.constructor.name}]`, `pre-call makeRequest()`);
         return this.makeRequest(reqOptions);
       })
       .then((res) => {
@@ -271,10 +271,12 @@ class webhookService extends EventEmitter {
           },
           {
             // timeout: Number(process.env[`JOB_QUEUE_TIMEOUT`])
-            timeout: Config.job.queue.timeout
+            timeout: Config.job.queue.timeout,
+            removeOnComplete: 100,
+            removeOnFail: 100
           }
         );
-        console.log(`[${this.constructor.name}]`, `post-add`);
+        // console.log(`[${this.constructor.name}]`, `post-add`);
       } catch(err) {
         console.error(err);
       }
@@ -282,7 +284,7 @@ class webhookService extends EventEmitter {
   }
 
   makeRequest(options) {
-    console.log(`[${this.constructor.name}]`, `makeRequest() >> `);
+    // console.log(`[${this.constructor.name}]`, `makeRequest() >> `);
     // console.log(`options: ${JSON.stringify(options, null, 2)}`);
     return new Promise((resolve, reject) => {
       let controller;

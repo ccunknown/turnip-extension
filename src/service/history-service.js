@@ -140,7 +140,9 @@ class historyService extends EventEmitter {
         }
       ),
       {
-        timeout: this.config.things.job.timeout
+        timeout: this.config.things.job.timeout,
+        removeOnComplete: 100,
+        removeOnFail: 100
       }
     };
   }
@@ -164,6 +166,11 @@ class historyService extends EventEmitter {
           payload: {
             duration: this.config.things.database.record.duration
           }
+        },
+        {
+          timeout: this.config.things.job.timeout,
+          removeOnComplete: 100,
+          removeOnFail: 100
         }
       )
     }
