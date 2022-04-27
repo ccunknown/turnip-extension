@@ -5,12 +5,23 @@ class TurnipExtensionHistory {
     this.said = this.turnipRaid.stringAutoId.bind(this.turnipRaid);
     this.saidObj = this.turnipRaid.stringAutoIdObject.bind(this.turnipRaid);
 
+    this.default = {
+      // timescale: `hour`,
+      timescale: `5 minite`,
+      chart: {
+        timestep: 5 // Second
+      }
+    }
+
     this.current = {
+      schema: null,
       device: null,
       property: null,
-      timescale: `hour`,
+      timescale: this.default.timescale,
       data: []
     };
+
+    this.chartCleanInterval = null;
 
     this.init();
   }
@@ -51,7 +62,9 @@ class TurnipExtensionHistory {
       render: (device, property) => {
         console.log(`[${this.constructor.name}]`, `display.render() >> `);
         // return this.renderService(device, property);
-        return (device && property) ? this.renderProperty(device, property) : this.renderDevices();
+        return (device && property)
+          ? this.renderProperty(device, property, this.default.timescale)
+          : this.renderDevices();
       },
       sync: (device, property) => {
         console.log(`[${this.constructor.name}]`, `display.sync() >> `);
@@ -94,99 +107,83 @@ class TurnipExtensionHistory {
     console.log(`[${this.constructor.name}]`, `initChart() >> `);
     let saidObj = this.saidObj;
     let ctx = saidObj(`turnip.content.history.section-02.body.chart`);
-    let config = {
-      type: `line`,
-      data: {
-        labels: [`label`],
-        datasets: [{
-          data: [{
-            x: '2011-10-05T14:48:00.000Z',
-            y: 50
-          }],
-          fill: false,
-          borderColor: `rgb(75, 192, 192)`,
-          tension: 0.1
-        }],
-        backgroundColor: [`rgba(0, 0, 0, 0.3)`],
-        borderWidth: 1
-      },
-      options: {
-        scales: {
-          // xAxes: [{
-          //   ticks: {
-          //       display: false //this will remove only the label
-          //   }
-          // }],
-          x: {
-            // min: `2021-11-07 00:00:00`
-            min: `2011-10-05T14:48:00.000Z`,
-            display: false
-            // type: `time`,
-            // time: {
-            //   unit: `millisecond`
-            // }
-          }
-        }
-      }
-    };
-    this.chart = new Chart(ctx, config);
+    this.chart = new TurnipExtensionHistoryChart(ctx);
+    return this.chart.init();
   }
 
-  updateChart(
-    dataset,    /* array like [ {x: ..., y: ...}, {x: ..., y: ...} ] */
-    timescale,   /* hour, day, week, month */
-    label = `undefined`
-  ) {
-    let t = this.getCurrentTimeRange(timescale);
-    this.chart.options.scales.x.min = t.toISOString();
-    this.chart.data.datasets[0].data = dataset;
-    this.chart.data.datasets[0].label = label;
-    this.chart.update();
-  }
-
-  addToChart(data) {
-    // this.chart.data.datasets[0].data.push(data);
-    this.chart.data.datasets[0].data.push(data);
-    let t = this.getCurrentTimeRange(this.current.timescale);
-    this.chart.update();
-
-    let count = 0;
-    console.log(`data 0   `, this.chart.data.datasets[0].data[0].x);
-    console.log(`current t`, t);
-    while(new Date(this.chart.data.datasets[0].data[0].x) < t) {
-      count = count + 1;
-      this.chart.data.datasets[0].data.shift();
-    }
-    console.log(`[${this.constructor.name}]`, `shiftout: `, count);
-    this.chart.options.scales.x.min = t.toISOString();
-    this.chart.update();
-  }
-
-  getCurrentTimeRange(timescale) {
-    let t =
-      timescale == `hour`
-      ? new Date(new Date() - 60 * 60 * 1000)
-      : timescale == `day`
-        ? new Date(new Date() - 24 * 60 * 60 * 1000)
-        : timescale == `week`
-          ? new Date(new Date() - 7 * 24 * 60 * 60 * 1000)
-          : timescale == `month`
-            ? new Date(new Date() - 30 * 24 * 60 * 60 * 1000)
-            : new Date(new Date() - 30 * 24 * 60 * 60 * 1000);
-    return t;
-  }
+  // getCurrentTimeRange(timescale) {
+  //   let t =
+  //     timescale == `minite`
+  //     ? new Date(new Date() - 60 * 1000)
+  //     : timescale == `hour`
+  //       ? new Date(new Date() - 60 * 60 * 1000)
+  //       : timescale == `day`
+  //         ? new Date(new Date() - 24 * 60 * 60 * 1000)
+  //         : timescale == `week`
+  //           ? new Date(new Date() - 7 * 24 * 60 * 60 * 1000)
+  //           : timescale == `month`
+  //             ? new Date(new Date() - 30 * 24 * 60 * 60 * 1000)
+  //             : new Date(new Date() - 30 * 24 * 60 * 60 * 1000);
+  //   return t;
+  // }
 
   scaleToDuration(timescale = this.current.timescale) {
-    switch(timescale) {
-      case `hour`: return 60 * 60;
-      case `day`: return 60 * 60 * 24;
-      case `week`: return 60 * 60 * 24 * 7;
-      case `month`: return 60 * 60 * 24 * 30;
+    let prefix = parseInt(timescale.match(/^\d+/)) || 1;
+    let suffix = timescale.match(/[^ ]+$/)[0];
+    switch(suffix) {
+      case `minite`: return prefix * 60;
+      case `hour`: return prefix * 60 * 60;
+      case `day`: return prefix * 60 * 60 * 24;
+      case `week`: return prefix * 60 * 60 * 24 * 7;
+      case `month`: return prefix * 60 * 60 * 24 * 30;
       default : 
         let last = (new Date()).getTime();
-        let begin = (new Date(this.current.timescale)).getTime();
+        let begin = (new Date(timescale)).getTime();
         return Math.floor((last - begin) / 1000);
     };
+  }
+
+  /*
+    data = { x: timestamp, y: <number, string, boolean> }
+  */
+  addData(data) {
+    console.log(`[${this.constructor.name}]`, `addData({x: ${data.x}, y: ${data.y}}) >> `);
+    this.current.data.push({ x: new Date(data.x), y: data.y });
+    this.chart.pushData({ x: new Date(data.x), y: data.y });
+  }
+
+  /*
+    arr = [ { x: timestamp, y: <number, string, boolean> } ]
+  */
+  setupData(arr) {
+    console.log(`[${this.constructor.name}]`, `setupData() >> `);
+    this.setupTextData(arr);
+    this.setupChartData(arr);
+    return new Promise((resolve, reject) => {
+      Promise.resolve()
+      .then(() => this.generatePropertyLabel())
+      .then((label) => this.chart.setLabel(label))
+      .then(() => resolve())
+      .catch((err) => reject(err));
+    })
+  }
+
+  setupChartData(arr) {
+    let data = JSON.parse(JSON.stringify(arr));
+    this.chart.setData(data);
+    this.chart.setTimescale(this.current.timescale);
+  }
+
+  setupTextData(arr) {
+    let text = ``;
+    arr.forEach((e) => {
+      let timestamp = this.toIsoString(e.x);
+      let line = `${timestamp}: ${e.y}`;
+      text = `${line}${text.length ? `\n${text}` : text}`;
+    });
+    // console.log(text);
+    this.saidObj(`turnip.content.history.section-02.title.label`).html(`${this.current.device}: ${this.current.property}`);
+    $(`#extension-turnip-extension-content-history-section-02-body-value`).val(text);
   }
 
   onChannelMessage(event) {
@@ -195,7 +192,11 @@ class TurnipExtensionHistory {
 
     if(data.device == this.current.device && data.property == this.current.property) {
       let timestamp = this.toIsoString(new Date(data.createdAt));
-      this.addToChart({
+      // this.addToChart({
+      //   x: timestamp,
+      //   y: data.value
+      // });
+      this.addData({
         x: timestamp,
         y: data.value
       });
@@ -206,12 +207,13 @@ class TurnipExtensionHistory {
     console.log(`[${this.constructor.name}]`, `render() >> `);
     this.display.sync(device, property);
     this.initButtonFunction();
-    this.initChart();
+    // this.initChart();
     let channelOptions = {
       name: `rtSensorData`,
       type: `data`
     }
     Promise.resolve()
+    .then(() => this.initChart())
     .then(() => this.channel = new TurnipWebRTCChannel(this.parent, channelOptions))
     .then(() => this.channel.start())
     .then(() => this.channel.addEventListener(
@@ -332,58 +334,32 @@ class TurnipExtensionHistory {
 
   renderProperty(
     device = this.current.device, 
-    property = this.current.property, 
-    timerange = this.scaleToDuration(this.current.timescale)
+    property = this.current.property
   ) {
-    let timerangeText = `hour`;
+
+    // Set current device & current property
+    this.current.device = device;
+    this.current.property = property;
+    // this.current.timescale = `hour`;
+
+    // let timerangeText = `hour`;
     let saidObj = this.saidObj;
     console.log(`[${this.constructor.name}]`, `renderProperty(${device}, ${property}) >> `);
 
     return new Promise((resolve, reject) => {
       let dataSet = [];
+      // this.current.data = [];
       let prop = null;
       Promise.resolve()
-
-      //  Render Schema
-      .then(() => this.api.getThings())
-      .then((schema) => {
-        console.log(schema);
-        return schema;
-      })
-      .then((schema) => schema.find(e => e.href.match(new RegExp(`\/${device}`))))
-      .then((d) => {
-        console.log(d);
-        return d;
-      })
-      .then((d) => {
-        let p = property.replace(/^prop-/, ``);
-        console.log(p);
-        if(d && d.properties && d.properties[p]) {
-          prop = d.properties[p];
-          return JSON.stringify(prop, null, 2);
-        }
-        else {
-          return `{}`;
-        }
+      .then(() => this.getPropertySchema(device, property))
+      .then((propSchema) => {
+        prop = propSchema;
+        console.log(`prop: ${prop}`);
+        return JSON.stringify(propSchema ? propSchema : {}, null, 2)
       })
       .then((p) => {
         console.log(p);
         $(`#extension-turnip-extension-content-history-section-02-body-schema`).val(p);
-      })
-
-      // Render Value
-      .then(() => this.api.getHistoryThings(device, property, timerange))
-      .then((dataArr) => {
-        let text = ``;
-        dataArr.forEach((e) => {
-          let timestamp = this.toIsoString(new Date(e.timestamp));
-          let line = `${timestamp}: ${e.value}`;
-          text = `${line}${text.length ? `\n${text}` : text}`;
-          dataSet.push({ x: timestamp, y: e.value });
-        });
-        console.log(text);
-        saidObj(`turnip.content.history.section-02.title.label`).html(`${device}: ${property}`);
-        $(`#extension-turnip-extension-content-history-section-02-body-value`).val(text);
       })
 
       // Render Timezone
@@ -393,32 +369,87 @@ class TurnipExtensionHistory {
         timezoneObj.val(timezone);
       })
 
-      // Render graph
-      .then(() => {
-        console.log(`[${this.constructor.name}]`, `prop: `, prop);
-        // console.log(`[${this.constructor.name}]`, `type: `, typeof prop.value);
-        if(prop && prop.type == `number`) {
-          let label = `${prop.title} (${prop.unit})`;
-          console.log(`[${this.constructor.name}]`, `render prop:`, label);
-          this.updateChart(dataSet, timerangeText, label);
-          console.log(dataSet);
-        }
-        else {
-          console.log(`[${this.constructor.name}]`, `render prop:`, `unrecognize`);
-          this.updateChart({}, timerangeText, label);
-        }
+      // Get Data
+      .then(() => this.api.getHistoryThings(device, property, this.scaleToDuration()))
+      .then((dataArr) => {
+        console.log(`dataArr: `, dataArr);
+        this.current.data = [];
+        dataArr.forEach((e) => {
+          let etimestamp = new Date(e.timestamp);
+          this.current.data.push({ x: etimestamp, y: e.value });
+        });
       })
 
-      // Set current device & current property
+      // Render Data
       .then(() => {
-        this.current.device = device;
-        this.current.property = property;
-        this.current.timescale = timerangeText;
+        let label = `${prop.title} (${prop.unit})`;
+        // console.log(`[${this.constructor.name}]`, `render prop:`, label);
+        this.setupData(this.current.data);
+        console.log(this.current.data);
       })
 
       .then(() => resolve())
       .catch((err) => reject(err));
     });
+  }
+
+  generatePropertyLabel(device = this.current.device, property = this.current.property) {
+    console.log(`[${this.constructor.name}]`, `generatePropertyLable(${device}, ${property}) >> `);
+    return new Promise((resolve, reject) => {
+      Promise.resolve()
+      .then(() => this.getPropertySchema(device, property))
+      .then((propSchema) => propSchema ? `${propSchema.title} (${propSchema.unit})` : ``)
+      .then((ret) => resolve(ret))
+      .catch((err) => reject(err));
+    });
+  }
+
+  getPropertySchema(
+    device = this.current.device, 
+    property = this.current.property,
+    opt = { renew: false, update: true }
+  ) {
+    console.log(`[${this.constructor.name}]`, `getPropertySchema(${device}, ${property}) >> `);
+    return new Promise((resolve, reject) => {
+      Promise.resolve()
+      .then(() => this.getSchema(opt))
+      .then((schema) => schema.find(e => e.href.match(new RegExp(`\/${device}`))))
+      .then((d) => {
+        console.log(d);
+        return d;
+      })
+      .then((d) => {
+        let p = property.replace(/^prop-/, ``);
+        console.log(p);
+        return (d && d.properties && d.properties[p]) ? d.properties[p] : null;
+      })
+      .then((ret) => resolve(ret))
+      .catch((err) => reject(err));
+    })
+  }
+
+  getSchema(opt = { renew: false, update: true }) {
+    console.log(`[${this.constructor.name}]`, `getSchema() >> `);
+    return new Promise((resolve, reject) => {
+      Promise.resolve()
+      .then(() => {
+        if(opt.renew || !this.current.schema) {
+          console.log(`renew schema`);
+          return this.api.getThings();
+        }
+        else {
+          console.log(`use existing schema`);
+          return this.current.schema;
+        }
+      })
+      .then((schema) => {
+        console.log(schema);
+        opt.update && (this.current.schema = schema);
+        return schema;
+      })
+      .then((ret) => resolve(ret))
+      .catch((err) => reject(err));
+    })
   }
 
   toIsoString(date, gmt = false) {
