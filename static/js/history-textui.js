@@ -61,7 +61,7 @@ class TurnipExtensionHistoryTextUI {
     // this.current.data = JSON.parse(JSON.stringify(dataArr));
     // this.current.data = [...dataArr];
     this.current.data = dataArr;
-    this.ctx.listui.html(``);
+    // this.ctx.listui.html(``);
     (display == `List`)
       ? this.displayListUI()
       : (display == `Text`)
@@ -120,6 +120,7 @@ class TurnipExtensionHistoryTextUI {
         this.ctx.header.html(`List`);
         this.ctx.listui.addClass(`hide`);
         this.ctx.textarea.addClass(`hide`);
+        this.ctx.listui.html(``);
       })
       .then(() => {
         this.current.data.forEach((data) => {
