@@ -6,8 +6,7 @@ class TurnipExtensionHistory {
     this.saidObj = this.turnipRaid.stringAutoIdObject.bind(this.turnipRaid);
 
     this.default = {
-      // timescale: `hour`,
-      timescale: `5 minite`,
+      timescale: `5 minute`,
       chart: {
         timestep: 5 // Second
       }
@@ -61,7 +60,6 @@ class TurnipExtensionHistory {
       },
       render: (device, property) => {
         console.log(`[${this.constructor.name}]`, `display.render() >> `);
-        // return this.renderService(device, property);
         return (device && property)
           ? this.renderProperty(device, property, this.default.timescale)
           : this.renderDevices();
@@ -101,6 +99,43 @@ class TurnipExtensionHistory {
       );
       return this.display.sync(this.current.device, this.current.property);
     });
+
+    // Clear timerange select button focus.
+    let clearTimerangeButton = () => {
+      let buttonGroup = saidObj(`turnip.content.history.section-02.body.timeselector`)[0];
+      buttonGroup.childNodes.forEach((subGroup) => {
+        subGroup.id && document.getElementById(subGroup.id).childNodes.forEach((e) => {
+          e.id && saidObj(e.id).removeClass(`focus`);
+        });
+      })
+    };
+
+    // Choose timerange select button focus.
+    let focusTimerangeButton = (id) => {
+      clearTimerangeButton();
+      saidObj(id).addClass(`focus`);
+    };
+
+    // Time select button group.
+    let timerangeButtonGroup = saidObj(`turnip.content.history.section-02.body.timeselector`)[0];
+    timerangeButtonGroup.childNodes.forEach((subGroup) => {
+      subGroup.id && document.getElementById(subGroup.id).childNodes.forEach((e) => {
+        if(e.id) {
+          let arr = e.id.split(`-`);
+          let amount = arr.pop();
+          let scale = arr.pop();
+          console.log(amount, scale);
+          // On click.
+          saidObj(e.id).click(() => {
+            focusTimerangeButton(e.id);
+            this.setupData([]);
+            this.current.timescale = `${amount} ${scale}`;
+            console.log(`[${this.constructor.name}]`, `time scale -> ${this.current.timescale}`);
+            this.renderData();
+          });
+        };
+      });
+    });
   }
 
   initChart() {
@@ -111,27 +146,21 @@ class TurnipExtensionHistory {
     return this.chart.init();
   }
 
-  // getCurrentTimeRange(timescale) {
-  //   let t =
-  //     timescale == `minite`
-  //     ? new Date(new Date() - 60 * 1000)
-  //     : timescale == `hour`
-  //       ? new Date(new Date() - 60 * 60 * 1000)
-  //       : timescale == `day`
-  //         ? new Date(new Date() - 24 * 60 * 60 * 1000)
-  //         : timescale == `week`
-  //           ? new Date(new Date() - 7 * 24 * 60 * 60 * 1000)
-  //           : timescale == `month`
-  //             ? new Date(new Date() - 30 * 24 * 60 * 60 * 1000)
-  //             : new Date(new Date() - 30 * 24 * 60 * 60 * 1000);
-  //   return t;
-  // }
+  initValuePanel() {
+    console.log(`[${this.constructor.name}]`, `initValuePanel() >> `);
+    let saidObj = this.saidObj;
+    let ctxHeader = saidObj(`turnip.content.history.section-02.body.value.headertag`);
+    let ctxList = saidObj(`turnip.content.history.section-02.body.value.list`);
+    let ctxTextArea = saidObj(`turnip.content.history.section-02.body.value.textarea`);
+    this.valuePanel = new TurnipExtensionHistoryTextUI(ctxHeader, ctxList, ctxTextArea);
+    return this.valuePanel.init();
+  }
 
   scaleToDuration(timescale = this.current.timescale) {
     let prefix = parseInt(timescale.match(/^\d+/)) || 1;
     let suffix = timescale.match(/[^ ]+$/)[0];
     switch(suffix) {
-      case `minite`: return prefix * 60;
+      case `minute`: return prefix * 60;
       case `hour`: return prefix * 60 * 60;
       case `day`: return prefix * 60 * 60 * 24;
       case `week`: return prefix * 60 * 60 * 24 * 7;
@@ -148,8 +177,11 @@ class TurnipExtensionHistory {
   */
   addData(data) {
     console.log(`[${this.constructor.name}]`, `addData({x: ${data.x}, y: ${data.y}}) >> `);
-    this.current.data.push({ x: new Date(data.x), y: data.y });
-    this.chart.pushData({ x: new Date(data.x), y: data.y });
+    // this.current.data.push({ x: new Date(data.x), y: data.y });
+    // this.chart.pushData({ x: new Date(data.x), y: data.y });
+    this.current.data.push({ x: data.x, y: data.y });
+    this.chart.pushData({ x: data.x, y: data.y });
+    this.valuePanel.pushData({ x: data.x, y: data.y });
   }
 
   /*
@@ -157,7 +189,8 @@ class TurnipExtensionHistory {
   */
   setupData(arr) {
     console.log(`[${this.constructor.name}]`, `setupData() >> `);
-    this.setupTextData(arr);
+    // this.setupTextData(arr);
+    this.setupValuePanelData(arr);
     this.setupChartData(arr);
     return new Promise((resolve, reject) => {
       Promise.resolve()
@@ -165,25 +198,19 @@ class TurnipExtensionHistory {
       .then((label) => this.chart.setLabel(label))
       .then(() => resolve())
       .catch((err) => reject(err));
-    })
+    });
   }
 
   setupChartData(arr) {
-    let data = JSON.parse(JSON.stringify(arr));
+    let data = [...arr];
     this.chart.setData(data);
     this.chart.setTimescale(this.current.timescale);
   }
 
-  setupTextData(arr) {
-    let text = ``;
-    arr.forEach((e) => {
-      let timestamp = this.toIsoString(e.x);
-      let line = `${timestamp}: ${e.y}`;
-      text = `${line}${text.length ? `\n${text}` : text}`;
-    });
-    // console.log(text);
-    this.saidObj(`turnip.content.history.section-02.title.label`).html(`${this.current.device}: ${this.current.property}`);
-    $(`#extension-turnip-extension-content-history-section-02-body-value`).val(text);
+  setupValuePanelData(arr) {
+    let data = [...arr];
+    this.valuePanel.setData(data);
+    this.valuePanel.setTimescale(this.current.timescale);
   }
 
   onChannelMessage(event) {
@@ -191,13 +218,8 @@ class TurnipExtensionHistory {
     let data = event.detail;
 
     if(data.device == this.current.device && data.property == this.current.property) {
-      let timestamp = this.toIsoString(new Date(data.createdAt));
-      // this.addToChart({
-      //   x: timestamp,
-      //   y: data.value
-      // });
       this.addData({
-        x: timestamp,
+        x: new Date(data.createdAt),
         y: data.value
       });
     }
@@ -214,6 +236,7 @@ class TurnipExtensionHistory {
     }
     Promise.resolve()
     .then(() => this.initChart())
+    .then(() => this.initValuePanel())
     .then(() => this.channel = new TurnipWebRTCChannel(this.parent, channelOptions))
     .then(() => this.channel.start())
     .then(() => this.channel.addEventListener(
@@ -222,10 +245,6 @@ class TurnipExtensionHistory {
     ))
     .catch((err) => console.error(err));
   }
-
-  // renderService(device, property) {
-  //   return (device && property) ? this.renderProperty(device, property) : this.renderDevices();
-  // }
 
   renderDevices() {
     let saidObj = this.saidObj;
@@ -340,17 +359,23 @@ class TurnipExtensionHistory {
     // Set current device & current property
     this.current.device = device;
     this.current.property = property;
-    // this.current.timescale = `hour`;
 
-    // let timerangeText = `hour`;
     let saidObj = this.saidObj;
     console.log(`[${this.constructor.name}]`, `renderProperty(${device}, ${property}) >> `);
 
     return new Promise((resolve, reject) => {
       let dataSet = [];
-      // this.current.data = [];
       let prop = null;
       Promise.resolve()
+
+      // Set header label
+      .then(() => {
+        this
+          .saidObj(`turnip.content.history.section-02.title.label`)
+          .html(`${this.current.device}: ${this.current.property}`);
+      })
+
+      // Get schema.
       .then(() => this.getPropertySchema(device, property))
       .then((propSchema) => {
         prop = propSchema;
@@ -369,8 +394,29 @@ class TurnipExtensionHistory {
         timezoneObj.val(timezone);
       })
 
-      // Get Data
-      .then(() => this.api.getHistoryThings(device, property, this.scaleToDuration()))
+      // Render Data
+      // .then(() => this.renderData())
+      .then(() => {
+        let min5 = saidObj(`turnip.content.history.section-02.body.timeselector.minute.5`)[0];
+        min5.click();
+      })
+
+      .then(() => resolve())
+      .catch((err) => reject(err));
+    });
+  }
+
+  renderData(
+    device = this.current.device,
+    property = this.current.property,
+    timescale = this.current.timescale
+  ) {
+    console.log(`[${this.constructor.name}]`, `renderData() >> `);
+    return new Promise((resolve, reject) => {
+      Promise.resolve()
+
+      // Get data from server.
+      .then(() => this.api.getHistoryThings(device, property, this.scaleToDuration(timescale)))
       .then((dataArr) => {
         console.log(`dataArr: `, dataArr);
         this.current.data = [];
@@ -382,8 +428,6 @@ class TurnipExtensionHistory {
 
       // Render Data
       .then(() => {
-        let label = `${prop.title} (${prop.unit})`;
-        // console.log(`[${this.constructor.name}]`, `render prop:`, label);
         this.setupData(this.current.data);
         console.log(this.current.data);
       })

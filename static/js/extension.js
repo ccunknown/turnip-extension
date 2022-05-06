@@ -46,6 +46,7 @@
         "static/js/channel.js",
         "static/js/webhook.js",
         "static/js/history-chart.js",
+        "static/js/history-textui.js",
         "static/js/history.js",
         "static/js/setting.js",
         "static/js/account.js",

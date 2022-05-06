@@ -134,7 +134,6 @@
 
     <!-- Card Body -->
     <div class="card-body bg-dark">
-
       <!-- Container -->
       <div
         id="extension-turnip-extension-content-history-section-02-container"
@@ -142,31 +141,164 @@
       >
         <div class="d-flex flex-md-row flex-column justify-content-center">
           <div class="f-flex flex-column flex-grow-1 mr-md-3">
-            <!-- <div class="mb-2"> -->
-              <div class="turnip-badge-header-group">
-                <label class="turnip-label-badge badge-secondary">Chart</label>
-                <canvas
-                  id="extension-turnip-extension-content-history-section-02-body-chart"
-                  class="turnip-badge-union border-secondary w-100"
+            <div
+              id="extension-turnip-extension-content-history-section-02-body-timeselector"
+              class=""
+            >
+              <div
+                id="extension-turnip-extension-content-history-section-02-body-timeselector-month"
+                class="btn-group mr-1 mb-2"
+                role="group"
+                aria-label="Timerange selector"
+              >
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-month-1"
+                  class="btn btn-secondary"
                 >
-                </canvas>
+                  Month
+                </button>
               </div>
-            <!-- </div> -->
-            <!-- <div class="mb-2"> -->
-              <div class="turnip-badge-header-group">
-                <label class="turnip-label-badge badge-secondary">Schema</label>
-                <textarea
-                  id="extension-turnip-extension-content-history-section-02-body-schema"
-                  class="turnip-badge-union border-secondary"
-                  style="
-                    min-height: 100px;
-                    font-family: Consolas;
-                  "
+              <div
+                id="extension-turnip-extension-content-history-section-02-body-timeselector-week"
+                class="btn-group mr-1 mb-2"
+                role="group"
+                aria-label="Timerange selector"
+              >
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-week-2"
+                  class="btn btn-secondary"
                 >
-
-                </textarea>
+                  2
+                </button>
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-week-1"
+                  class="btn btn-secondary"
+                >
+                  Week
+                </button>
               </div>
-            <!-- </div> -->
+              <div
+                id="extension-turnip-extension-content-history-section-02-body-timeselector-day"
+                class="btn-group mr-1 mb-2"
+                role="group"
+                aria-label="Timerange selector"
+              >
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-day-5"
+                  class="btn btn-secondary"
+                >
+                  5
+                </button>
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-day-2"
+                  class="btn btn-secondary"
+                >
+                  2
+                </button>
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-day-1"
+                  class="btn btn-secondary"
+                >
+                  Day
+                </button>
+              </div>
+              <div
+                id="extension-turnip-extension-content-history-section-02-body-timeselector-hour"
+                class="btn-group mr-1 mb-2"
+                role="group"
+                aria-label="Timerange selector"
+              >
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-hour-12"
+                  class="btn btn-secondary"
+                >
+                  12
+                </button>
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-hour-6"
+                  class="btn btn-secondary"
+                >
+                  6
+                </button>
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-hour-2"
+                  class="btn btn-secondary"
+                >
+                  2
+                </button>
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-hour-1"
+                  class="btn btn-secondary"
+                >
+                  Hour
+                </button>
+              </div>
+              <div
+                id="extension-turnip-extension-content-history-section-02-body-timeselector-minute"
+                class="btn-group mr-1 mb-2"
+                role="group"
+                aria-label="Timerange selector"
+              >
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-minute-30"
+                  class="btn btn-secondary"
+                >
+                  30
+                </button>
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-minute-15"
+                  class="btn btn-secondary"
+                >
+                  15
+                </button>
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-minute-5"
+                  class="btn btn-secondary"
+                >
+                  5
+                </button>
+                <button
+                  type="button"
+                  id="extension-turnip-extension-content-history-section-02-body-timeselector-minute-1"
+                  class="btn btn-secondary"
+                >
+                  Minute
+                </button>
+              </div>
+            </div>
+            <div class="turnip-badge-header-group">
+              <label class="turnip-label-badge badge-secondary">Chart</label>
+              <canvas
+                id="extension-turnip-extension-content-history-section-02-body-chart"
+                class="turnip-badge-union border-secondary w-100"
+              >
+              </canvas>
+            </div>
+            <div class="turnip-badge-header-group">
+              <label class="turnip-label-badge badge-secondary">Schema</label>
+              <textarea
+                id="extension-turnip-extension-content-history-section-02-body-schema"
+                class="turnip-badge-union border-secondary"
+                style="
+                  min-height: 100px;
+                  font-family: Consolas;
+                "
+              >
+              </textarea>
+            </div>
           </div>
           <div class="d-inline d-md-none mb-3"></div>
           <div class="d-flex flex-column" style="min-width: 250px;">
@@ -178,26 +310,48 @@
                 type="text"
               >
             </div>
-            <div class="turnip-badge-header-group grow-1">
+            <div
+              id="extension-turnip-extension-content-history-section-02-body-value"
+              class="turnip-badge-header-group grow-1"
+            >
               <div class="turnip-label-badge-group">
-                <label class="turnip-label-badge badge-secondary">Value</label>
-                <label class="turnip-label-badge turnip-label-badge-button badge-warning">Text</label>
+                <label class="turnip-label-badge badge-secondary">
+                  Value
+                </label>
+                <label
+                  id="extension-turnip-extension-content-history-section-02-body-value-headertag"
+                  class="turnip-label-badge turnip-label-badge-button badge-warning"
+                >
+                  List
+                </label>
               </div>
-              <div class="turnip-badge-union border-secondary flex-grow-1" style="min-height: 100px;">
+              <div
+                class="turnip-badge-union border-secondary d-flex flex-grow-1"
+                style="
+                  min-height: 100px;
+                  overflow: auto;
+                "
+              >
+                <ul
+                  id="extension-turnip-extension-content-history-section-02-body-value-list"
+                  class="list-group flex-grow-1 w-100 h-100"
+                  style="
+                    min-height: 100px;
+                    position: absolute;
+                  "
+                >
+                </ul>
                 <textarea
-                  id="extension-turnip-extension-content-history-section-02-body-value"
-                  class="flex-grow-1 w-100 h-100"
+                  id="extension-turnip-extension-content-history-section-02-body-value-textarea"
+                  class="flex-grow-1 w-100 h-100 hide"
                   style="min-height: 100px;"
                 >
-
                 </textarea>
               </div>
             </div>
           </div>
         </div>
-
       </div>
-
     </div>
 
   </div>

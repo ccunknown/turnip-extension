@@ -373,6 +373,7 @@ class RoutesManager extends APIHandler{
               let property = arr.pop();
               let device = arr.pop();
               let duration = req.query.duration || 3600;
+              console.log(`duration: ${duration}`);
               Promise.resolve()
               .then(() => this.laborsManager.getService(`history-service`))
               .then((service) => service.obj)

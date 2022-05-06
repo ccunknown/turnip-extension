@@ -11,7 +11,7 @@ class TurnipExtensionHistoryChart {
 
     this.default = {
       timescale: `hour`
-      // timescale: `minite`
+      // timescale: `minute`
     };
     this.current = {
       timescale: this.default.timescale
@@ -86,7 +86,7 @@ class TurnipExtensionHistoryChart {
     let prefix = parseInt(timescale.match(/^\d+/)) || 1;
     let suffix = timescale.match(/[^ ]+$/)[0];
     switch(suffix) {
-      case `minite`: return prefix * 60 * 1000;
+      case `minute`: return prefix * 60 * 1000;
       case `hour`: return prefix * 60 * 60 * 1000;
       case `day`: return prefix * 60 * 60 * 24 * 1000;
       case `week`: return prefix * 60 * 60 * 24 * 7 * 1000;
@@ -120,8 +120,10 @@ class TurnipExtensionHistoryChart {
     this.current.timescale = timescale;
     let duration = this.timescaleToDuration(this.current.timescale);
     console.log(`duration: ${duration}`);
-    this.realtimeOpts.duration = duration;
-    this.realtimeOpts.ttl = duration;
+    // this.realtimeOpts.duration = duration;
+    // this.realtimeOpts.ttl = duration;
+    this.chart.options.scales.x.realtime.duration = duration;
+    this.chart.options.scales.x.realtime.ttl = duration + (60 * 1000);
     this.chart.update(`none`);
   }
 }
