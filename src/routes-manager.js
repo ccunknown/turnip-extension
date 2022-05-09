@@ -315,6 +315,7 @@ class RoutesManager extends APIHandler{
                 group: [ `device`, `property` ],
                 fields: [ `device`, `property` ]
               }))
+              .then((ret) => ret.array)
               .then((ret) => {
                 console.log(`ret: ${JSON.stringify(ret)}`);
                 return ret;

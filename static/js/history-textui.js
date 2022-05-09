@@ -58,10 +58,7 @@ class TurnipExtensionHistoryTextUI {
 
   setData(dataArr, display = `List`) {
     console.log(`[${this.constructor.name}]`, `setData() >> `);
-    // this.current.data = JSON.parse(JSON.stringify(dataArr));
-    // this.current.data = [...dataArr];
     this.current.data = dataArr;
-    // this.ctx.listui.html(``);
     (display == `List`)
       ? this.displayListUI()
       : (display == `Text`)
@@ -83,16 +80,13 @@ class TurnipExtensionHistoryTextUI {
       this.current.data.shift();
 
     let listui = this.ctx.listui[0];
-    let childrens = listui.children;
-    console.log(listui);
-    // while(!childNodes.lastChild)
-    //   childNodes.removeChild(childNodes.lastChild);
-    while(new Date(listui.children[listui.children.length - 1].attributes.timestamp.nodeValue) < currRange)
+    while(
+      listui && 
+      listui.children && 
+      listui.children.length && 
+      new Date(listui.children[listui.children.length - 1].attributes.timestamp.nodeValue) < currRange
+    )
       listui.removeChild(listui.lastElementChild);
-    console.log(childrens);
-    console.log(listui.lastElementChild);
-    console.log(listui.children[listui.children.length - 1]);
-    console.log(listui.children[listui.children.length - 1].attributes.timestamp.nodeValue);
   }
 
   timescaleToDuration(timescale = this.current.timescale) {
@@ -169,12 +163,14 @@ class TurnipExtensionHistoryTextUI {
   }
 
   prependList(data) {
-    console.log(`prepend`);
+    // console.log(`prepend`);
     let dom = this.ctx.listui;
     let timestamp = this.toIsoString(data.x);
     dom.prepend(`
       <li class="list-group-item bg-dark pt-1 pb-1" timestamp="${timestamp}">
-        ${timestamp}: ${data.y}
+        <div class="text-truncate">
+          ${timestamp}: ${data.y}
+        </div>
       </li>
     `);
   }
@@ -185,7 +181,7 @@ class TurnipExtensionHistoryTextUI {
   }
 
   toIsoString(date, gmt = false) {
-    console.log(`typeof date: ${typeof date}`);
+    // console.log(`typeof date: ${typeof date}`);
     let tzo = -date.getTimezoneOffset();
     let dif = tzo >= 0 ? '+' : '-';
     let pad = (num) => (num < 10 ? '0' : '') + num;

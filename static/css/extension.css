@@ -30,6 +30,13 @@
 
   --extension-container-space-top: calc(7.6rem + 10px);
   --extension-container-space-bottom: 10px;
+
+  --extension-content-top-padding: 15px;
+  --extension-content-bottom-padding: 15px;
+  /* --extension-container-content-maxheight: calc(100% - calc(7.6rem + 50px)); */
+  /* --extension-container-content-maxheight: calc(100vh - calc(7.6rem + 10px + 10px + 15px + 15px)); */
+
+  --extension-content-card-header: 45px;
 }
 
 #main-menu #extension-turnip-extension-menu-item {
@@ -121,6 +128,17 @@
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+#turnip-container .turnip-content-maxheight {
+  height: calc(
+    100vh - calc(
+      var(--extension-container-space-top) + 
+      var(--extension-container-space-bottom) + 
+      var(--extension-content-top-padding) + 
+      var(--extension-content-bottom-padding)
+    )
+  );
 }
 
 #turnip-container .turnip-slide-container {
@@ -641,6 +659,18 @@
 
   #turnip-container .turnip-container-content {
     max-width: 900px;
+  }
+
+  #turnip-container .turnip-md-max-body-height {
+    height: calc(
+      100vh - calc(
+        var(--extension-container-space-top) + 
+        var(--extension-container-space-bottom) + 
+        var(--extension-content-top-padding) + 
+        var(--extension-content-bottom-padding) +
+        var(--extension-content-card-header)
+      )
+    );
   }
 }
 

@@ -107,13 +107,36 @@
           <b id="extension-turnip-extension-content-history-section-02-title-label">Device: Property</b>
         </div>
         <div class="d-flex">
-          <button
-            id="extension-turnip-extension-content-history-section-02-title-download"
-            class="btn btn-success border-secondary text-nowrap mr-1"
-          >
-            <i class="fas fa-save"></i>
-            <b class="d-none d-md-inline ml-2">Download</b>
-          </button>
+          <div class="btn-group" role="group">
+            <button
+              id="extension-turnip-extension-content-history-section-02-title-download"
+              class="btn btn-success dropdown-toggle border-secondary text-nowrap mr-1"
+              type="button"
+              data-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <i class="fas fa-save"></i>
+              <b class="d-none d-md-inline ml-2">Download</b>
+            </button>
+            <div class="dropdown-menu bg-secondary" aria-labelledby="btnGroupDrop1">
+              <a
+                id="extension-turnip-extension-content-history-section-02-title-download-json"
+                class="dropdown-item"
+                onMouseOver="this.style.color='black'"
+                onMouseOut="this.style.color='white'"
+              >
+                JSON
+              </a>
+              <a
+                id="extension-turnip-extension-content-history-section-02-title-download-csv"
+                class="dropdown-item"
+                onMouseOver="this.style.color='black'"
+                onMouseOut="this.style.color='white'"
+              >
+                CSV
+              </a>
+            </div>
+          </div>
           <button
             id="extension-turnip-extension-content-history-section-02-title-reload"
             class="btn btn-success border-secondary text-nowrap mr-1"
@@ -133,14 +156,14 @@
     </div>
 
     <!-- Card Body -->
-    <div class="card-body bg-dark">
+    <div class="card-body bg-dark turnip-md-max-body-height" style="min-height: 480px;">
       <!-- Container -->
       <div
         id="extension-turnip-extension-content-history-section-02-container"
-        class="turnip-form-container d-flex justify-content-center"
+        class="turnip-form-container d-flex justify-content-center h-100"
       >
-        <div class="d-flex flex-md-row flex-column justify-content-center">
-          <div class="f-flex flex-column flex-grow-1 mr-md-3">
+        <div class="d-flex flex-md-row flex-column justify-content-center h-100">
+          <div class="d-flex flex-column flex-grow-1 mr-md-3 h-100">
             <div
               id="extension-turnip-extension-content-history-section-02-body-timeselector"
               class=""
@@ -287,14 +310,17 @@
               >
               </canvas>
             </div>
-            <div class="turnip-badge-header-group">
+            <div class="turnip-badge-header-group grow-1">
               <label class="turnip-label-badge badge-secondary">Schema</label>
               <textarea
                 id="extension-turnip-extension-content-history-section-02-body-schema"
-                class="turnip-badge-union border-secondary"
+                class="turnip-badge-union border-secondary grow-1"
                 style="
                   min-height: 100px;
                   font-family: Consolas;
+                  background: black;
+                  color: white;
+                  resize: none;
                 "
               >
               </textarea>
@@ -344,7 +370,15 @@
                 <textarea
                   id="extension-turnip-extension-content-history-section-02-body-value-textarea"
                   class="flex-grow-1 w-100 h-100 hide"
-                  style="min-height: 100px;"
+                  style="
+                    min-height: 100px;
+                    white-space: pre;
+                    overflow-wrap: normal;
+                    overflow-x: auto;
+                    background: black;
+                    color: white;
+                    resize: none;
+                  "
                 >
                 </textarea>
               </div>

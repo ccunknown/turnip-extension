@@ -280,6 +280,10 @@ class historyService extends EventEmitter {
   thingsQuery(options) {
     console.log(`[${this.constructor.name}]`, `thingsQuery() >> `);
     return new Promise((resolve, reject) => {
+      let result = {
+        metadata: {},
+        array: []
+      };
       let fields = (
         (options && options.fields)
         ? options.fields
@@ -297,7 +301,7 @@ class historyService extends EventEmitter {
           return [ Sequelize.fn(`DISTINCT`, Sequelize.col(f)), fa ];
         else
           return [ f, fa ];
-      })
+      });
       Promise.resolve()
       .then(() => this.sequelize.sync())
       .then(() => {
@@ -309,16 +313,20 @@ class historyService extends EventEmitter {
           query.group = options.group;
         }
         if(options && options.duration) {
+          let begin = new Date(new Date() - (options && options.duration * 1000 || 0));
+          result.metadata.from = begin.toISOString();
           query.where.createdAt = {
-            [Op.gt]: new Date(new Date() - (options && options.duration * 1000 || 0))
+            [Op.gt]: begin
           };
         }
         if(options && options.device && options.device.name) {
+          result.metadata.device = options.device.name;
           query.where.device = {
             [Op.like]: options.device.name
           };
         }
         if(options && options.property && options.property.name) {
+          result.metadata.property = options.property.name;
           query.where.property = {
             [Op.like]: options.property.name
           }
@@ -326,6 +334,10 @@ class historyService extends EventEmitter {
         return query;
       })
       .then((query) => this.model.thingRecord.findAll(query))
+      .then((ret) => {
+        result.array = ret;
+        return result;
+      })
       .then((ret) => resolve (ret))
       .catch((err) => reject(err));
     })

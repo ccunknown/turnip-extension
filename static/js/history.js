@@ -6,10 +6,7 @@ class TurnipExtensionHistory {
     this.saidObj = this.turnipRaid.stringAutoIdObject.bind(this.turnipRaid);
 
     this.default = {
-      timescale: `5 minute`,
-      chart: {
-        timestep: 5 // Second
-      }
+      timescale: `5 minute`
     }
 
     this.current = {
@@ -29,7 +26,6 @@ class TurnipExtensionHistory {
     console.log(`[${this.constructor.name}]`, `init() >> `);
     this.initRestApiTool();
     this.initDisplay();
-    // this.initButtonFunction();
   }
 
   initRestApiTool() {
@@ -100,6 +96,83 @@ class TurnipExtensionHistory {
       return this.display.sync(this.current.device, this.current.property);
     });
 
+    // Download JSON button
+    saidObj(`turnip.content.history.section-02.title.download.json`).click(() => {
+      console.log(
+        `[${this.constructor.name}]`,
+        `Event [Click] : turnip.content.history.section-02.title.download.json`
+      );
+      return new Promise((resolve, reject) => {
+        console.log(`[${this.constructor.name}]`, `current timescale: ${this.current.timescale}`);
+        Promise.resolve()
+        .then(() => this.api.getHistoryThings(
+          this.current.device, 
+          this.current.property, 
+          this.scaleToDuration(this.current.timescale)
+        ))
+        .then((data) => {
+          let content = JSON.stringify(data, null, 2);
+          let meta = data.metadata;
+          let fname = `${meta.device}-${meta.property}-${meta.from}.json`;
+          let file = new File([content], {
+            type: "text/plain;charset=utf-8"
+          });
+          // saveAs(blob, fname);
+          return this.download(file, fname);
+        })
+        .then(() => resolve())
+        .catch((err) => reject(err));
+      });
+    });
+
+    // Download CSV button
+    saidObj(`turnip.content.history.section-02.title.download.csv`).click(() => {
+      console.log(
+        `[${this.constructor.name}]`,
+        `Event [Click] : turnip.content.history.section-02.title.download.json`
+      );
+      return new Promise((resolve, reject) => {
+        console.log(`[${this.constructor.name}]`, `current timescale: ${this.current.timescale}`);
+        let fname;
+        Promise.resolve()
+        .then(() => this.api.getHistoryThings(
+          this.current.device, 
+          this.current.property, 
+          this.scaleToDuration(this.current.timescale)
+        ))
+        .then((data) => {
+          const rows = [];
+
+          // Create file name
+          fname = `${data.metadata.device}-${data.metadata.property}-${data.metadata.from}.csv`;
+
+          // Metadata rows
+          for(let i in data.metadata) {
+            rows.push([i, data.metadata[i]]);
+          }
+          rows.push([]);
+
+          // Header row
+          rows.push([`timestamp`, `value`]);
+
+          // Data rows
+          data.array.forEach((e) => rows.push([e.timestamp, e.value]));
+
+          // Join rows
+          return rows.map(e => e.join(`,`)).join(`\n`);
+        })
+        .then((content) => {
+          let file = new File([content], {
+            type: "text/plain;charset=utf-8"
+          });
+          // saveAs(blob, fname);
+          return this.download(file, fname);
+        })
+        .then(() => resolve())
+        .catch((err) => reject(err));
+      });
+    });
+
     // Clear timerange select button focus.
     let clearTimerangeButton = () => {
       let buttonGroup = saidObj(`turnip.content.history.section-02.body.timeselector`)[0];
@@ -136,6 +209,20 @@ class TurnipExtensionHistory {
         };
       });
     });
+  }
+
+  download(file, fname = `untitled`) {
+    console.log(`[${this.constructor.name}]`, `download(${fname}) >> `);
+    const link = document.createElement(`a`);
+    const url = URL.createObjectURL(file);
+
+    link.href = url;
+    link.download = fname;
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   }
 
   initChart() {
@@ -417,6 +504,10 @@ class TurnipExtensionHistory {
 
       // Get data from server.
       .then(() => this.api.getHistoryThings(device, property, this.scaleToDuration(timescale)))
+      .then((data) => {
+        console.log(`[${this.constructor.name}]`, data);
+        return data.array;
+      })
       .then((dataArr) => {
         console.log(`dataArr: `, dataArr);
         this.current.data = [];
@@ -442,7 +533,7 @@ class TurnipExtensionHistory {
     return new Promise((resolve, reject) => {
       Promise.resolve()
       .then(() => this.getPropertySchema(device, property))
-      .then((propSchema) => propSchema ? `${propSchema.title} (${propSchema.unit})` : ``)
+      .then((propSchema) => propSchema ? `${propSchema.title} ${propSchema.unit ? `${propSchema.unit}` : ``}` : ``)
       .then((ret) => resolve(ret))
       .catch((err) => reject(err));
     });
