@@ -58,14 +58,19 @@ class channelService extends EventEmitter {
     });
   }
 
-  createSession(channelOptions, config = this.config.ice) {
-    console.log(`[${this.constructor.name}]`, `create() >> `);
+  createSession(channelOptions, iceConfig = this.config.server.config.ice) {
+    console.log(`[${this.constructor.name}]`, `createSession() >> `);
     return new Promise((resolve ,reject) => {
       let session = null;
       Promise.resolve()
       .then(() => this.createBlankSession())
       .then((s) => session = s)
-      .then(() => this.createPeerConnection(session.id, config))
+      // .then(() => console.log(
+      //   `[${this.constructor.name}]`, 
+      //   `iceConfig: `, 
+      //   JSON.stringify(iceConfig, null ,2)
+      // ))
+      .then(() => this.createPeerConnection(session.id, iceConfig))
       .then(() => this.createChannel(session.id, channelOptions))
       .then(() => this.createOffer(session.id))
       .then((ret) => resolve(session))
@@ -73,13 +78,8 @@ class channelService extends EventEmitter {
     })
   }
 
-  getSession(id) {
-    console.log(`[${this.constructor.name}]`, `getSession(${id || ``}) >> `);
-    return this.sessions.find(e => e.id == id);
-  }
-
   createBlankSession() {
-    console.log(`[${this.constructor.name}]`, `createSession() >> `);
+    console.log(`[${this.constructor.name}]`, `createBlankSession() >> `);
     const session = {
       id: uuid(),
       peerConnection: null,
@@ -97,6 +97,11 @@ class channelService extends EventEmitter {
     console.log(`[${this.constructor.name}]`, JSON.stringify(session, null, 2));
     this.sessions.push(session);
     return session;
+  }
+
+  getSession(id) {
+    console.log(`[${this.constructor.name}]`, `getSession(${id || ``}) >> `);
+    return this.sessions.find(e => e.id == id);
   }
 
   deleteSession(session) {
@@ -129,11 +134,17 @@ class channelService extends EventEmitter {
     }
   }
 
-  createPeerConnection(session, config = this.config.ice) {
+  // createPeerConnection(session, config = this.config.ice) {
+  createPeerConnection(session, iceConfig = this.config.server.config.ice) {
     console.log(`[${this.constructor.name}]`, `createPeerConnection() >> `);
     session = typeof session == `object` ? session : this.getSession(session);
     if(session) {
-      session.peerConnection = new RTCPeerConnection(config);
+      console.log(
+        `[${this.constructor.name}]`, 
+        `iceConfig`, 
+        JSON.stringify(iceConfig, null, 2)
+      );
+      session.peerConnection = new RTCPeerConnection(iceConfig);
       session.peerConnection.onicecandidate = (e) => {
         if(e && e.type && e.candidate) {
           console.log(

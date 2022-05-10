@@ -465,8 +465,8 @@ class TurnipExtensionWebhook {
     return new Promise((resolve, reject) => {
       ((webhookName) ? this.api.getConfigWebhook(webhookName) : Promise.resolve(JSON.parse(JSON.stringify(this.form.default))))
       .then((form) => {
-        console.log(`default : ${JSON.stringify(this.form.default, null, 2)}`);
-        console.log(`form : ${JSON.stringify(form, null, 2)}`);
+        // console.log(`default : ${JSON.stringify(this.form.default, null, 2)}`);
+        // console.log(`form : ${JSON.stringify(form, null, 2)}`);
 
         let meta = {
           mode: (webhookName) ? "edit" : this.form.default.meta.mode,

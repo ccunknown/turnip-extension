@@ -39,13 +39,13 @@ class TurnipExtensionHistory {
 
     this.display = {
       loading: () => {
-        console.log(`[${this.constructor.name}]`, `display.loading() >> `);
+        // console.log(`[${this.constructor.name}]`, `display.loading() >> `);
         saidObj(`turnip.content.history.section-01`).addClass('hide');
         saidObj(`turnip.content.history.section-02`).addClass('hide');
         saidObj(`turnip.content.history.section-loading`).removeClass('hide');
       },
       loaded: (sec) => {
-        console.log(`[${this.constructor.name}]`, `display.loaded() >> `);
+        // console.log(`[${this.constructor.name}]`, `display.loaded() >> `);
         sec = `${sec}`;
         while(sec.length < 2)
           sec = `0${sec}`;
@@ -55,13 +55,13 @@ class TurnipExtensionHistory {
         saidObj(`turnip.content.history.section-${sec}`).removeClass('hide');
       },
       render: (device, property) => {
-        console.log(`[${this.constructor.name}]`, `display.render() >> `);
+        // console.log(`[${this.constructor.name}]`, `display.render() >> `);
         return (device && property)
           ? this.renderProperty(device, property, this.default.timescale)
           : this.renderDevices();
       },
       sync: (device, property) => {
-        console.log(`[${this.constructor.name}]`, `display.sync() >> `);
+        // console.log(`[${this.constructor.name}]`, `display.sync() >> `);
         this.display.loading();
         this.display.render(device, property)
         .then(() => {
@@ -103,7 +103,7 @@ class TurnipExtensionHistory {
         `Event [Click] : turnip.content.history.section-02.title.download.json`
       );
       return new Promise((resolve, reject) => {
-        console.log(`[${this.constructor.name}]`, `current timescale: ${this.current.timescale}`);
+        // console.log(`[${this.constructor.name}]`, `current timescale: ${this.current.timescale}`);
         Promise.resolve()
         .then(() => this.api.getHistoryThings(
           this.current.device, 
@@ -132,7 +132,7 @@ class TurnipExtensionHistory {
         `Event [Click] : turnip.content.history.section-02.title.download.json`
       );
       return new Promise((resolve, reject) => {
-        console.log(`[${this.constructor.name}]`, `current timescale: ${this.current.timescale}`);
+        // console.log(`[${this.constructor.name}]`, `current timescale: ${this.current.timescale}`);
         let fname;
         Promise.resolve()
         .then(() => this.api.getHistoryThings(
@@ -197,13 +197,13 @@ class TurnipExtensionHistory {
           let arr = e.id.split(`-`);
           let amount = arr.pop();
           let scale = arr.pop();
-          console.log(amount, scale);
+          // console.log(amount, scale);
           // On click.
           saidObj(e.id).click(() => {
             focusTimerangeButton(e.id);
             this.setupData([]);
             this.current.timescale = `${amount} ${scale}`;
-            console.log(`[${this.constructor.name}]`, `time scale -> ${this.current.timescale}`);
+            // console.log(`[${this.constructor.name}]`, `time scale -> ${this.current.timescale}`);
             this.renderData();
           });
         };
@@ -466,11 +466,11 @@ class TurnipExtensionHistory {
       .then(() => this.getPropertySchema(device, property))
       .then((propSchema) => {
         prop = propSchema;
-        console.log(`prop: ${prop}`);
+        // console.log(`prop: ${prop}`);
         return JSON.stringify(propSchema ? propSchema : {}, null, 2)
       })
       .then((p) => {
-        console.log(p);
+        // console.log(p);
         $(`#extension-turnip-extension-content-history-section-02-body-schema`).val(p);
       })
 
@@ -505,11 +505,11 @@ class TurnipExtensionHistory {
       // Get data from server.
       .then(() => this.api.getHistoryThings(device, property, this.scaleToDuration(timescale)))
       .then((data) => {
-        console.log(`[${this.constructor.name}]`, data);
+        console.log(`[${this.constructor.name}]`, `data:`, data);
         return data.array;
       })
       .then((dataArr) => {
-        console.log(`dataArr: `, dataArr);
+        // console.log(`dataArr: `, dataArr);
         this.current.data = [];
         dataArr.forEach((e) => {
           let etimestamp = new Date(e.timestamp);
@@ -520,7 +520,7 @@ class TurnipExtensionHistory {
       // Render Data
       .then(() => {
         this.setupData(this.current.data);
-        console.log(this.current.data);
+        // console.log(this.current.data);
       })
 
       .then(() => resolve())
@@ -529,7 +529,7 @@ class TurnipExtensionHistory {
   }
 
   generatePropertyLabel(device = this.current.device, property = this.current.property) {
-    console.log(`[${this.constructor.name}]`, `generatePropertyLable(${device}, ${property}) >> `);
+    // console.log(`[${this.constructor.name}]`, `generatePropertyLable(${device}, ${property}) >> `);
     return new Promise((resolve, reject) => {
       Promise.resolve()
       .then(() => this.getPropertySchema(device, property))
@@ -544,18 +544,18 @@ class TurnipExtensionHistory {
     property = this.current.property,
     opt = { renew: false, update: true }
   ) {
-    console.log(`[${this.constructor.name}]`, `getPropertySchema(${device}, ${property}) >> `);
+    // console.log(`[${this.constructor.name}]`, `getPropertySchema(${device}, ${property}) >> `);
     return new Promise((resolve, reject) => {
       Promise.resolve()
       .then(() => this.getSchema(opt))
       .then((schema) => schema.find(e => e.href.match(new RegExp(`\/${device}`))))
       .then((d) => {
-        console.log(d);
+        // console.log(d);
         return d;
       })
       .then((d) => {
         let p = property.replace(/^prop-/, ``);
-        console.log(p);
+        // console.log(p);
         return (d && d.properties && d.properties[p]) ? d.properties[p] : null;
       })
       .then((ret) => resolve(ret))
@@ -578,7 +578,7 @@ class TurnipExtensionHistory {
         }
       })
       .then((schema) => {
-        console.log(schema);
+        // console.log(schema);
         opt.update && (this.current.schema = schema);
         return schema;
       })

@@ -38,7 +38,7 @@ class TurnipExtensionHistoryTextUI {
     console.log(`[${this.constructor.name}]`, `initButton() >> `);
     this.ctx.header.click(() => {
       let current = this.ctx.header.html().trim();
-      console.log(`current: ${current}`);
+      // console.log(`current: ${current}`);
       if(current == `Text`)
         this.displayListUI();
       else if(current == `List`)
@@ -73,7 +73,7 @@ class TurnipExtensionHistoryTextUI {
   }
 
   cleanData(timescale = this.current.timescale) {
-    console.log(`[${this.constructor.name}]`, `cleanData() >> `);
+    // console.log(`[${this.constructor.name}]`, `cleanData() >> `);
     let duration = this.timescaleToDuration(timescale);
     let currRange = new Date(Date.now() - duration);
     while(this.current.data[0] && new Date(this.current.data[0].x) < currRange)
@@ -90,7 +90,7 @@ class TurnipExtensionHistoryTextUI {
   }
 
   timescaleToDuration(timescale = this.current.timescale) {
-    console.log(`[${this.constructor.name}]`, `timescaleToDuration(${timescale}) >> `);
+    // console.log(`[${this.constructor.name}]`, `timescaleToDuration(${timescale}) >> `);
     let prefix = parseInt(timescale.match(/^\d+/)) || 1;
     let suffix = timescale.match(/[^ ]+$/)[0];
     switch(suffix) {

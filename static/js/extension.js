@@ -85,7 +85,7 @@
           let idList = [];
           for(let i in this.contents)
             idList = [...idList, ...this.idOfText(this.contents[i])];
-          console.log(`id list : ${JSON.stringify(idList, null, 2)}`);
+          // console.log(`id list : ${JSON.stringify(idList, null, 2)}`);
 
           //  Set up html element id shortcut as said.
           this.turnipRaid = new TurnipRaid(idList);
@@ -130,7 +130,7 @@
           }
           else
             this.config = config;
-          console.log(JSON.stringify(this.config, null, 2));
+          // console.log(JSON.stringify(this.config, null, 2));
           this.pageRender();
         });
       });
@@ -162,7 +162,7 @@
         s.async = false;
 
         s.addEventListener("load", () => {
-          console.log(`loadScriptSync("${src}"") : finish`);
+          // console.log(`loadScriptSync("${src}"") : finish`);
           resolve();
         });
 
@@ -171,7 +171,7 @@
           reject(err);
         });
 
-        console.log(`loadScriptSync("${src}"") : start`);
+        // console.log(`loadScriptSync("${src}"") : start`);
         document.getElementsByTagName('head')[0].appendChild(s);
       });
     }

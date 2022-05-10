@@ -41,10 +41,10 @@ class TurnipWebRTCChannel extends EventTarget {
 
       // Get ice server config from server.
       .then(() => this.getIceServerConfig())
-      .then((config) => this.config = config)
+      .then((config) => this.iceConfig = config)
 
       // Create peer-connection.
-      .then(() => this.createPeerConnection(this.config))
+      .then(() => this.createPeerConnection(this.iceConfig))
 
       // Setup data channel.
       .then(() => this.initDataChannel())
@@ -93,12 +93,12 @@ class TurnipWebRTCChannel extends EventTarget {
     });
   }
 
-  createPeerConnection(config = this.config) {
+  createPeerConnection(iceConfig = this.iceConfig) {
     console.log(`[${this.constructor.name}]`, `createPeerConnection() >> `);
     return new Promise((resolve, reject) => {
       Promise.resolve()
       .then(() => {
-        this.peerConnection = new RTCPeerConnection(config);
+        this.peerConnection = new RTCPeerConnection(iceConfig);
         this.peerConnection.onicecandidate = (e) => {
           console.log(`[${this.constructor.name}]`, `candidate`, e.candidate);
           console.log(`[${this.constructor.name}]`, `sessionId`, this.sessionId);
@@ -111,7 +111,7 @@ class TurnipWebRTCChannel extends EventTarget {
     })
   }
 
-  createSession(channelOptions, config) {
+  createSession(channelOptions, iceConfig) {
     console.log(`[${this.constructor.name}]`, `createSession() >> `);
     return new Promise((resolve, reject) => {
       Promise.resolve()
@@ -120,7 +120,7 @@ class TurnipWebRTCChannel extends EventTarget {
         `/channel/session`, 
         {
           channelOptions: channelOptions,
-          config: config ? config : null
+          iceConfig: iceConfig ? iceConfig : undefined
         }
       ))
       .then((ret) => resolve(ret))

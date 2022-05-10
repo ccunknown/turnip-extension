@@ -50,7 +50,7 @@ var Defaults = {
       "server": {
         "config": {
           "ice": {
-            "iceServer": [
+            "iceServers": [
               {
                 "urls": [
                   "stun:stun1.l.google.com:19302",
@@ -212,10 +212,10 @@ var Defaults = {
                 "properties": {
                   "ice": {
                     "type": "object",
-                    "required": [ "iceServer" ],
+                    "required": [ "iceServers" ],
                     "additionalProperties": false,
                     "properties": {
-                      "iceServer": {
+                      "iceServers": {
                         "type": "array",
                         "items": {
                           "type": "object",
