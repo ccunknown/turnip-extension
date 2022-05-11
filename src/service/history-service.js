@@ -253,7 +253,8 @@ class historyService extends EventEmitter {
       // ))
       .then(() => this.model.thingRecord.create(record))
       // .then((ret) => console.log(`[${this.constructor.name}]`, ret.dataValues))
-      .then((ret) => this.channelService.send(`rtSensorData`, JSON.stringify(ret.dataValues)))
+      // .then((ret) => this.channelService.send(`rtSensorData`, JSON.stringify(ret.dataValues)))
+      .then((ret) => this.channelService.shout(ret.dataValues, `rtSensorData`))
       .then((ret) => resolve(ret))
       .catch((err) => reject(err));
     });

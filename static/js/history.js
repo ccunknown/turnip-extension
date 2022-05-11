@@ -264,8 +264,6 @@ class TurnipExtensionHistory {
   */
   addData(data) {
     console.log(`[${this.constructor.name}]`, `addData({x: ${data.x}, y: ${data.y}}) >> `);
-    // this.current.data.push({ x: new Date(data.x), y: data.y });
-    // this.chart.pushData({ x: new Date(data.x), y: data.y });
     this.current.data.push({ x: data.x, y: data.y });
     this.chart.pushData({ x: data.x, y: data.y });
     this.valuePanel.pushData({ x: data.x, y: data.y });
@@ -324,10 +322,14 @@ class TurnipExtensionHistory {
     Promise.resolve()
     .then(() => this.initChart())
     .then(() => this.initValuePanel())
-    .then(() => this.channel = new TurnipWebRTCChannel(this.parent, channelOptions))
-    .then(() => this.channel.start())
-    .then(() => this.channel.addEventListener(
-      `channel-${channelOptions.name}`, 
+    .then(() => this.rtcpeer = new TurnipRTCPeer(this.parent, channelOptions))
+    .then(() => this.rtcpeer.start())
+    // .then(() => this.rtcpeer.addEventListener(
+    //   `channel-${channelOptions.name}`, 
+    //   (event) => this.onChannelMessage(event)
+    // ))
+    .then(() => this.rtcpeer.addEventListener(
+      `rtSensorData`, 
       (event) => this.onChannelMessage(event)
     ))
     .catch((err) => console.error(err));
@@ -451,8 +453,6 @@ class TurnipExtensionHistory {
     console.log(`[${this.constructor.name}]`, `renderProperty(${device}, ${property}) >> `);
 
     return new Promise((resolve, reject) => {
-      let dataSet = [];
-      let prop = null;
       Promise.resolve()
 
       // Set header label
@@ -465,8 +465,6 @@ class TurnipExtensionHistory {
       // Get schema.
       .then(() => this.getPropertySchema(device, property))
       .then((propSchema) => {
-        prop = propSchema;
-        // console.log(`prop: ${prop}`);
         return JSON.stringify(propSchema ? propSchema : {}, null, 2)
       })
       .then((p) => {

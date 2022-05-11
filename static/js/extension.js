@@ -43,7 +43,7 @@
 
         "static/js/turnip-api.js",
         "static/js/turnipRaid.js",
-        "static/js/channel.js",
+        "static/js/rtcpeer.js",
         "static/js/webhook.js",
         "static/js/history-chart.js",
         "static/js/history-textui.js",

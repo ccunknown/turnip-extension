@@ -48,12 +48,40 @@ class channelService extends EventEmitter {
     console.log(`[${this.constructor.name}]`, `stop() >> `);
   }
 
-  send(channelName, message) {
-    // console.log(`[${this.constructor.name}]`, `send() >> `);
+  // send(message) {
+  //   // console.log(`[${this.constructor.name}]`, `send() >> `);
+  //   this.sessions.forEach(session => {
+  //     if(
+  //       session.channel && 
+  //       session.channel.sender && 
+  //       session.channel.sender.readyState == `open` && 
+  //       session.channel.sender.label == channelName
+  //     ) {
+  //       console.log(`[${this.constructor.name}]`, `message >> `, message);
+  //       session.channel.sender.send(message);
+  //     }
+  //   });
+  // }
+
+  shout(message, type) {
+    message = message.type == `string` ? message : JSON.stringify(message);
+    message = type
+    ? JSON.stringify({
+        type: type,
+        message: message
+      })
+    : message;
+
     this.sessions.forEach(session => {
-      if(session.channel && session.channel.readyState == `open` && session.channel.label == channelName) {
+      if(
+        session.channel && 
+        session.channel.sender && 
+        session.channel.sender.readyState == `open`
+        // session.channel.sender.readyState == `open` && 
+        // session.channel.sender.label == channelName
+      ) {
         console.log(`[${this.constructor.name}]`, `message >> `, message);
-        session.channel.send(message);
+        session.channel.sender.send(message);
       }
     });
   }
@@ -71,7 +99,9 @@ class channelService extends EventEmitter {
       //   JSON.stringify(iceConfig, null ,2)
       // ))
       .then(() => this.createPeerConnection(session.id, iceConfig))
-      .then(() => this.createChannel(session.id, channelOptions))
+      // .then(() => this.createChannel(session.id, channelOptions))
+      .then(() => this.createReceiveChannel(session))
+      .then(() => this.createSendChannel(session))
       .then(() => this.createOffer(session.id))
       .then((ret) => resolve(session))
       .catch((err) => reject(err));
@@ -87,7 +117,10 @@ class channelService extends EventEmitter {
       answer: null,
       offerCandidate: [],
       answerCandidate: [],
-      channel: null,
+      channel: {
+        sender: null,
+        receiver: null
+      },
       metric: {
         createDate: (new Date()).toISOString(),
         failCount: 0,
@@ -116,15 +149,9 @@ class channelService extends EventEmitter {
             (event) => this.onDataChannelRequest(session, event)
           );
         }
-        if(session.channel) { 
-          session.channel.removeEventListener(
-            `open`, 
-            (event) => this.onChannelOpen(session, event)
-          );
-          session.channel.removeEventListener(
-            `close`, 
-            (event) => this.deleteSession(session.id)
-          );
+        if(session.channel) {
+          session.channel.sender && this.setupSendChannelListener(session, false);
+          session.channel.receiver && this.setupReceiveChannelListener(session, false);
         }
         this.sessions = this.sessions.filter(e => e.id != session.id);
       }
@@ -169,45 +196,128 @@ class channelService extends EventEmitter {
     }
   }
 
-  createChannel(session, options) {
-    console.log(`[${this.constructor.name}]`, `createChannel() >> `);
-    session = typeof session == `object` ? session : this.getSession(session);
-    if(options.type == `data` && options.name) {
-      return this.createDataChannel(session, options.name);
-    }
+  // createChannel(session, options) {
+  //   console.log(`[${this.constructor.name}]`, `createChannel() >> `);
+  //   session = typeof session == `object` ? session : this.getSession(session);
+  //   if(options.type == `data` && options.name) {
+  //     return this.createDataChannel(session, options.name);
+  //   }
+  // }
+
+  // createDataChannel(session, name) {
+  //   console.log(`[${this.constructor.name}]`, `createDataChannel(${name || ``}) >> `);
+  //   session = typeof session == `object` ? session : this.getSession(session);
+
+  //   session.peerConnection.addEventListener(
+  //     `datachannel`,
+  //     (event) => this.onChannelRequest(session, event)
+  //   );
+
+  //   session.channel = session.peerConnection.createDataChannel(`${name}`);
+
+  //   session.channel.addEventListener(
+  //     `open`,
+  //     (event) => this.onChannelOpen(session, event)
+  //   );
+  //   session.channel.addEventListener(
+  //     `close`,
+  //     (event) => this.deleteSession(session.id)
+  //   );
+
+  //   return session.channel;
+  // }
+
+  /*
+    Create sender channel function.
+  */
+  createSendChannel(session) {
+    console.log(`[${this.constructor.name}]`, `createSendChannel() >> `);
+    session.channel.sender = session.peerConnection.createDataChannel(`server-to-client`);
+    this.setupSendChannelListener(session);
   }
 
-  createDataChannel(session, name) {
-    console.log(`[${this.constructor.name}]`, `createDataChannel(${name || ``}) >> `);
-    session = typeof session == `object` ? session : this.getSession(session);
+  setupSendChannelListener(session, set = true) {
+    let func = set ? `addEventListener` : `removeEventListener`;
+    session.channel.sender[func](`open`, (event) => this.onSendChannelOpen(session, event));
+    session.channel.sender[func](`close`, (event) => this.onSendChannelClose(session, event));
+  }
 
+  onSendChannelOpen(session, event) {
+    console.log(
+      `[${this.constructor.name}]`, 
+      `"server-to-client" channel of session[${session.id}] is open`
+    );
+  }
+
+  onSendChannelClose(session, event) {
+    console.log(
+      `[${this.constructor.name}]`, 
+      `"server-to-client" channel of session[${session.id}] is close`
+    );
+  }
+
+  /*
+    Create receiver channel function.
+  */
+  createReceiveChannel(session) {
+    console.log(`[${this.constructor.name}]`, `createReceiveChannel() >> `);
     session.peerConnection.addEventListener(
       `datachannel`,
-      (event) => this.onChannelRequest(session, event)
+      (event) => this.onReceiveChannelRequest(session, event)
     );
-
-    session.channel = session.peerConnection.createDataChannel(`${name}`);
-
-    session.channel.addEventListener(
-      `open`,
-      (event) => this.onChannelOpen(session, event)
-    );
-    session.channel.addEventListener(
-      `close`,
-      (event) => this.deleteSession(session.id)
-    );
-
-    return session.channel;
   }
 
-  onChannelRequest(session, event) {
-    console.log(`[${this.constructor.name}]`, `on channel request`);
-    session.channel = event.channel;
+  onReceiveChannelRequest(session, event) {
+    console.log(`[${this.constructor.name}]`, `onReceiveChannelRequest() >> `);
+    session.channel.receiver = event.channel;
+    this.setupReceiveChannelListener(session);
   }
 
-  onChannelOpen(session, event) {
-    console.log(`[${this.constructor.name}]`, `on channel open`);
+  setupReceiveChannelListener(session, set = true) {
+    let func = set ? `addEventListener` : `removeEventListener`;
+    session.channel.receiver[func](`open`, (event) => this.onReceiveChannelOpen(session, event));
+    session.channel.receiver[func](`message`, (event) => this.onReceiveChannelMessage(session, event));
+    session.channel.receiver[func](`error`, (event) => this.onReceiveChannelError(session, event));
+    session.channel.receiver[func](`close`, (event) => this.onReceiveChannelClose(session, event));
   }
+
+  onReceiveChannelOpen(session, event) {
+    console.log(
+      `[${this.constructor.name}]`, 
+      `"client-to-server" channel of session[${session.id}] is open`
+    );
+  }
+
+  onReceiveChannelMessage(session, event) {
+    console.log(
+      `[${this.constructor.name}]`, 
+      `message[${session.id}]: ${event.data}`
+    );
+  }
+
+  onReceiveChannelError(session, event) {
+    console.log(
+      `[${this.constructor.name}]`, 
+      `"client-to-server" session[${session.id}] error:`,
+      event
+    );
+  }
+
+  onReceiveChannelClose(session, event) {
+    console.log(
+      `[${this.constructor.name}]`, 
+      `"client-to-server" channel of session[${session.id}] is close`
+    );
+  }
+
+  // onChannelRequest(session, event) {
+  //   console.log(`[${this.constructor.name}]`, `on channel request`);
+  //   session.channel = event.channel;
+  // }
+
+  // onChannelOpen(session, event) {
+  //   console.log(`[${this.constructor.name}]`, `on channel open`);
+  // }
 
   createOffer(session) {
     console.log(`[${this.constructor.name}]`, `createOffer() >> `);

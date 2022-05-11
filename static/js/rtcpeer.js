@@ -1,6 +1,6 @@
 // const { EventEmitter } = require('events');
 
-class TurnipWebRTCChannel extends EventTarget {
+class TurnipRTCPeer extends EventTarget {
   constructor(parent, channelOptions) {
     super();
     this.parent = parent;
@@ -14,6 +14,13 @@ class TurnipWebRTCChannel extends EventTarget {
       name: channelOptions.name
     }
 
+    this.channel = {};
+
+    // this.channel = {
+    //   receiver: null,
+    //   sender: null
+    // };
+
     this.init();
   }
 
@@ -21,17 +28,104 @@ class TurnipWebRTCChannel extends EventTarget {
     console.log(`[${this.constructor.name}]`, `init() >> `);
   }
 
-  initDataChannel(options = this.channelOptions) {
-    console.log(`[${this.constructor.name}]`, `initDataChannel() >> `);
-    this.channel = this.peerConnection.createDataChannel(options.name);
-    this.channel.addEventListener(`message`, event => {
-      let data = JSON.parse(event.data);
-      // console.log(`[${this.constructor.name}]`, `on message`, options.name, data);
-      this.dispatchEvent(new CustomEvent(
-        `channel-${options.name}`, 
-        { detail: data }
-      ));
-    });
+  // initDataChannel(options = this.channelOptions) {
+  //   console.log(`[${this.constructor.name}]`, `initDataChannel() >> `);
+  //   this.channel = this.peerConnection.createDataChannel(options.name);
+  //   this.channel.addEventListener(`message`, event => {
+  //     let data = JSON.parse(event.data);
+  //     // console.log(`[${this.constructor.name}]`, `on message`, options.name, data);
+  //     this.dispatchEvent(new CustomEvent(
+  //       `channel-${options.name}`, 
+  //       { detail: data }
+  //     ));
+  //   });
+  // }
+
+  /*
+    Create sender channel function.
+  */
+  createSendChannel() {
+    console.log(`[${this.constructor.name}]`, `createSendChannel() >> `);
+    this.channel.sender = this.peerConnection.createDataChannel(`server-to-client`);
+    this.channel.sender.addEventListener(`open`, (event) => this.onSendChannelOpen(event));
+    this.channel.sender.addEventListener(`close`, (event) => this.onSendChannelClose(event));
+  }
+
+  setupSendChannelListener(set = true) {
+    let func = set ? `addEventListener` : `removeEventListener`;
+    this.channel.sender[func](`open`, (event) => this.onSendChannelOpen(event));
+    this.channel.sender[func](`close`, (event) => this.onSendChannelClose(event));
+  }
+
+  onSendChannelOpen(event) {
+    console.log(
+      `[${this.constructor.name}]`, 
+      `"client-to-server" channel open`
+    );
+  }
+
+  onSendChannelClose(event) {
+    console.log(
+      `[${this.constructor.name}]`, 
+      `"client-to-server" channel close`
+    );
+  }
+
+  /*
+    Create receiver channel function.
+  */
+  createReceiveChannel() {
+    console.log(`[${this.constructor.name}]`, `createReceiveChannel() >> `);
+    this.peerConnection.addEventListener(
+      `datachannel`,
+      (event) => this.onReceiveChannelRequest(event)
+    );
+  }
+
+  onReceiveChannelRequest(event) {
+    console.log(`[${this.constructor.name}]`, `onReceiveChannelRequest() >> `);
+    this.channel.receiver = event.channel;
+    this.setupReceiveChannelListener();
+  }
+
+  setupReceiveChannelListener(set = true) {
+    let func = set ? `addEventListener` : `removeEventListener`;
+    this.channel.receiver[func](`open`, (event) => this.onReceiveChannelOpen(event));
+    this.channel.receiver[func](`message`, (event) => this.onReceiveChannelMessage(event));
+    this.channel.receiver[func](`error`, (event) => this.onReceiveChannelError(event));
+    this.channel.receiver[func](`close`, (event) => this.onReceiveChannelClose(event));
+  }
+
+  onReceiveChannelOpen(event) {
+    console.log(
+      `[${this.constructor.name}]`, 
+      `"server-to-client" channel open`
+    );
+  }
+
+  onReceiveChannelMessage(event) {
+    let data = JSON.parse(event.data);
+    console.log(`[${this.constructor.name}]`, `on message`, data);
+    this.dispatchEvent(new CustomEvent(
+      data.type, 
+      { detail: JSON.parse(data.message) }
+    ));
+    // this.channel.sender.send(`test`);
+  }
+
+  onReceiveChannelError(event) {
+    console.log(
+      `[${this.constructor.name}]`, 
+      `"server-to-client" channel error:`,
+      event
+    );
+  }
+
+  onReceiveChannelClose(event) {
+    console.log(
+      `[${this.constructor.name}]`, 
+      `"client-to-server" channel of session[${session.id}] is close`
+    );
   }
 
   start() {
@@ -47,7 +141,7 @@ class TurnipWebRTCChannel extends EventTarget {
       .then(() => this.createPeerConnection(this.iceConfig))
 
       // Setup data channel.
-      .then(() => this.initDataChannel())
+      // .then(() => this.initDataChannel())
 
       // Create session.
       .then(() => this.createSession(this.channelOptions))
@@ -55,6 +149,9 @@ class TurnipWebRTCChannel extends EventTarget {
         this.sessionId = ret.id;
         console.log(`[${this.constructor.name}]`, `session id: ${this.sessionId}`);
       })
+
+      .then(() => this.createReceiveChannel())
+      .then(() => this.createSendChannel())
 
       // Get offer.
       .then(() => this.getOffer(this.sessionId))
