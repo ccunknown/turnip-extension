@@ -1,4 +1,5 @@
 const servicePrefix = "./service/";
+const serviceDir = "./service";
 
 class laborsManager {
   constructor(extension) {
@@ -16,8 +17,6 @@ class laborsManager {
     return new Promise((resolve, reject) => {
       this.loadService()
       .then(() => {
-        //console.log(`service list : `);
-        //console.log(this.serviceList);
         resolve(this.startService());
       });
     });
@@ -31,27 +30,14 @@ class laborsManager {
         let serviceList = config.service;
         for(let i in serviceList) {
           let service = serviceList[i];
-          let serviceClass = require(`${servicePrefix}${service.id}`);
+          // let serviceClass = require(`${servicePrefix}${service.id}`);
+          let serviceClass = require([serviceDir, service.id, service.id].join(`/`));
           service.obj = new serviceClass(this.extension, config);
           console.log(`service : ${service.id}`);
           this.serviceList.push(service);
         }
         resolve();
       });
-      /*
-      this.getConfigService()
-      .then((serviceList) => {
-        //console.log(`service list : ${JSON.stringify(serviceList, null, 2)}`);
-        for(let i in serviceList) {
-          let service = serviceList[i];
-          let serviceClass = require(`${servicePrefix}${service.id}`);
-          service.obj = new serviceClass(this.extension);
-          console.log(`service : ${service.id}`);
-          this.serviceList.push(service);
-        }
-        resolve();
-      });
-      */
     });
   }
 

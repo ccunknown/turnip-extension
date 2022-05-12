@@ -3,11 +3,11 @@
 const EventEmitter = require('events').EventEmitter;
 const request = require('request');
 
-const Database = require('../lib/my-database');
-const {Defaults, Errors} = require('../../constants/constants');
+const Database = require('../../lib/my-database');
+const {Defaults, Errors} = require('../../../constants/constants');
 
 //const ReopeningWebSocket = require('../lib/reopening-web-socket');
-const Websocket = require('../lib/websocket');
+const Websocket = require('../../lib/websocket');
 
 class wsocketService extends EventEmitter {
   constructor(extension, config) {

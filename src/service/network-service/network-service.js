@@ -4,7 +4,7 @@ const EventEmitter = require(`events`).EventEmitter;
 const DNS = require(`dns`);
 // const redis = require(`redis`);
 const { exec } = require(`child_process`);
-const { Default, Error } = require(`../../constants/constants`);
+const { Default, Error } = require(`../../../constants/constants`);
 
 class NetworkService extends EventEmitter {
   constructor(extension, config) {

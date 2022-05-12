@@ -435,16 +435,16 @@ class RoutesManager extends APIHandler{
         }
       },
 
-      /***  Resource : /channel/session  ***/
+      /***  Resource : /rtcpeer/session  ***/
       {
-        "resource": /\/channel\/session/,
+        "resource": /\/rtcpeer\/session/,
         "method": {
           "GET": (req) => {
             return new Promise((resolve, reject) => {
-              this.laborsManager.getService(`channel-service`)
+              this.laborsManager.getService(`rtcpeer-service`)
               .then((service) => {
-                this.channelService = service.obj;
-                return this.channelService.getSession()
+                this.rtcpeerService = service.obj;
+                return this.rtcpeerService.getSession()
               })
               .then((list) => resolve(this.makeJsonRespond(JSON.stringify(list))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
@@ -453,9 +453,9 @@ class RoutesManager extends APIHandler{
           "POST": (req) => {
             return new Promise((resolve, reject) => {
               Promise.resolve()
-              .then(() => this.laborsManager.getService(`channel-service`))
-              .then((service) => this.channelService = service.obj)
-              .then(() => this.channelService.createSession(req.body.channelOptions, req.body.config))
+              .then(() => this.laborsManager.getService(`rtcpeer-service`))
+              .then((service) => this.rtcpeerService = service.obj)
+              .then(() => this.rtcpeerService.createSession(req.body.channelOptions, req.body.config))
               .then((session) => { return { id: session.id }; })
               .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
@@ -464,9 +464,9 @@ class RoutesManager extends APIHandler{
           "DELETE": (req) => {
             return new Promise((resolve, reject) => {
               Promise.resolve()
-              .then(() => this.laborsManager.getService(`channel-service`))
-              .then((service) => this.channelService = service.obj)
-              .then(() => this.channelService.deleteSession())
+              .then(() => this.laborsManager.getService(`rtcpeer-service`))
+              .then((service) => this.rtcpeerService = service.obj)
+              .then(() => this.rtcpeerService.deleteSession())
               .then(() => { return { "result": true } })
               .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
@@ -475,17 +475,17 @@ class RoutesManager extends APIHandler{
         }
       },
 
-      /***  Resource : /channel/session/{sessionId}  ***/
+      /***  Resource : /rtcpeer/session/{sessionId}  ***/
       {
-        "resource": /\/channel\/session\/[^/]+/,
+        "resource": /\/rtcpeer\/session\/[^/]+/,
         "method": {
           "GET": (req) => {
             return new Promise((resolve, reject) => {
               let id = this.getPathElement(req.path);
               Promise.resolve()
-              .then(() => this.laborsManager.getService(`channel-service`))
-              .then((service) => this.channelService = service.obj)
-              .then(() => this.channelService.getSession(id))
+              .then(() => this.laborsManager.getService(`rtcpeer-service`))
+              .then((service) => this.rtcpeerService = service.obj)
+              .then(() => this.rtcpeerService.getSession(id))
               .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
@@ -494,9 +494,9 @@ class RoutesManager extends APIHandler{
             return new Promise((resolve, reject) => {
               let id = this.getPathElement(req.path);
               Promise.resolve()
-              .then(() => this.laborsManager.getService(`channel-service`))
-              .then((service) => this.channelService = service.obj)
-              .then(() => this.channelService.deleteSession(id))
+              .then(() => this.laborsManager.getService(`rtcpeer-service`))
+              .then((service) => this.rtcpeerService = service.obj)
+              .then(() => this.rtcpeerService.deleteSession(id))
               .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
@@ -504,17 +504,17 @@ class RoutesManager extends APIHandler{
         }
       },
 
-      /***  Resource : /channel/session/{sessionId}/offer  ***/
+      /***  Resource : /rtcpeer/session/{sessionId}/offer  ***/
       {
-        "resource": /\/channel\/session\/[^/]+\/offer/,
+        "resource": /\/rtcpeer\/session\/[^/]+\/offer/,
         "method": {
           "GET": (req) => {
             return new Promise((resolve, reject) => {
               let id = this.getPathElement(req.path, 2);
               Promise.resolve()
-              .then(() => this.laborsManager.getService(`channel-service`))
-              .then((service) => this.channelService = service.obj)
-              .then(() => this.channelService.getOffer(id))
+              .then(() => this.laborsManager.getService(`rtcpeer-service`))
+              .then((service) => this.rtcpeerService = service.obj)
+              .then(() => this.rtcpeerService.getOffer(id))
               // .then((ret) => {
               //   console.log(`[${this.constructor.name}]`, JSON.stringify(ret, null, 2));
               //   return ret;
@@ -526,17 +526,17 @@ class RoutesManager extends APIHandler{
         }
       },
 
-      /***  Resource : /channel/session/{sessionId}/offer-candidate  ***/
+      /***  Resource : /rtcpeer/session/{sessionId}/offer-candidate  ***/
       {
-        "resource": /\/channel\/session\/[^/]+\/offer-candidate/,
+        "resource": /\/rtcpeer\/session\/[^/]+\/offer-candidate/,
         "method": {
           "GET": (req) => {
             return new Promise((resolve, reject) => {
               let id = this.getPathElement(req.path, 2);
               Promise.resolve()
-              .then(() => this.laborsManager.getService(`channel-service`))
-              .then((service) => this.channelService = service.obj)
-              .then(() => this.channelService.getOfferCandidate(id))
+              .then(() => this.laborsManager.getService(`rtcpeer-service`))
+              .then((service) => this.rtcpeerService = service.obj)
+              .then(() => this.rtcpeerService.getOfferCandidate(id))
               .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
@@ -544,17 +544,17 @@ class RoutesManager extends APIHandler{
         }
       },
 
-      /***  Resource : /channel/session/{sessionId}/answer  ***/
+      /***  Resource : /rtcpeer/session/{sessionId}/answer  ***/
       {
-        "resource": /\/channel\/session\/[^/]+\/answer/,
+        "resource": /\/rtcpeer\/session\/[^/]+\/answer/,
         "method": {
           "POST": (req) => {
             return new Promise((resolve, reject) => {
               let id = this.getPathElement(req.path, 2);
               Promise.resolve()
-              .then(() => this.laborsManager.getService(`channel-service`))
-              .then((service) => this.channelService = service.obj)
-              .then(() => this.channelService.addAnswer(id, req.body))
+              .then(() => this.laborsManager.getService(`rtcpeer-service`))
+              .then((service) => this.rtcpeerService = service.obj)
+              .then(() => this.rtcpeerService.addAnswer(id, req.body))
               .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });
@@ -562,17 +562,17 @@ class RoutesManager extends APIHandler{
         }
       },
 
-      /***  Resource : /channel/session/{sessionId}/answer-candidate  ***/
+      /***  Resource : /rtcpeer/session/{sessionId}/answer-candidate  ***/
       {
-        "resource": /\/channel\/session\/[^/]+\/answer-candidate/,
+        "resource": /\/rtcpeer\/session\/[^/]+\/answer-candidate/,
         "method": {
           "POST": (req) => {
             return new Promise((resolve, reject) => {
               let id = this.getPathElement(req.path, 2);
               Promise.resolve()
-              .then(() => this.laborsManager.getService(`channel-service`))
-              .then((service) => this.channelService = service.obj)
-              .then(() => this.channelService.addAnswerCandidate(id, req.body))
+              .then(() => this.laborsManager.getService(`rtcpeer-service`))
+              .then((service) => this.rtcpeerService = service.obj)
+              .then(() => this.rtcpeerService.addAnswerCandidate(id, req.body))
               .then((ret) => resolve(this.makeJsonRespond(JSON.stringify(ret))))
               .catch((err) => resolve(this.catchErrorRespond(err)));
             });

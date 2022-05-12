@@ -20,10 +20,10 @@ var Defaults = {
         "description": "This service use to check internet connection and redis (install if not exist)."
       },
       {
-        "id": "channel-service",
+        "id": "rtcpeer-service",
         "enable": true,
         "status": "unknow",
-        "description": "This service use to create WebRTC channel for real-time communicate between backend and frontend."
+        "description": "This service use to create WebRTC peer-to-peer connection for real-time backend/frontend communication."
       },
       {
         "id": "history-service",
@@ -46,7 +46,7 @@ var Defaults = {
         ]
       }
     ],
-    "channel": {
+    "rtcpeer": {
       "server": {
         "config": {
           "ice": {
@@ -195,7 +195,7 @@ var Defaults = {
           }
         }
       },
-      "channel": {
+      "rtcpeer": {
         "type": "object",
         "required": [ "server" ],
         "additionalProperties": false,

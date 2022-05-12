@@ -5,8 +5,8 @@ const Queue = require(`bull`);
 const { Sequelize, DataTypes, Op } = require(`sequelize`);
 const EventEmitter = require('events').EventEmitter;
 
-const Database = require('../lib/my-database');
-const {Defaults, Errors} = require('../../constants/constants');
+const Database = require('../../lib/my-database');
+const {Defaults, Errors} = require('../../../constants/constants');
 
 class historyService extends EventEmitter {
   constructor(extension, config) {
@@ -91,7 +91,7 @@ class historyService extends EventEmitter {
       .then(() => this.initThingsQueueProcess())
       .then(() => this.initThingsUpdateHandler())
       .then(() => this.initThingsCleanupHandler())
-      .then(() => this.initChannel())
+      .then(() => this.initRTCPeer())
       .then((ret) => resolve(ret))
       .catch((err) => reject(err));
     });
@@ -101,12 +101,12 @@ class historyService extends EventEmitter {
 
   }
  
-  initChannel() {
-    console.log(`[${this.constructor.name}]`, `initChannel() >> `);
+  initRTCPeer() {
+    console.log(`[${this.constructor.name}]`, `initRTCPeer() >> `);
     return new Promise((resolve, reject) => {
       Promise.resolve()
-      .then(() => this.laborsManager.getService(`channel-service`))
-      .then((service) => this.channelService = service.obj)
+      .then(() => this.laborsManager.getService(`rtcpeer-service`))
+      .then((service) => this.rtcpeerService = service.obj)
       .then(() => resolve())
       .catch((err) => reject(err));
     })
@@ -254,7 +254,7 @@ class historyService extends EventEmitter {
       .then(() => this.model.thingRecord.create(record))
       // .then((ret) => console.log(`[${this.constructor.name}]`, ret.dataValues))
       // .then((ret) => this.channelService.send(`rtSensorData`, JSON.stringify(ret.dataValues)))
-      .then((ret) => this.channelService.shout(ret.dataValues, `rtSensorData`))
+      .then((ret) => this.rtcpeerService.shout(ret.dataValues, `rtSensorData`))
       .then((ret) => resolve(ret))
       .catch((err) => reject(err));
     });

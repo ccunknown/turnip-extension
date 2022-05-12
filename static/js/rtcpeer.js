@@ -214,7 +214,7 @@ class TurnipRTCPeer extends EventTarget {
       Promise.resolve()
       .then(() => this.restCall(
         `POST`,
-        `/channel/session`, 
+        `/rtcpeer/session`, 
         {
           channelOptions: channelOptions,
           iceConfig: iceConfig ? iceConfig : undefined
@@ -229,7 +229,10 @@ class TurnipRTCPeer extends EventTarget {
     console.log(`[${this.constructor.name}]`, `getIceServerConfig() >> `);
     return new Promise((resolve, reject) => {
       Promise.resolve()
-      .then(() => this.restCall(`GET`, `/config/channel/server/config/ice`))
+      .then(() => this.restCall(
+        `GET`, 
+        `/config/rtcpeer/server/config/ice`
+      ))
       .then((ret) => resolve(ret))
       .catch((err) => reject(err));
     });
@@ -239,7 +242,10 @@ class TurnipRTCPeer extends EventTarget {
     console.log(`[${this.constructor.name}]`, `getOffer() >> `);
     return new Promise((resolve, reject) => {
       Promise.resolve()
-      .then(() => this.restCall(`GET`, `/channel/session/${id}/offer`))
+      .then(() => this.restCall(
+        `GET`, 
+        `/rtcpeer/session/${id}/offer`
+      ))
       .then((ret) => resolve(ret))
       .catch((err) => reject(err));
     });
@@ -249,7 +255,10 @@ class TurnipRTCPeer extends EventTarget {
     console.log(`[${this.constructor.name}]`, `getOffer() >> `);
     return new Promise((resolve, reject) => {
       Promise.resolve()
-      .then(() => this.restCall(`GET`, `/channel/session/${id}/offer-candidate`))
+      .then(() => this.restCall(
+        `GET`, 
+        `/rtcpeer/session/${id}/offer-candidate`
+      ))
       .then((ret) => resolve(ret))
       .catch((err) => reject(err));
     });
@@ -261,7 +270,7 @@ class TurnipRTCPeer extends EventTarget {
       Promise.resolve()
       .then(() => this.restCall(
         `POST`,
-        `/channel/session/${id}/answer`,
+        `/rtcpeer/session/${id}/answer`,
         answer
       ))
       .then((ret) => resolve(ret))
@@ -275,7 +284,7 @@ class TurnipRTCPeer extends EventTarget {
       Promise.resolve()
       .then(() => this.restCall(
         `POST`,
-        `/channel/session/${id}/answer-candidate`, 
+        `/rtcpeer/session/${id}/answer-candidate`, 
         candidate
       ))
       .then((ret) => resolve(ret))

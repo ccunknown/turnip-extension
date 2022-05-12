@@ -1,6 +1,6 @@
 'use strict';
 
-const Config = require(`../config/config`);
+const Config = require(`../../config/config`);
 const fetch = require('node-fetch');
 const EventEmitter = require('events').EventEmitter;
 const request = require('request');
@@ -9,7 +9,7 @@ const request = require('request');
 const mustache = require('mustache');
 const Queue = require(`bull`);
 
-const {Defaults, Errors} = require('../../constants/constants');
+const {Defaults, Errors} = require('../../../constants/constants');
 
 class webhookService extends EventEmitter {
   constructor(extension, config) {
