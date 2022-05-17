@@ -23,33 +23,33 @@
           "noWebhook": "nowebhook",
           "allReady": "allready"
         },
-        "scriptAddrPrefix": `/extensions/${this.id}/`
+        "scriptAddrPrefix": `/extensions/${this.id}/static/`
       };
 
-      //  Load script.
+      //  Script list.
       let scriptArr = [
-        "static/js/jquery.min.js",
-        "static/js/popper.min.js",
-        "static/js/bootstrap.js",
-        "static/js/password-generator.min.js",
-        "static/ace-builds/src-min-noconflict/ace.js",
-        "static/ace-builds/src-min-noconflict/ext-language_tools.js",
-        "static/js/mode-text_mustache.js",
-        "static/js/mode-json_mustache.js",
-        "static/js/chart.min.js",
-        "static/js/chartjs-plugin-streaming@2.0.0.js",
-        "static/js/luxon@1.27.0.js",
-        "static/js/chartjs-adapter-luxon@1.0.0.js",
+        "js/jquery.min.js",
+        "js/popper.min.js",
+        "js/bootstrap.js",
+        "js/password-generator.min.js",
+        "ace-builds/src-min-noconflict/ace.js",
+        "ace-builds/src-min-noconflict/ext-language_tools.js",
+        "js/mode-text_mustache.js",
+        "js/mode-json_mustache.js",
+        "js/chart.min.js",
+        "js/chartjs-plugin-streaming@2.0.0.js",
+        "js/luxon@1.27.0.js",
+        "js/chartjs-adapter-luxon@1.0.0.js",
 
-        "static/js/turnip-api.js",
-        "static/js/turnipRaid.js",
-        "static/js/rtcpeer.js",
-        "static/js/webhook.js",
-        "static/js/history-chart.js",
-        "static/js/history-textui.js",
-        "static/js/history.js",
-        "static/js/setting.js",
-        "static/js/account.js",
+        "js/turnip-api.js",
+        "js/turnipRaid.js",
+        "js/rtcpeer.js",
+        "js/webhook.js",
+        "js/history-chart.js",
+        "js/history-textui.js",
+        "js/history.js",
+        "js/setting.js",
+        "js/account.js",
       ];
 
       //for(let i in scriptArr)
