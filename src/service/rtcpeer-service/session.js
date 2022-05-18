@@ -7,6 +7,7 @@ const {
   RTCIceCandidate,
 } = require(`wrtc`);
 
+const Config = require(`./default`);
 const ChannelPair = require(`./channel-pair`);
 
 class Session extends EventEmitter {
@@ -14,6 +15,7 @@ class Session extends EventEmitter {
     super();
     this.iceConfig = iceConfig;
     this.state = `uninitialize`;
+    this.interval = null;
     const defaultOption = {
       id: uuid ? uuid() : null,
       peerConnection: null,
@@ -26,16 +28,40 @@ class Session extends EventEmitter {
         createDate: (new Date()).toISOString(),
         failCount: 0,
         successCount: 0
-      }
+      },
+      config: Config.session
     };
 
     this.initParam(this, defaultOption);
     this.initParam(this, options);
+    this.abortcountdown = this.config.handshake.abortcountdown;
   }
 
   initParam(dest, src) {
     for(let i in src)
       dest[i] = src[i];
+  }
+
+  initHandshake() {
+    this.interval = setInterval(() => this.doHandshake(), this.config.handshake.period);
+  }
+
+  doHandshake() {
+    return new Promise((resolve, reject) => {
+      let timeout = setTimeout(() => {
+        this.abortcountdown = this.abortcountdown - 1;
+        (this.abortcountdown <= 0) && this.destroy();
+      }, this.config.handshake.abortcountdown);
+      Promise.resolve()
+      .then(() => this.channel.callRespond(`ping`))
+      .then((ret) => console.log(`handshake:`, ret))
+      .then((ret) => {
+        clearTimeout(timeout);
+        this.abortcountdown = this.config.handshake.abortcountdown;
+        resolve();
+      })
+      .catch((err) => reject(err));
+    });
   }
 
   createPeerConnection(iceConfig = this.iceConfig) {
@@ -71,7 +97,8 @@ class Session extends EventEmitter {
     console.log(`[${this.constructor.name}]`, `createChannel() >> `);
     this.channel = new ChannelPair(peerConnection);
 
-    this.channel.on(`message`, (event) => this.onMessage(event))
+    this.channel.on(`message`, (event) => this.onMessage(event));
+    this.initHandshake();
   }
 
   onMessage(event) {
@@ -138,10 +165,16 @@ class Session extends EventEmitter {
   }
 
   destroy() {
+    this.emit(`destroy`, this.id)
+
+    this.interval && clearInterval(this.interval);
+    
     this.channel.sender && 
-    this.channel.sender.setupSendChannelListener(false);
+    this.channel.setupSenderListener(false);
+    
     this.channel.receiver && 
-    this.channel.receiver.setupReceiveChannelListener(false);
+    this.channel.setupReceiverListener(false);
+    
     this.peerConnection.close();
   }
 }

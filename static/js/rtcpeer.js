@@ -28,27 +28,13 @@ class TurnipRTCPeer extends EventTarget {
     console.log(`[${this.constructor.name}]`, `init() >> `);
   }
 
-  // initDataChannel(options = this.channelOptions) {
-  //   console.log(`[${this.constructor.name}]`, `initDataChannel() >> `);
-  //   this.channel = this.peerConnection.createDataChannel(options.name);
-  //   this.channel.addEventListener(`message`, event => {
-  //     let data = JSON.parse(event.data);
-  //     // console.log(`[${this.constructor.name}]`, `on message`, options.name, data);
-  //     this.dispatchEvent(new CustomEvent(
-  //       `channel-${options.name}`, 
-  //       { detail: data }
-  //     ));
-  //   });
-  // }
-
   /*
     Create sender channel function.
   */
   createSendChannel() {
     console.log(`[${this.constructor.name}]`, `createSendChannel() >> `);
     this.channel.sender = this.peerConnection.createDataChannel(`server-to-client`);
-    this.channel.sender.addEventListener(`open`, (event) => this.onSendChannelOpen(event));
-    this.channel.sender.addEventListener(`close`, (event) => this.onSendChannelClose(event));
+    this.setupSendChannelListener();
   }
 
   setupSendChannelListener(set = true) {
@@ -106,10 +92,19 @@ class TurnipRTCPeer extends EventTarget {
   onReceiveChannelMessage(event) {
     let data = JSON.parse(event.data);
     console.log(`[${this.constructor.name}]`, `on message`, data);
-    this.dispatchEvent(new CustomEvent(
-      data.type, 
-      { detail: JSON.parse(data.message) }
-    ));
+    if(data.messageId && data.message == `ping`) {
+      console.log(`ping`, data);
+      this.channel.sender.send(JSON.stringify({
+        messageId: data.messageId,
+        message: `pong`
+      }));
+    }
+    else {
+      this.dispatchEvent(new CustomEvent(
+        data.type, 
+        { detail: JSON.parse(data.message) }
+      ));
+    }
     // this.channel.sender.send(`test`);
   }
 

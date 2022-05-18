@@ -475,11 +475,12 @@ class TurnipExtensionHistory {
       : `[id: ${deviceId}]`;
 
     let propertiesText = ``;
-    Object.keys(deviceSchema.properties).forEach((p) => {
-      let propertySchema = deviceSchema.properties[p];
-      let propertyId = `extension-turnip-extension-content-history-section-01-list-:${deviceId}:-:${p}:`
-      let propertyTitle = propertySchema.title ? `${propertySchema.title}` : `${p}`;
+    Object.keys(deviceSchema.properties).forEach((propertyId) => {
+      let propertySchema = deviceSchema.properties[propertyId];
+      let domId = `extension-turnip-extension-content-history-section-01-list-:${deviceId}:-:${propertyId}:`
+      let propertyTitle = propertySchema.title ? `${propertySchema.title}` : `${propertyId}`;
       let propertyText = `${this.sec1.template.property}`
+        .replaceAll(`{{domId}}`, domId)
         .replaceAll(`{{propertyId}}`, propertyId)
         .replaceAll(`{{propertyTitle}}`, propertyTitle);
       propertiesText = `${propertiesText}${propertyText}`;
@@ -511,8 +512,8 @@ class TurnipExtensionHistory {
       // Set header label
       .then(() => {
         this
-          .saidObj(`turnip.content.history.section-02.title.label`)
-          .html(`${this.current.device}: ${this.current.property}`);
+        .saidObj(`turnip.content.history.section-02.title.label`)
+        .html(`${this.current.device}: ${this.current.property}`);
       })
 
       // Get schema.

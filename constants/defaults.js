@@ -62,6 +62,19 @@ var Defaults = {
           }
         }
       },
+      "session": {
+        "handshake": {
+          // Handshake interval.
+          "period": 3000,
+          // Counter of continuous fail handshake to be abort session.
+          "abortcountdown": 3
+        },
+      },
+      "channel": {
+        "callrespond": {
+          "timeout": 3000
+        }
+      },
       "abort": {
         "successRate": 0.1,
         "period": 30000
@@ -127,7 +140,7 @@ var Defaults = {
   },
   "schema": {
     "type": "object",
-    "required": ["account", "webhook"],
+    "required": ["account", "webhook", "service", "rtcpeer"],
     "additionalProperties": false,
     "properties": {
       "account": {
@@ -197,7 +210,7 @@ var Defaults = {
       },
       "rtcpeer": {
         "type": "object",
-        "required": [ "server" ],
+        "required": [ "server", "session", "channel" ],
         "additionalProperties": false,
         "properties": {
           "server": {
@@ -235,6 +248,43 @@ var Defaults = {
                         "type": "number"
                       }
                     }
+                  }
+                }
+              }
+            }
+          },
+          "session": {
+            "type": "object",
+            "required": ["handshake"],
+            "additionalProperties": false,
+            "properties": {
+              "handshake": {
+                "type": "object",
+                "required": ["period", "abortcountdown"],
+                "additionalProperties": false,
+                "properties": {
+                  "period": {
+                    "type": "number"
+                  },
+                  "abortcountdown": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "channel": {
+            "type": "object",
+            "required": ["callrespond"],
+            "additionalProperties": false,
+            "properties": {
+              "callrespond": {
+                "type": "object",
+                "required": ["timeout"],
+                "additionalProperties": false,
+                "properties": {
+                  "timeout": {
+                    "type": "number"
                   }
                 }
               }

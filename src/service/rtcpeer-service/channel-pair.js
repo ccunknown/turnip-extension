@@ -3,20 +3,31 @@
 const Path = require(`path`);
 const { v1: uuid } = require(`uuid`);
 const EventEmitter = require('events').EventEmitter;
+const Config = require(`./default`);
 
 class ChannelPair extends EventEmitter {
-  constructor(peerConnection) {
+  constructor(peerConnection, config = {}) {
     super();
     this.peerConnection = peerConnection;
     this.sender = null;
     this.receiver = null;
 
+    this.config = Config.channel;
+
+    this.callRespondStack = [];
+
+    this.overWriteConfig(this.config, config);
     this.init();
   }
 
   init() {
     this.createReceiver();
     this.createSender();
+  }
+
+  overWriteConfig(dest, src) {
+    for(let i in src)
+      dest[i] = src[i];
   }
 
   /*
@@ -73,6 +84,46 @@ class ChannelPair extends EventEmitter {
       `close`, 
       (event) => this.emit(`receiver-close`, event)
     );
+  }
+
+  /*
+    Call respond
+  */
+  callRespond(message) {
+    let payload = {
+      messageId: uuid(),
+      type: `call-respond`,
+      message: message
+    };
+    return new Promise((resolve, reject) => {
+      Promise.resolve()
+      .then(() => this.sender.send(JSON.stringify(payload)))
+      .then(() => this.waitForRespond(payload.messageId))
+      .then((ret) => resolve(ret))
+      .catch((err) => reject(err));
+    });
+  }
+
+  waitForRespond(messageId) {
+    return new Promise((resolve, reject) => {
+      let timeout = null;
+      let onMessage = (payload) => {
+        // console.log(`[${this.constructor.name}]`, `[${typeof payload}]`, payload);
+        let ret = JSON.parse(payload.data);
+        if(ret && ret.messageId) {
+          messageId && resolve(ret.message);
+          clearTimeout(timeout);
+        }
+      };
+      this.on(`receiver-message`, (payload) => onMessage(payload))
+      timeout = setTimeout(
+        () => {
+          this.removeListener(`receiver-message`, (payload) => onMessage(payload));
+          reject(new Error(`Call-respond timeout.`));
+        }, 
+        this.config.callrespond.timeout
+      );
+    });
   }
 }
 
