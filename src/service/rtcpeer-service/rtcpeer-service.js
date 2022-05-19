@@ -88,11 +88,12 @@ class rtcpeerService extends EventEmitter {
     let sessionEvent = {};
     sessionEvent = {
       destroy: (sessionId) => {
-        Object.keys(sessionEvent).forEach((event) => session.removeListener(event, (param) => sessionEvent[event](param)));
+        Object.keys(sessionEvent).forEach((event) => session.removeListener(event, sessionEvent[event]));
         this.sessions = this.sessions.filter(e => e.id != sessionId);
+        console.log(`Sessions:`, JSON.stringify(this.sessions.map(e => e.id), null, 2));
       }
     };
-    Object.keys(sessionEvent).forEach((event) => session.on(event, (param) => sessionEvent[event](param)))
+    Object.keys(sessionEvent).forEach((event) => session.on(event, sessionEvent[event]));
   }
 
   getSession(id) {
