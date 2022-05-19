@@ -67,7 +67,7 @@ var Defaults = {
           // Handshake interval.
           "period": 3000,
           // Counter of continuous fail handshake to be abort session.
-          "abortcountdown": 3
+          "abortcountdown": 5
         },
       },
       "channel": {

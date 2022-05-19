@@ -57,12 +57,6 @@ class historyService extends EventEmitter {
       logging: false
     });
     this.model.thingRecord = this.sequelize.define(`ThingsHistory`, {
-      // timestamp: {
-      //   type: DataTypes.DATE,
-      //   allowNull: false,
-      //   // defaultValue: Sequelize.literal(`CURRENT_TIMESTAMP`),
-      //   defaultValue: DataTypes.NOW,
-      // },
       id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -190,7 +184,7 @@ class historyService extends EventEmitter {
       .then((job) => job.finished())
       .then((ret) => {
         console.log(`[${this.constructor.name}]`, `job finished`);
-        console.log(`[${this.constructor.name}]`, ret);
+        // console.log(`[${this.constructor.name}]`, ret);
         return ret;
       })
       .then((ret) => resolve(ret))

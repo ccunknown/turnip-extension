@@ -26,7 +26,8 @@ class TurnipExtensionHistory {
       current: {
         thingsSchema: null,
         devices: [],
-        deviceTextArray: []
+        deviceTextArray: [],
+        renderCards: ``
       },
       template: {
         device: ``,
@@ -105,8 +106,7 @@ class TurnipExtensionHistory {
         `Event [Change] : turnip.content.history.section-01.search.box`
       );
       console.log(event);
-      // console.log(saidObj(`turnip.content.history.section-01.search.box`)[0].id)
-      this.applyHighlight(undefined, event.target.value);
+      this.applyHighlight(this.sec1.current.renderCards, event.target.value);
       this.applyFilter(event.target.value);
     });
 
@@ -147,7 +147,6 @@ class TurnipExtensionHistory {
           let file = new File([content], {
             type: "text/plain;charset=utf-8"
           });
-          // saveAs(blob, fname);
           return this.download(file, fname);
         })
         .then(() => resolve())
@@ -195,7 +194,6 @@ class TurnipExtensionHistory {
           let file = new File([content], {
             type: "text/plain;charset=utf-8"
           });
-          // saveAs(blob, fname);
           return this.download(file, fname);
         })
         .then(() => resolve())
@@ -227,7 +225,7 @@ class TurnipExtensionHistory {
           let arr = e.id.split(`-`);
           let amount = arr.pop();
           let scale = arr.pop();
-          // console.log(amount, scale);
+          
           // On click.
           saidObj(e.id).click(() => {
             focusTimerangeButton(e.id);
@@ -304,7 +302,6 @@ class TurnipExtensionHistory {
   */
   setupData(arr) {
     console.log(`[${this.constructor.name}]`, `setupData() >> `);
-    // this.setupTextData(arr);
     this.setupValuePanelData(arr);
     this.setupChartData(arr);
     return new Promise((resolve, reject) => {
@@ -344,7 +341,6 @@ class TurnipExtensionHistory {
     console.log(`[${this.constructor.name}]`, `render() >> `);
     this.display.sync(device, property);
     this.initButtonFunction();
-    // this.initChart();
     let channelOptions = {
       name: `rtSensorData`,
       type: `data`
@@ -354,10 +350,6 @@ class TurnipExtensionHistory {
     .then(() => this.initValuePanel())
     .then(() => this.rtcpeer = new TurnipRTCPeer(this.parent, channelOptions))
     .then(() => this.rtcpeer.start())
-    // .then(() => this.rtcpeer.addEventListener(
-    //   `channel-${channelOptions.name}`, 
-    //   (event) => this.onChannelMessage(event)
-    // ))
     .then(() => this.rtcpeer.addEventListener(
       `rtSensorData`, 
       (event) => this.onChannelMessage(event)
@@ -417,54 +409,25 @@ class TurnipExtensionHistory {
       .then((ret) => this.sec1.template.property = ret)
       .then(() => this.renderDeviceCards())
 
-      // render
-      .then((text) => {
-        // saidObj(`turnip.content.history.section-01.accordion`).empty();
-        // saidObj(`turnip.content.history.section-01.accordion`).html(
-        //   this.applyFilter(text).join()
-        // );
-        // saidObj(`turnip.content.history.section-01.accordion`).html(text);
-        // thingsSchema.forEach((d) => {
-        //   let device = d.href.replace(/^\/things\//, ``);
-        //   Object.keys(d.properties).forEach((p) => {
-        //     // Add click event
-        //     saidObj(`turnip.content.history.section-01.list.:${device}:.:${p}:`).click(() => {
-        //       this.display.sync(device, p);
-        //     });
-        //   })
-        // });
-      })
-
       .then(() => resolve())
       .catch((err) => reject(err));
     });
   }
 
-  renderDeviceCards(options = { filter: ``, highlight: `` }) {
+  renderDeviceCards() {
     let text = this.sec1.current.thingsSchema.map(
-      (deviceSchema) => this.renderDeviceCard(deviceSchema, options)
+      (deviceSchema) => this.renderDeviceCard(deviceSchema)
     ).join(`\n`);
-    this.saidObj(`turnip.content.history.section-01.accordion`).empty();
+    
     this.saidObj(`turnip.content.history.section-01.accordion`).html(text);
     this.turnipRaid.updateIdList(this.parent.idRegex);
     this.initialPropertyButton();
-    // this.applyFilter(options.filter);
+    
+    this.sec1.current.renderCards = text;
     return text;
   }
 
-  initialPropertyButton() {
-    this.sec1.current.thingsSchema.forEach((d) => {
-      let device = d.href.replace(/^\/things\//, ``);
-      Object.keys(d.properties).forEach((p) => {
-        // Add click event
-        this.saidObj(`turnip.content.history.section-01.list.:${device}:.:${p}:`).click(() => {
-          this.display.sync(device, p);
-        });
-      })
-    });
-  }
-
-  renderDeviceCard(deviceSchema, options = { highlight: `` }) {
+  renderDeviceCard(deviceSchema) {
     // let d  = deviceSchema;
     console.log(`[${this.constructor.name}]`, `renderDeviceCard() >> `);
     let deviceId = deviceSchema.href.replace(/^\/things\//, ``);
@@ -492,6 +455,49 @@ class TurnipExtensionHistory {
       .replaceAll(`{{properties}}`, propertiesText);
 
     return deviceText;
+  }
+
+  initialPropertyButton() {
+    this.sec1.current.thingsSchema.forEach((d) => {
+      let device = d.href.replace(/^\/things\//, ``);
+      Object.keys(d.properties).forEach((p) => {
+        // Add click event
+        this.saidObj(`turnip.content.history.section-01.list.:${device}:.:${p}:`).click(() => {
+          this.display.sync(device, p);
+        });
+      });
+    });
+  }
+
+  applyFilter(filter) {
+    // if(!filter)
+    //   return ;
+    const regex = new RegExp(`(>[^<]*)(${filter})([^<>]*<)`, "g");
+    this.saidObj(`turnip.content.history.section-01.accordion`)[0]
+    .childNodes.forEach(deviceCard => {
+      if(!deviceCard.id)
+        return ;
+      // let card = document.getElementById(deviceCard.id);
+      let card = this.saidObj(deviceCard.id);
+      filter
+      ? card[0].innerHTML.match(regex) ? card.removeClass(`hide`) : card.addClass(`hide`)
+      : card.removeClass(`hide`);
+    })
+    
+  }
+
+  applyHighlight(context = this.renderDeviceCards(), text) {
+    let content =
+      (text && text.length)
+      ? `${context}`.replaceAll(
+          new RegExp(`(>[^<]*)(${text})([^<>]*<)`, "g"), 
+          `$1<span style="background-color: yellow; color: black">${text}</span>$3`
+        )
+      : context;
+    // this.saidObj(`turnip.content.history.section-01.accordion`).empty();
+    this.saidObj(`turnip.content.history.section-01.accordion`).html(content);
+    this.turnipRaid.updateIdList(this.parent.idRegex);
+    this.initialPropertyButton();
   }
 
   renderProperty(
@@ -652,45 +658,6 @@ class TurnipExtensionHistory {
       .then((ret) => resolve(ret))
       .catch((err) => reject(err));
     });
-  }
-
-  // applyFilter(filter, highlight = false) {
-  //   const regex = new RegExp(`(>[^<]*)(${filter})([^<>]*<)`, "g");
-  //   return this.sec1.current.deviceTextArray
-  //   .filter(e => !filter.length || e.match(regex))
-  //   .map(e => highlight ? this.applyHighlight(e, filter) : e);
-  // }
-
-  applyFilter(filter) {
-    // if(!filter)
-    //   return ;
-    const regex = new RegExp(`(>[^<]*)(${filter})([^<>]*<)`, "g");
-    this.saidObj(`turnip.content.history.section-01.accordion`)[0]
-    .childNodes.forEach(deviceCard => {
-      if(!deviceCard.id)
-        return ;
-      // let card = document.getElementById(deviceCard.id);
-      let card = this.saidObj(deviceCard.id);
-      filter
-      ? card[0].innerHTML.match(regex) ? card.removeClass(`hide`) : card.addClass(`hide`)
-      : card.removeClass(`hide`);
-    })
-    
-  }
-
-  applyHighlight(context = this.renderDeviceCards(), text) {
-    let content =
-      text
-      ? `${context}`.replaceAll(
-          new RegExp(`(>[^<]*)(${text})([^<>]*<)`, "g"), 
-          `$1<span style="background-color: yellow; color: black">${text}</span>$3`
-        )
-      : context;
-    // this.saidObj(`turnip.content.history.section-01.accordion`).empty();
-    this.saidObj(`turnip.content.history.section-01.accordion`).html(content);
-    this.turnipRaid.updateIdList(this.parent.idRegex);
-    this.initialPropertyButton();
-    // return content;
   }
 
   toIsoString(date, gmt = false) {

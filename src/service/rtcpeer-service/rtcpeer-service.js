@@ -1,15 +1,7 @@
 'use strict';
 
-const Path = require(`path`);
 const EventEmitter = require('events').EventEmitter;
-const { v1: uuid } = require(`uuid`);
-const {
-  RTCPeerConnection,
-  RTCIceCandidate,
-} = require(`wrtc`);
 
-const Database = require('../../lib/my-database');
-const {Defaults, Errors} = require('../../../constants/constants');
 const Session = require(`./session`);
 
 class rtcpeerService extends EventEmitter {
@@ -49,21 +41,6 @@ class rtcpeerService extends EventEmitter {
     console.log(`[${this.constructor.name}]`, `stop() >> `);
   }
 
-  // send(message) {
-  //   // console.log(`[${this.constructor.name}]`, `send() >> `);
-  //   this.sessions.forEach(session => {
-  //     if(
-  //       session.channel && 
-  //       session.channel.sender && 
-  //       session.channel.sender.readyState == `open` && 
-  //       session.channel.sender.label == channelName
-  //     ) {
-  //       console.log(`[${this.constructor.name}]`, `message >> `, message);
-  //       session.channel.sender.send(message);
-  //     }
-  //   });
-  // }
-
   shout(message, type) {
     message = message.type == `string` ? message : JSON.stringify(message);
     this.sessions.forEach(session => {
@@ -87,7 +64,7 @@ class rtcpeerService extends EventEmitter {
         message: message
       })
     : message;
-    console.log(message);
+    // console.log(message);
     session.send(message);
   }
 
@@ -96,7 +73,7 @@ class rtcpeerService extends EventEmitter {
     return new Promise((resolve, reject) => {
       let session = null;
       Promise.resolve()
-      .then(() => session = new Session(iceConfig))
+      .then(() => session = new Session(iceConfig, { config: this.config.session }))
       .then(() => session.createPeerConnection())
       .then(() => session.createChannel())
       .then(() => session.createOffer())

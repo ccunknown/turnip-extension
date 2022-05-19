@@ -47,21 +47,47 @@ class Session extends EventEmitter {
   }
 
   doHandshake() {
+    // console.log(`[${this.constructor.name}]`, `doHandshake() >> `);
+    return new Promise((resolve, reject) => {
+      Promise.resolve()
+      .then(() => {
+        if(
+          this.channel.sender.readyState == `open` && 
+          this.channel.receiver.readyState == `open`
+        ) {
+          this.handshake();
+        }
+        else {
+          this.onHandshakeFail();
+        }
+      })
+    });
+  }
+
+  handshake() {
     return new Promise((resolve, reject) => {
       let timeout = setTimeout(() => {
-        this.abortcountdown = this.abortcountdown - 1;
-        (this.abortcountdown <= 0) && this.destroy();
+        this.onHandshakeFail();
       }, this.config.handshake.abortcountdown);
       Promise.resolve()
       .then(() => this.channel.callRespond(`ping`))
-      .then((ret) => console.log(`handshake:`, ret))
+      // .then((ret) => console.log(`handshake [${this.id}]:`, ret))
       .then((ret) => {
         clearTimeout(timeout);
-        this.abortcountdown = this.config.handshake.abortcountdown;
+        this.onHandshakeSuccess();
         resolve();
       })
       .catch((err) => reject(err));
     });
+  }
+
+  onHandshakeSuccess() {
+    this.abortcountdown = this.config.handshake.abortcountdown;
+  }
+
+  onHandshakeFail() {
+    this.abortcountdown = this.abortcountdown - 1;
+    (this.abortcountdown <= 0) && this.destroy();
   }
 
   createPeerConnection(iceConfig = this.iceConfig) {
@@ -165,17 +191,24 @@ class Session extends EventEmitter {
   }
 
   destroy() {
-    this.emit(`destroy`, this.id)
+    // console.log(`[${this.constructor.name}]`, `[${this.id}]`, `destroy`);
 
     this.interval && clearInterval(this.interval);
     
     this.channel.sender && 
-    this.channel.setupSenderListener(false);
-    
+    this.channel.setupSenderListener(false) &&
+    delete this.channel.sender;
+
     this.channel.receiver && 
-    this.channel.setupReceiverListener(false);
+    this.channel.setupReceiverListener(false) &&
+    delete this.channel.receiver;
     
     this.peerConnection.close();
+    
+    delete this.peerConnection;
+    
+    console.log(`[${this.constructor.name}]`, `[${this.id}]`, `destroy`);
+    this.emit(`destroy`, this.id);
   }
 }
 

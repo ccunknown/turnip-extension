@@ -41,12 +41,10 @@ class ChannelPair extends EventEmitter {
 
   setupSenderListener(set = true) {
     let func = set ? `addEventListener` : `removeEventListener`;
-    this.sender[func](
-      `open`, 
-      (event) => this.emit(`sender-open`, event));
-    this.sender[func](
-      `close`, 
-      (event) => this.emit(`sender-close`, event));
+    let onSenderOpen = (event) => this.emit(`sender-open`, event);
+    let onSenderClose = (event) => this.emit(`sender-close`, event);
+    this.sender[func](`open`, onSenderOpen);
+    this.sender[func](`close`, onSenderClose);
   }
 
   /*
@@ -68,22 +66,14 @@ class ChannelPair extends EventEmitter {
 
   setupReceiverListener(set = true) {
     let func = set ? `addEventListener` : `removeEventListener`;
-    this.receiver[func](
-      `open`, 
-      (event) => this.emit(`receiver-open`, event)
-    );
-    this.receiver[func](
-      `message`, 
-      (event) => this.emit(`receiver-message`, event)
-    );
-    this.receiver[func](
-      `error`, 
-      (event) => this.emit(`receiver-error`, event)
-    );
-    this.receiver[func](
-      `close`, 
-      (event) => this.emit(`receiver-close`, event)
-    );
+    let onReceiverOpen = (event) => this.emit(`receiver-open`, event);
+    let onReceiverMessage = (event) => this.emit(`receiver-message`, event);
+    let onReceiverError = (event) => this.emit(`receiver-error`, event);
+    let onReceiverClose = (event) => this.emit(`receiver-close`, event);
+    this.receiver[func](`open`, onReceiverOpen);
+    this.receiver[func](`message`, onReceiverMessage);
+    this.receiver[func](`error`, onReceiverError);
+    this.receiver[func](`close`, onReceiverClose);
   }
 
   /*
@@ -113,12 +103,14 @@ class ChannelPair extends EventEmitter {
         if(ret && ret.messageId) {
           messageId && resolve(ret.message);
           clearTimeout(timeout);
+          this.removeListener(`receiver-message`, onMessage);
         }
       };
-      this.on(`receiver-message`, (payload) => onMessage(payload))
+      this.on(`receiver-message`, onMessage);
+      // this.addEventListener(`receiver-message`, (payload) => onMessage(payload));
       timeout = setTimeout(
         () => {
-          this.removeListener(`receiver-message`, (payload) => onMessage(payload));
+          this.removeListener(`receiver-message`, onMessage);
           reject(new Error(`Call-respond timeout.`));
         }, 
         this.config.callrespond.timeout
