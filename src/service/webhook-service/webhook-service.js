@@ -197,6 +197,7 @@ class webhookService extends EventEmitter {
   }
 
   dataImprove(data) {
+    // console.log(`[${this.constructor.name}]`, JSON.stringify(data.meta.properties[data.property.origin], null, 2));
     let propMeta = (data.property.name == 'connected') ? {} :  data.meta.properties[data.property.origin];
     let type = (data.property.name == 'connected') ? `string` :  data.meta.properties[data.property.origin].type;
 
