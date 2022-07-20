@@ -72,7 +72,7 @@ class historyService extends EventEmitter {
       },
       value: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       }
     })
     return ;
