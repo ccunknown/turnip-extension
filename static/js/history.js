@@ -395,8 +395,8 @@ class TurnipExtensionHistory {
         recordThings.forEach((rthing) => {
           if(!thingsSchema.find((thing) => thing.href.replace(/^\/things\//, ``) == rthing.device))
             thingsSchema.push({
-              href: `/things/${rthings.device}`,
-              properties: rthings.properties
+              href: `/things/${rthing.device}`,
+              properties: rthing.properties
             });
         });
         console.log(`[${this.constructor.name}]`, thingsSchema);
@@ -418,11 +418,11 @@ class TurnipExtensionHistory {
     let text = this.sec1.current.thingsSchema.map(
       (deviceSchema) => this.renderDeviceCard(deviceSchema)
     ).join(`\n`);
-    
+
     this.saidObj(`turnip.content.history.section-01.accordion`).html(text);
     this.turnipRaid.updateIdList(this.parent.idRegex);
     this.initialPropertyButton();
-    
+
     this.sec1.current.renderCards = text;
     return text;
   }
@@ -432,7 +432,7 @@ class TurnipExtensionHistory {
     console.log(`[${this.constructor.name}]`, `renderDeviceCard() >> `);
     let deviceId = deviceSchema.href.replace(/^\/things\//, ``);
     let deviceName = deviceSchema.title || ``;
-    let deviceLabel = 
+    let deviceLabel =
       deviceSchema.title
       ? `${deviceSchema.title} [id: ${deviceId}]`
       : `[id: ${deviceId}]`;
@@ -483,14 +483,14 @@ class TurnipExtensionHistory {
       ? card[0].innerHTML.match(regex) ? card.removeClass(`hide`) : card.addClass(`hide`)
       : card.removeClass(`hide`);
     })
-    
+
   }
 
   applyHighlight(context = this.renderDeviceCards(), text) {
     let content =
       (text && text.length)
       ? `${context}`.replaceAll(
-          new RegExp(`(>[^<]*)(${text})([^<>]*<)`, "g"), 
+          new RegExp(`(>[^<]*)(${text})([^<>]*<)`, "g"),
           `$1<span style="background-color: yellow; color: black">${text}</span>$3`
         )
       : context;
@@ -501,7 +501,7 @@ class TurnipExtensionHistory {
   }
 
   renderProperty(
-    device = this.current.device, 
+    device = this.current.device,
     property = this.current.property
   ) {
 
@@ -598,7 +598,7 @@ class TurnipExtensionHistory {
   }
 
   getPropertySchema(
-    device = this.current.device, 
+    device = this.current.device,
     property = this.current.property,
     opt = { renew: false, update: true }
   ) {
