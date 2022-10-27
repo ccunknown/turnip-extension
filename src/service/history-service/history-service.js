@@ -23,7 +23,7 @@ class historyService extends EventEmitter {
 
     this.history = {};
     this.config = config.history;
-    this.thingsHistoryQueue = new Queue(`thingsHistoryQueue`);
+    this.thingsHistoryQueue = new Queue(`thingsHistoryQueue`, { defaultJobOptions: { removeOnComplete: 100, removeOnFail: 100 } });
 
     this.thingsDbPath = Path.join(
       this.addonManager.getUserProfile().dataDir,
@@ -134,9 +134,7 @@ class historyService extends EventEmitter {
         }
       ),
       {
-        timeout: this.config.things.job.timeout,
-        removeOnComplete: 100,
-        removeOnFail: 100
+        timeout: this.config.things.job.timeout
       }
     };
   }
@@ -162,9 +160,7 @@ class historyService extends EventEmitter {
           }
         },
         {
-          timeout: this.config.things.job.timeout,
-          removeOnComplete: 100,
-          removeOnFail: 100
+          timeout: this.config.things.job.timeout
         }
       )
     }
