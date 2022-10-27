@@ -24,7 +24,7 @@ class webhookService extends EventEmitter {
     this.configManager = this.extension.configManager;
     this.routesManager = this.extension.routesManager;
     this.laborsManager = this.extension.laborsManager;
-    this.requestQueue = new Queue(`requestQueue`);
+    this.requestQueue = new Queue(`requestQueue`, { defaultJobOptions: { removeOnComplete: 100, removeOnFail: 100 } });
     // this.historyQueue = new Queue(`historyQueue`);
 
     this.webhookList = [];
@@ -272,9 +272,7 @@ class webhookService extends EventEmitter {
           },
           {
             // timeout: Number(process.env[`JOB_QUEUE_TIMEOUT`])
-            timeout: Config.job.queue.timeout,
-            removeOnComplete: 100,
-            removeOnFail: 100
+            timeout: Config.job.queue.timeout
           }
         );
         // console.log(`[${this.constructor.name}]`, `post-add`);
