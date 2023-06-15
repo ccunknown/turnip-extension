@@ -1,7 +1,6 @@
-'use strict';
-
 const Config = require(`../../config/config`);
 const fetch = require('node-fetch');
+const https = require('https');
 const EventEmitter = require('events').EventEmitter;
 const request = require('request');
 // const AbortController = globalThis.AbortController || await import('abort-controller');
@@ -10,6 +9,9 @@ const mustache = require('mustache');
 const Queue = require(`bull`);
 
 const {Defaults, Errors} = require('../../../constants/constants');
+const agent = new https.Agent({
+  rejectUnauthorized: false,
+});
 
 class webhookService extends EventEmitter {
   constructor(extension, config) {
@@ -248,12 +250,19 @@ class webhookService extends EventEmitter {
         url: webhook.url,
         method: webhook.method,
         headers: {},
-        insecure: webhook.unverify,
+        // insecure: webhook.unverify,
         // insecureHTTPParser: webhook.unverify,
-        rejectUnauthorized: !webhook.unverify,
-        strictSSL: !webhook.unverify,
+        // rejectUnauthorized: !webhook.unverify,
+        // strictSSL: !webhook.unverify,
+        insecure: webhook.unverify,
         body: webhook.payload
       };
+      //if (webhook.unverify) {
+      //  const agent = new https.Agent({
+      //    rejectUnauthorized: false,
+      //  });
+      //  option.agent = agent;
+      //}
 
       for(let i in webhook.headers) {
         option.headers[webhook.headers[i].key] = webhook.headers[i].value;
@@ -291,6 +300,8 @@ class webhookService extends EventEmitter {
       let response = {};
       Promise.resolve()
       .then(() => {
+        // Patch unverify options
+        options.agent = options.insecure ? agent : undefined;
         // console.log(`options: ${JSON.stringify(options, null, 2)}`);
         // controller = new AbortController();
         // timeout = setTimeout(() => {
