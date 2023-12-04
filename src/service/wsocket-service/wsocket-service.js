@@ -37,6 +37,7 @@ class wsocketService extends EventEmitter {
       this.initialThingsSchema()
       .then(() => this.configManager.getConfig())
       .then((config) => {
+        this.config = config;
         this.reopeningWebsocket(config.account.jwt);
         resolve();
       });
@@ -50,7 +51,7 @@ class wsocketService extends EventEmitter {
   reopeningWebsocket(jwt) {
     console.log(`wsocketService: openWebsocket() >> `);
     if(!this.websocket) {
-      this.websocket = new Websocket(`ws://localhost:8080/things?jwt=${jwt}`);
+      this.websocket = new Websocket(`ws://${this.config.endpoint.host}:${this.config.endpoint.port}/things?jwt=${jwt}`);
       this.websocket.create();
     }
     else {
@@ -153,7 +154,7 @@ class wsocketService extends EventEmitter {
 
   getSchemaWithToken(jwt) {
     return this.makeRequest({
-      url: `http://localhost:8080/things/`,
+      url: `http://${this.config.endpoint.host}:${this.config.endpoint.port}/things/`,
       method: `GET`,
       headers: {
         accept: "application/json",
