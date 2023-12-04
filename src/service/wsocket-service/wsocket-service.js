@@ -34,13 +34,15 @@ class wsocketService extends EventEmitter {
   start() {
     console.log(`wsocketService: start() >> `);
     return new Promise((resolve, reject) => {
-      this.initialThingsSchema()
+      Promise.resolve()
       .then(() => this.configManager.getConfig())
       .then((config) => {
         this.config = config;
-        this.reopeningWebsocket(config.account.jwt);
-        resolve();
-      });
+      })
+      .then(() => this.initialThingsSchema())
+      .then(() => this.reopeningWebsocket(config.account.jwt))
+      .then(() => resolve())
+      .catch((err) => reject(err));
     });
   }
 
