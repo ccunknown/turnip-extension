@@ -40,7 +40,7 @@ class wsocketService extends EventEmitter {
         this.config = config;
       })
       .then(() => this.initialThingsSchema())
-      .then(() => this.reopeningWebsocket(config.account.jwt))
+      .then(() => this.reopeningWebsocket(this.config.account.jwt))
       .then(() => resolve())
       .catch((err) => reject(err));
     });
