@@ -6,6 +6,10 @@ var Defaults = {
     "version": "0.1.0"
   },
   "config": {
+    "endpoint": {
+      "host": "localhost",
+      "port": 8080
+    },
     "account": {
       "email": "turnip.extension@extension.com",
       "name": "turnip.extension",
@@ -143,6 +147,20 @@ var Defaults = {
     "required": ["account", "webhook", "service", "rtcpeer"],
     "additionalProperties": false,
     "properties": {
+      "endpoint": {
+        "type": "object",
+        "required": ["host", "port"],
+        "properties": {
+          "host": {
+            "type": "string",
+            "default": "localhost"
+          },
+          "port": {
+            "type": "number",
+            "default": 8080
+          }
+        }
+      },
       "account": {
         "type": "object",
         "required": ["email", "name", "password", "jwt"],
