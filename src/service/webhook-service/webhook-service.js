@@ -135,7 +135,7 @@ class webhookService extends EventEmitter {
       // 5,
       (job, done) => {
         // console.log(`[${this.constructor.name}]`, `JOB Process requestQueue() >> `);
-        console.log(`[${this.constructor.name}]`, `webhook job id[${job.id}]`);
+        // console.log(`[${this.constructor.name}]`, `webhook job id[${job.id}]`);
         Promise.resolve()
         .then(() => this.requestQueueProcess(job.data.webhookName, job.data.options))
         .then((res) => done(null, res))
